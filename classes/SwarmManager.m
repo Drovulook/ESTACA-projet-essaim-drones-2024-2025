@@ -42,7 +42,7 @@ classdef SwarmManager < handle
                 disp(['Drone à l''indice ', num2str(id), ' a été supprimé.']);
                 env.Platforms = obj.Drones;
             else
-                error("Aucun drone n'existe à cet indice.");
+                error('Aucun drone n''existe à cet indice.');
             end
         end
 
@@ -57,7 +57,7 @@ classdef SwarmManager < handle
             if ~isempty(idx)
                 obj.Drones{idx}.setDestination(destination);
             else
-                error("Aucun drone n'existe à cet indice.");
+                error('Aucun drone n''existe à cet indice.');
             end
         end
 

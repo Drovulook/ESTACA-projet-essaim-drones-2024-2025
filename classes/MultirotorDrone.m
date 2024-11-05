@@ -1,9 +1,10 @@
 % classes/MultirotorDrone.m
 % Classe pour les drones multirotors avec contrôle basé sur l'attitude
 
-classdef MultirotorDrone < DroneBase
+classdef MultirotorDrone < DroneBase & handle
     properties
         Destination      % Position cible actuelle
+        CurrentPos       % Position physique actuelle
         MaxSpeed         % Vitesse maximale
         CruiseSpeed      % Vitesse de croisière
         MaxVarioUp       % Taux de montée maximal
@@ -27,7 +28,12 @@ classdef MultirotorDrone < DroneBase
             
             % Initialiser le contrôleur d'attitude
             obj.Controller = BasicAttitudeController(obj);
+            obj.CurrentPos = initialPosition;
             obj.Destination = initialPosition;
+        end
+
+        function setDestination(obj, dest)
+            obj.Destination = dest
         end
         
         function update(obj, dt)
@@ -45,10 +51,6 @@ classdef MultirotorDrone < DroneBase
             % Mettre à jour la position avec la vitesse et le taux de montée
             newPos = currentPos + [velocity(1:2); climbRate] * dt;
             obj.Platform.updatePose('Position', newPos);
-        end
-        
-        function setDestination(obj, dest)
-            obj.Destination = dest
         end
     end
 end

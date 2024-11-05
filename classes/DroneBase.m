@@ -1,7 +1,7 @@
 % classes/DroneBase.m
 % Classe de base abstraite pour tous les types de drones
 
-classdef (Abstract) DroneBase
+classdef (Abstract) DroneBase < handle
     % DroneBase : Classe de base abstraite pour les drones
     
     properties
