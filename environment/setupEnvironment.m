@@ -2,29 +2,14 @@
 % Initialise l'environnement de simulation 3D
 
 function env = setupEnvironment()
-    % Créer un scénario pour les UAV
+    % Créer un scénario pour les UAV avec un taux de mise à jour de 10 Hz et une durée de 200 secondes
     env = uavScenario("UpdateRate", 10, "StopTime", 200);
-   
-    % Ajouter le plancher
-    % Définir une grille 200x200 pour les coordonnées X et Y
-    [x, y] = meshgrid(linspace(0, 200, 200), linspace(0, 200, 200));
-    
-    % Définir Z comme une hauteur constante, ce qui en fait une surface plane (par exemple, Z=0 pour un terrain plat)
-    z = zeros(size(x));
-    addMesh(env, "surface", {x, y, z}, [0.75 0.75 0.75]);
-    
-    % Ajouter des obstacles
-    setupObstacles;
-end
 
-% function setupCamera(env)
-%     figure;
-%     axis equal;
-%     view(3);
-%     xlabel('X (m)');
-%     ylabel('Y (m)');
-%     zlabel('Altitude (m)');
-%     title('Scénario UAV');
-%     grid on;
-%     hold on;
-% end
+    % Ajouter une surface de sol grise au niveau z = 0
+    ground_x = [-150, 150, 150, -150]; % Définir les coins de la surface selon x (en mètres)
+    ground_y = [-150, -150, 150, 150]; % Définir les coins de la surface selon y (en mètres)
+    ground_z = [0, 0, 0, 0]; % Niveau du sol à z = 0 (en mètres)
+    
+    % Définir les zones de l'espace aérien en appelant la fonction de configuration des zones
+    setupZones;
+end
