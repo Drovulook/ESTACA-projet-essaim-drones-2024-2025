@@ -1,4 +1,4 @@
-% classes/FixedWingDrone.m
+@% classes/FixedWingDrone.m
 % Classe pour les drones à voilure fixe avec un contrôle de base basé sur l'attitude
 
 classdef FixedWingDrone < DroneBase & handle
