@@ -53,10 +53,10 @@ classdef (Abstract) DroneBase < handle
         
     end
     
-    methods (Abstract)
+    methods
         function update_pos(obj, dt) %Update la position du drone en fct de sa vitesse
-            dpos = dt*speedState %on peut ajouter du noise
-            obj.posState = obj.posState + dpos 
+            dpos = dt*obj.speedState; %on peut ajouter du noise
+            obj.posState = obj.posState + dpos;
 
         end
     end

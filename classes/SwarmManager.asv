@@ -97,7 +97,7 @@ classdef SwarmManager < handle
 
         % Méthode pour mettre à jour la vitesse de chaque drone dans l'essaim
         
-        function update_speed(obj, dt, r, w, ABC, pondeTarg) %r est la liste de rayon (répulsion, évitement, attraction_max), w la liste de pondération (répulsion, orientation, attraction, évitement)
+        function update_speed(obj, dt, r, w) %r est la liste de rayon (répulsion, évitement, attraction_max), w la liste de pondération (répulsion, orientation, attraction, évitement)
             %répulsion pour les drones, évitement pour le terrain ;
             %attraction max, distance d'attraction maximum
             n = length(obj.Drones);
@@ -111,6 +111,8 @@ classdef SwarmManager < handle
                 speedStateMatrix(i,:) = obj.Drones{i}.speedState; % Crée matrice de vitesses
             end
             
+            posStateMatrix
+            speedStateMatrix
 
             % Calcul des voisins de voronoi avec une triangulation de chaque drone
             dTri = delaunay(posStateMatrix); %Création de la matrice de triangulation
@@ -169,22 +171,16 @@ classdef SwarmManager < handle
             T_y_pond = T_y./T_eucli;
             T_z_pond = T_z./T_eucli;
 
-            %Pondération target de test
-            T_x_pond(:,2) = T_x_pond(:,2) * pondeTarg(2);
-            T_y_pond(:,2) = T_y_pond(:,2) * pondeTarg(2);
-            T_z_pond(:,2) = T_z_pond(:,2) * pondeTarg(2);
-             
-            %Pondération target de test
-            T_x_pond(:,1) = T_x_pond(:,1) * pondeTarg(1);
-            T_y_pond(:,1) = T_y_pond(:,1) * pondeTarg(1);
-            T_z_pond(:,1) = T_z_pond(:,1) * pondeTarg(1);
-
+            %Pondération de test
+            T_x_pond(:,2) = T_x_pond(:,2) * 2;
+            T_y_pond(:,2) = T_y_pond(:,2) * 2;
+            T_z_pond(:,2) = T_z_pond(:,2) * 2;
 
             %Changer le 3 par la valeur de pondération mdr (3 car 2 pr
             %target 2 et 1 pour target 1), arbitraire pour test
-            T_x_pond = sum(T_x_pond,2)/sum(pondeTarg);
-            T_y_pond = sum(T_y_pond,2)/sum(pondeTarg);
-            T_z_pond = sum(T_z_pond,2)/sum(pondeTarg);
+            T_x_pond = sum(T_x_pond,2)/3;
+            T_y_pond = sum(T_y_pond,2)/3;
+            T_z_pond = sum(T_z_pond,2)/3;
 
 
             %Chaque matrice a le drone par ligne, et ses contacts par
@@ -207,11 +203,11 @@ classdef SwarmManager < handle
             % pondération, axe de travail à pousser en second temps
 
             %distances pondérées et normalisées = matrices d'attraction
-            a = ABC(1);
-            b = ABC(2);
-            c = ABC(3); %REMPLACER c PAR W(3)
+            a = 1;
+            b = 1;
+            c = 1; %REMPLACER c PAR W(3)
             
-            Pond_x = ((nansum(weight_matrix.*rho_x./rhon, 2)./sum(weight_matrix,2))*a + speedStateMatrix(:,1)*b + T_x_pond*c)/(a+b+c);
+            Pond_x = ((nansum(weight_matrix.*rho_x./rhon, 2)./sum(weight_matrix,2))*a + speedStateMatrix(:,1)*b + T_y_pond*c)/(a+b+c);
             Pond_y = ((nansum(weight_matrix.*rho_y./rhon, 2)./sum(weight_matrix,2))*a + speedStateMatrix(:,2)*b + T_y_pond*c)/(a+b+c);
             Pond_z = ((nansum(weight_matrix.*rho_z./rhon, 2)./sum(weight_matrix,2))*a + speedStateMatrix(:,3)*b + T_z_pond*c)/(a+b+c);
 
@@ -227,13 +223,14 @@ classdef SwarmManager < handle
             %A voir si on ne rajoute pas le troisième cercle concentrique
             %d'attraction avec les autres drones
             
-            newSpeedMatrix = [Pond_x Pond_y Pond_z];
+            newSpeedMatrix = [Pond_x Pond_y Pond_z]
 
             
             for i = 1:n
                 obj.Drones{i}.speedState = newSpeedMatrix(i,:);
+            
+
             end
-          
 
         end
 

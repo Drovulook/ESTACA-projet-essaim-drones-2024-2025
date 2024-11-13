@@ -4,7 +4,6 @@
 classdef MultirotorDrone < DroneBase & handle
     properties
         Destination      % Position cible actuelle du drone
-        CurrentPos       % Position physique actuelle du drone
         MaxSpeed         % Vitesse maximale autorisée
         CruiseSpeed      % Vitesse de croisière du drone
         MaxVarioUp       % Taux de montée maximal autorisé
@@ -16,8 +15,8 @@ classdef MultirotorDrone < DroneBase & handle
     
     methods
         % Constructeur pour initialiser un drone multirotor avec ses paramètres
-        function obj = MultirotorDrone(id, env, initialPosition, params)
-            obj@DroneBase(id, env, 'multirotor', initialPosition); % Appel du constructeur de la classe de base
+        function obj = MultirotorDrone(id, initialPosition, params)
+            obj@DroneBase(id, 'multirotor', initialPosition); % Appel du constructeur de la classe de base
             
             % Charger les paramètres depuis la structure params
             obj.MaxSpeed = params.MaxSpeed; % Initialiser la vitesse maximale
@@ -29,7 +28,7 @@ classdef MultirotorDrone < DroneBase & handle
             
             % Initialiser le contrôleur d'attitude pour le drone
             obj.Controller = BasicAttitudeController(obj);
-            obj.CurrentPos = initialPosition; % Définir la position actuelle
+            obj.posState = initialPosition; % Définir la position actuelle
             obj.Destination = initialPosition; % Définir la destination initiale comme la position de départ
         end
 

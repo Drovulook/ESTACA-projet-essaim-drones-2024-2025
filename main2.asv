@@ -1,0 +1,18 @@
+clear all;
+close all;
+clc;
+
+env = Environment(10, 200, [-150, 150, 150, -150], [-150, -150, 150, 150], [0, 0, 0, 0]);
+setupZones; % Configuration des zones de l'espace aérien
+
+swarm = SwarmManager(env.Env); % Initialiser le gestionnaire d'essaim avec l'environnement
+numMultirotor = 3; % Nombre de drones multirotors
+
+
+% Ajouter les drones multirotors à l'essaim, placés à la coordonnée de la base
+for i = 1:numMultirotor
+    swarm.addDrone('multirotor', homeBaseCoord);
+end
+
+
+swarm.up

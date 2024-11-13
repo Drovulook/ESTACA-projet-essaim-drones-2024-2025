@@ -4,7 +4,6 @@
 classdef FixedWingDrone < DroneBase & handle
     properties
         Destination      % Position cible actuelle du drone
-        CurrentPos       % Position physique actuelle du drone
         MaxSpeed         % Vitesse maximale du drone
         MinSpeed         % Vitesse minimale du drone (vitesse de décrochage)
         MaxClimbRate     % Taux de montée maximal autorisé
@@ -14,8 +13,8 @@ classdef FixedWingDrone < DroneBase & handle
     
     methods
         % Constructeur pour initialiser un drone à voilure fixe avec ses paramètres
-        function obj = FixedWingDrone(id, env, initialPosition, params)
-            obj@DroneBase(id, env, 'fixedwing', initialPosition); % Appel du constructeur de la classe de base
+        function obj = FixedWingDrone(id, initialPosition, params)
+            obj@DroneBase(id, 'fixedwing', initialPosition); % Appel du constructeur de la classe de base
             
             % Charger les paramètres depuis la structure params
             obj.MaxSpeed = params.MaxSpeed; % Initialiser la vitesse maximale
@@ -25,7 +24,7 @@ classdef FixedWingDrone < DroneBase & handle
             
             % Initialiser le contrôleur d'attitude de base
             obj.Controller = BasicAttitudeController(obj);
-            obj.CurrentPos = initialPosition; % Définir la position actuelle
+            obj.posState = initialPosition; % Définir la position actuelle
             obj.Destination = initialPosition; % Définir la destination initiale comme la position de départ
         end
 
