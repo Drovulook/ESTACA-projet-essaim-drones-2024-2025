@@ -97,7 +97,7 @@ classdef SwarmManager < handle
 
         % Méthode pour mettre à jour la vitesse de chaque drone dans l'essaim
         
-        function update_speed(obj, dt, r, w, ABC, pondeTarg) %r est la liste de rayon (répulsion, évitement, attraction_max), w la liste de pondération (répulsion, orientation, attraction, évitement)
+        function update_speed(obj, dt, r, swarm_weights, weights, pondeTarg) %r est la liste de rayon (répulsion, évitement, attraction_max), w la liste de pondération (répulsion, orientation, attraction, évitement)
             %répulsion pour les drones, évitement pour le terrain ;
             %attraction max, distance d'attraction maximum
             n = length(obj.Drones);
@@ -140,7 +140,8 @@ classdef SwarmManager < handle
             %La pb avec ça, c'est le comportement dans un cas
             %coplanaire/colinéaire, ça marche pas
 
-
+            
+            %% SWARM INFLUENCE
 
             % On fusionne les matrices + on gère l'indice de fin
             stateA = [posStateMatrix speedStateMatrix ; nan(1,6)];
@@ -151,7 +152,37 @@ classdef SwarmManager < handle
             rho_z = reshape(stateA(neighborI,3),n,nnmax) - posStateMatrix(:,3); % Différence axe z
             rhon = sqrt(rho_x.^2 + rho_y.^2 + rho_z.^2); % Distance euclidienne en 3D
 
-            %Target
+          
+            %Chaque matrice a le drone par ligne, et ses contacts par
+            %dépendance sur la ligne. Ainsi, on peut, en fonction de rhon,
+            %qui définit la distance euclidienne, définir si le drone de la
+            %case est dans le cercle d'attraction, de répulsion,
+            %d'orientation ou d'évitement
+
+            %Règles de pondération
+            weight_matrix = zeros(size(rhon));
+            weight_matrix(rhon < r(1)) = swarm_weights(1); % Cercle de répulsion
+            weight_matrix(rhon >= r(1)) = swarm_weights(2); % Cercle d'orientation
+
+            swarminfluence_x = (nansum(weight_matrix.*rho_x./rhon, 2)./sum(weight_matrix,2));
+            swarminfluence_y = (nansum(weight_matrix.*rho_y./rhon, 2)./sum(weight_matrix,2));
+            swarminfluence_z = (nansum(weight_matrix.*rho_z./rhon, 2)./sum(weight_matrix,2));
+         
+            %sum(weight_matrix,2) poids par ligne à diviser pour pondérer de la somme
+            %On multiplie la projection sur un axe par le poids, qu'on
+            %normalise par la norme euclidienne, pour obtenir un nouveau
+            %vecteur d'influence
+
+            %% SPEED INFLUENCE
+
+            speedNorm = sqrt(sum(speedStateMatrix(:,1:3).^2));
+            speedinfluence_x = speedStateMatrix(:,1)/speedNorm
+            speedinfluence_y = speedStateMatrix(:,2)/speedNorm
+            speedinfluence_z = speedStateMatrix(:,3)/speedNorm
+            
+
+            %% Target
+
             %Différence de position aux targets, en ligne, les drones, en
             %colonne la diff à chaque target
             %Rajouter un IF si pas de target + Comportement retour maison
@@ -182,18 +213,7 @@ classdef SwarmManager < handle
             T_z_pond = sum(T_z_pond,2)/sum(pondeTarg);
 
 
-            %Chaque matrice a le drone par ligne, et ses contacts par
-            %dépendance sur la ligne. Ainsi, on peut, en fonction de rhon,
-            %qui définit la distance euclidienne, définir si le drone de la
-            %case est dans le cercle d'attraction, de répulsion,
-            %d'orientation ou d'évitement
-
-            %Règles de pondération
-            weight_matrix = zeros(size(rhon));
-            weight_matrix(rhon < r(1)) = w(1); % Cercle de répulsion
-            weight_matrix(rhon >= r(1)) = w(2); % Cercle d'orientation
-            
-            % Maintentant, pour chaque drone, on fait la pondération des influeneces et on les sommes
+            %% Maintentant, pour chaque drone, on fait la pondération des influeneces swarm/target/speed et on les sommes
             % Il ne faut pas oublier de pondérer les influences avec son propre vecteur
             % vitesse, weighté en fonction du type de drone, pour simuler l'inertie.
             % GROS POINT BLOQUANT, je ne vois pas comment intégrer les
@@ -201,18 +221,13 @@ classdef SwarmManager < handle
             % pondération, axe de travail à pousser en second temps
 
             %distances pondérées et normalisées = matrices d'attraction
-            a = ABC(1);
-            b = ABC(2);
-            c = ABC(3); %REMPLACER c PAR w(3)
+            swarm_weight = weights(1);
+            speed_weight = weights(2);
+            target_weight = weights(3); 
             
-            Pond_x = ((nansum(weight_matrix.*rho_x./rhon, 2)./sum(weight_matrix,2))*a + speedStateMatrix(:,1)*b + T_x_pond*c)/(a+b+c);
-            Pond_y = ((nansum(weight_matrix.*rho_y./rhon, 2)./sum(weight_matrix,2))*a + speedStateMatrix(:,2)*b + T_y_pond*c)/(a+b+c);
-            Pond_z = ((nansum(weight_matrix.*rho_z./rhon, 2)./sum(weight_matrix,2))*a + speedStateMatrix(:,3)*b + T_z_pond*c)/(a+b+c);
-
-            %sum(weight_matrix,2) poids par ligne à diviser pour pondérer de la somme
-            %On multiplie la projection sur un axe par le poids, qu'on
-            %normalise par la norme euclidienne, pour obtenir un nouveau
-            %vecteur
+            Pond_x = (swarminfluence_x*swarm_weight + speedStateMatrix(:,1)*speed_weight + T_x_pond*target_weight)/(swarm_weight+speed_weight+target_weight);
+            Pond_y = (swarminfluence_y*swarm_weight + speedStateMatrix(:,2)*speed_weight + T_y_pond*target_weight)/(swarm_weight+speed_weight+target_weight);
+            Pond_z = (swarminfluence_z*swarm_weight + speedStateMatrix(:,3)*speed_weight + T_z_pond*target_weight)/(swarm_weight+speed_weight+target_weight);
 
             %Concrètement, on pondère une fois les cercles de répulsion,
             %orientation des drones, puis on repondère avec la vitesse
@@ -222,7 +237,6 @@ classdef SwarmManager < handle
             %d'attraction avec les autres drones
             
             newSpeedMatrix = [Pond_x Pond_y Pond_z];
-
             
             for i = 1:n
                 %On réinjecte la nouvelle vitesse

@@ -26,10 +26,10 @@ swarm.Drones{4}.posState = [1 1 0];
 
 swarm.Target = [3 2 7 ; -5 -7 30]; % 2 targets pour l'instant, sinon c'est cassé mdr, pas plus, pas moins
 r = [5 10 50]; %Répulsion, évitement, attraction max (rayons)
-w = [-100 50 5 30]; %Pondérations répulsion, alignement, attraction drone, évitement obstacle
-ABC = [10 100 1] %Influence sur le vecteur vitesse de : l'environnement ; la vitesse du drone a t-1 (maniabilité) ; la target
+swarm_weights = [-100 50 5 30]; %Pondérations répulsion, alignement, attraction drone, évitement obstacle
+weights = [10 100 1] %Influence sur le vecteur vitesse de : l'environnement ; la vitesse du drone a t-1 (maniabilité) ; la target
 pondeTarg = [100 1] %Pondération de la value des 2 targets
 
 temps = 1000
 
-RTPlot2(env, swarm,temps, r, w, ABC, pondeTarg)
+RTPlot2(env, swarm,temps, r, swarm_weights, weights, pondeTarg)
