@@ -76,7 +76,7 @@ function RTPlot2(env, swarm, temps, r, w, ABC, pondeTarg)
         drawnow limitrate
         
         % Pause optionnelle pour contrôler la vitesse de visualisation
-        %pause(0.0001);  % Ajuster ou supprimer selon les besoins
+        pause(0.0001);  % Ajuster ou supprimer selon les besoins
 
         k = k + 1;
         if k == temps

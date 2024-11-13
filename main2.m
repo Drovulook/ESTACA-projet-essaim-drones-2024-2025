@@ -24,11 +24,11 @@ swarm.Drones{4}.posState = [1 1 0];
 % figure;
 % testplot(swarm)
 
-swarm.Target = [10 10 10 ; -5 -7 30]; % 2 targets pour l'instant, sinon c'est cassé mdr, pas plus, pas moins
+swarm.Target = [3 2 7 ; -5 -7 30]; % 2 targets pour l'instant, sinon c'est cassé mdr, pas plus, pas moins
 r = [5 10 50]; %Répulsion, évitement, attraction max (rayons)
-w = [-10 2 50 30]; %Pondérations répulsion, orientation, attraction, évitement
-ABC = [1 1 1] %Influence sur le vecteur vitesse de : l'environnement ; la vitesse du drone a t-1 (maniabilité) ; la target
-pondeTarg = [1000 1] %Pondération de la value des 2 targets
+w = [-100 50 5 30]; %Pondérations répulsion, alignement, attraction drone, évitement obstacle
+ABC = [10 100 1] %Influence sur le vecteur vitesse de : l'environnement ; la vitesse du drone a t-1 (maniabilité) ; la target
+pondeTarg = [100 1] %Pondération de la value des 2 targets
 
 temps = 1000
 
