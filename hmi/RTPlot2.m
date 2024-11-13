@@ -45,18 +45,7 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
     while true
         %Fonction qui calcule la speed T+1 et update la pos T0
         swarm.update_speed(dt,r,swarm_weights, weights, pondeTarg, sat)
-        
-        % %Hard codé à modifier pour que ce soit variable
-        % drone1 = swarm.Drones{1}.posState;
-        % drone2 = swarm.Drones{2}.posState;
-        % drone3 = swarm.Drones{3}.posState;
-        % drone4 = swarm.Drones{4}.posState;
-        % 
-        % speed1 = swarm.Drones{1}.speedState;
-        % speed2 = swarm.Drones{2}.speedState;
-        % speed3 = swarm.Drones{3}.speedState;
-        % speed4 = swarm.Drones{4}.speedState;
-        
+                
         drone=zeros(n_drone,3);
         speed=zeros(n_drone,3);
         for i=1:n_drone
@@ -64,27 +53,6 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
             speed(i,:)=swarm.Drones{i}.speedState;
         end
 
-
-        % %Hardcodé pareil, c'est bourrin
-        % % Mettre à jour les données des objets scatter3 pour les positions
-        % set(head1, 'XData', drone1(1), 'YData', drone1(2), 'ZData', drone1(3));
-        % set(head2, 'XData', drone2(1), 'YData', drone2(2), 'ZData', drone2(3));
-        % set(head3, 'XData', drone3(1), 'YData', drone3(2), 'ZData', drone3(3));
-        % set(head4, 'XData', drone4(1), 'YData', drone4(2), 'ZData', drone4(3));
-        % 
-        % %Toujours aussi bourrin
-        % % Mettre à jour les objets quiver3 pour afficher les vecteurs de vitesse
-        % set(quiver_handle1, 'XData', drone1(1), 'YData', drone1(2), 'ZData', drone1(3), ...
-        %     'UData', speed1(1), 'VData', speed1(2), 'WData', speed1(3));
-        % set(quiver_handle2, 'XData', drone2(1), 'YData', drone2(2), 'ZData', drone2(3), ...
-        %     'UData', speed2(1), 'VData', speed2(2), 'WData', speed2(3));
-        % set(quiver_handle3, 'XData', drone3(1), 'YData', drone3(2), 'ZData', drone3(3), ...
-        %     'UData', speed3(1), 'VData', speed3(2), 'WData', speed3(3));
-        % set(quiver_handle4, 'XData', drone4(1), 'YData', drone4(2), 'ZData', drone4(3), ...
-        %     'UData', speed4(1), 'VData', speed4(2), 'WData', speed4(3));
-        
-        % Mettre à jour les données des objets scatter3 pour les positions
-        % Mettre à jour les objets quiver3 pour afficher les vecteurs de vitesse
         for i=1:n_drone
              set(head(i), 'XData', drone(i,1), 'YData', drone(i,2), 'ZData', drone(i,3));
              set(quiver_handle(i), 'XData', drone(i,1), 'YData', drone(i,2), 'ZData', drone(i,3), ...
