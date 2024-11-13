@@ -1,4 +1,4 @@
-function RTPlot2(env, swarm, temps, r, swarm_weights, weights, pondeTarg)
+function RTPlot2(env, swarm, temps, r, swarm_weights, weights, pondeTarg, sat)
 
     %% Échelle, Angle d'observation et Légende
     % Configurer la figure avec une taille de fenêtre fixe plus grande
@@ -43,7 +43,7 @@ function RTPlot2(env, swarm, temps, r, swarm_weights, weights, pondeTarg)
     k =0;
     while true
         %Fonction qui calcule la speed T+1 et update la pos T0
-        swarm.update_speed(1,r,swarm_weights, weights, pondeTarg)
+        swarm.update_speed(1,r,swarm_weights, weights, pondeTarg, sat)
         
         %Hard codé à modifier pour que ce soit variable
         drone1 = swarm.Drones{1}.posState;

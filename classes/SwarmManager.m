@@ -97,7 +97,7 @@ classdef SwarmManager < handle
 
         % Méthode pour mettre à jour la vitesse de chaque drone dans l'essaim
         
-        function update_speed(obj, dt, r, swarm_weights, weights, pondeTarg) %r est la liste de rayon (répulsion, évitement, attraction_max), w la liste de pondération (répulsion, orientation, attraction, évitement)
+        function update_speed(obj, dt, r, swarm_weights, weights, pondeTarg, sat) %r est la liste de rayon (répulsion, évitement, attraction_max), w la liste de pondération (répulsion, orientation, attraction, évitement)
             %répulsion pour les drones, évitement pour le terrain ;
             %attraction max, distance d'attraction maximum
             n = length(obj.Drones);
@@ -164,7 +164,7 @@ classdef SwarmManager < handle
             weight_matrix(rhon < r(1)) = -swarm_weights(1); % Cercle de répulsion
             weight_matrix(rhon >= r(1)) = swarm_weights(2); % Cercle d'orientation
 
-            swarminfluence_x = (nansum(weight_matrix.*rho_x./rhon, 2)./sum(weight_matrix,2));
+            swarminfluence_x = (nansum(weight_matrix.*rho_x./rhon, 2)./sum(weight_matrix,2))
             swarminfluence_y = (nansum(weight_matrix.*rho_y./rhon, 2)./sum(weight_matrix,2));
             swarminfluence_z = (nansum(weight_matrix.*rho_z./rhon, 2)./sum(weight_matrix,2));
          
@@ -180,7 +180,7 @@ classdef SwarmManager < handle
             speedinfluence_y = speedStateMatrix(:,2)./speedNorm;
             speedinfluence_z = speedStateMatrix(:,3)./speedNorm;
 
-            speedinfluence_x(isnan(speedinfluence_x)) = 0;
+            speedinfluence_x(isnan(speedinfluence_x)) = 0
             speedinfluence_y(isnan(speedinfluence_y)) = 0;
             speedinfluence_z(isnan(speedinfluence_z)) = 0;
             
@@ -212,7 +212,7 @@ classdef SwarmManager < handle
             T_y_pond(:,1) = T_y_pond(:,1) * pondeTarg(1);
             T_z_pond(:,1) = T_z_pond(:,1) * pondeTarg(1);
    
-            T_x_pond = sum(T_x_pond,2)/sum(pondeTarg);
+            T_x_pond = sum(T_x_pond,2)/sum(pondeTarg)
             T_y_pond = sum(T_y_pond,2)/sum(pondeTarg);
             T_z_pond = sum(T_z_pond,2)/sum(pondeTarg);
 
@@ -241,6 +241,9 @@ classdef SwarmManager < handle
             %d'attraction avec les autres drones
             
             newSpeedMatrix = [Pond_x Pond_y Pond_z];
+
+            newSpeedMatrix(newSpeedMatrix < sat(1)) = sat(1)
+            newSpeedMatrix(newSpeedMatrix > sat(2)) = sat(2)
             
             for i = 1:n
                 %On réinjecte la nouvelle vitesse
