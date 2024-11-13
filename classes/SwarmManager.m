@@ -8,8 +8,7 @@ classdef SwarmManager < handle
 
         %% Swarm PROPERTIES
         
-        Ip = 1.5; % 0-10 vision control power
-        In = 0.3; % 0-1 vision control noise
+        Target = [10 10 10 ; 100 100 10] %1 ligne par target en coordonées xyz, A changer + tard en classe pour définir niveau d'intérêt (pondération d'attraction) + mouvement
 
     end
     
@@ -75,78 +74,127 @@ classdef SwarmManager < handle
 
 
 
-        % Méthode pour mettre à jour la position de chaque drone dans l'essaim
-
+        % Méthode pour mettre à jour la vitesse de chaque drone dans l'essaim
         
-        function update_speed(obj, dt)
+        function update_speed(obj, dt, r, w) %r est la liste de rayon (répulsion, évitement, attraction_max), w la liste de pondération (répulsion, orientation, attraction, évitement)
+            %répulsion pour les drones, évitement pour le terrain ;
+            %attraction max, distance d'attraction maximum
             n = length(obj.Drones)
+            
+            posStateMatrix = zeros(n,3)
+            speedStateMatrix = zeros (n,3)
 
             for i = 1:n
-                obj.Drones{i}.update_pos
+                obj.Drones{i}.update_pos(dt)
                 posStateMatrix = [posStateMatrix ; obj.Drones{i}.posState]; % Crée matrice de positions
                 speedStateMatrix = [speedStateMatrix ; obj.Drones{i}.speedState] % Crée matrice de vitesses
-            
+            end
+
             % Calcul des voisins de voronoi avec une triangulation de chaque drone
             dTri = delaunay(posState); %Création de la matrice de triangulation
             vn = sparse(dTri, dTri(:,[2 3 4 1]),1); % décalage des indices et on crée la matrice des voisins de voroi (vn)
             vn = vn | vn'; %On rend vn symétrique pour s'assurer que la relation de voisinage ets bijective
-            
-            % A partir de la je comprends plus rien, mais ça marche
-            listI = repmat(1:n,1,n)
-            ns = listI(vn)
-            nn = sum(vn)
-            nnmax = max(nn)
 
+            
+            listI = repmat(1:n,1,n);
+            ns = listI(vn);
+            nn = sum(vn);
+            nnmax = max(nn);
             neighborI = full(sparse(nn+1,1:n,n+1));
             neighborI = cumsum(neighborI(1:end-1,:),1); 
             neighborI(neighborI==0) = ns;
             neighborI = neighborI';
 
-            
-            
+            %La matrice NeighborI permet, lorsque parsée avec stateA, de
+            %donner une matrice ou sur la ligne, on a le drone, et sur
+            %chaque colonne, le numéro de ligne de ses voisins dans un
+            %thétradon
+            % Actuellement la partie du dessus fonctionne en thétradon, si
+            % on veut la changer pour utiliser TOUS les voisins
+            % (fonctionnement omniscient télépathique), il faut boucler
+            % pour chaque drone, tous les autres drones, et computer leur
+            % distances comme fait dessous, je trouve que c'est plus
+            % élégant au-dessus
+
+
+
             % vision control induced angular velocity
-            stateA = [posStateMatrix speedStateMatrix; nan(1,6)];
-            
-            phi = reshape(stateA(neighborI,3),n,nnmax) - posStateMatrix(:,3);
-            
+            stateA = [posStateMatrix speedStateMatrix ; nan(1,6)];
+
+            % % Différence d'angle entre les drones et leurs voisins
+            % phi_diff = reshape(stateA(neighborI,6),n,nnmax) - posStateMatrix(:,6); % Différence phi
+            % theta_diff = reshape(stateA(neighborI,5),n,nnmax) - posStateMatrix(:,5); % Différence theta
+
+
             % Différence de position entre les drones et leurs voisins
-            rho1 = reshape(stateA(neighborI,1),n,nnmax) - posStateMatrix(:,1); % Différence axe x
-            rho2 = reshape(stateA(neighborI,2),n,nnmax) - posStateMatrix(:,2); % Différence axe y
-            rho3 = reshape(stateA(neighborI,3),n,nnmax) - posStateMatrix(:,3); % Différence axe z
+            rho_x = reshape(stateA(neighborI,1),n,nnmax) - posStateMatrix(:,1); % Différence axe x
+            rho_y = reshape(stateA(neighborI,2),n,nnmax) - posStateMatrix(:,2); % Différence axe y
+            rho_z = reshape(stateA(neighborI,3),n,nnmax) - posStateMatrix(:,3); % Différence axe z
+            rhon = sqrt(rho_x.^2 + rho_y.^2 + rho_z.^2); % Distance euclidienne en 3D
 
-            rhon = sqrt(rho1.^2 + rho2.^2 + rho3.^2); % Distance euclidienne en 3D
-            theta = getangle(state(:,3),rho1,rho2,rhon);
-            minDist = nanmin(rhon,[],2);
+            %Target
+            %Différence de position aux targets, en ligne, les drones, en
+            %colonne la diff à chaque target
+            %Rajouter un IF si pas de target + Comportement retour maison
             
-            w_vision = nansum((Ip*sin(phi) + rhon.*sin(theta)).*(1 + cos(theta)),2)./nansum(1 + cos(theta),2);
-  
+            T_x = obj.Target(:,1)' - posStateMatrix(:,1);
+            T_y = obj.Target(:,2)' - posStateMatrix(:,2);
+            T_z = obj.Target(:,3)' - posStateMatrix(:,3);
 
+            T_eucli = sqrt(T_x.^2 + T_y.^2 + T_z.^2); % On peut y ajouter de la pondération de cible en fct de la distance ; distance d'attraction max à ajouter (r(3)/w(3))
+            T_x_pond = T_x./T_eucli;  % 10 arbitraire, il faut remplacer par w(3), puis repondérer une deuxième fois par l'attractivité de la cible, à définir dans Target
+            T_y_pond = T_y./T_eucli;
+            T_z_pond = T_z./T_eucli;
+
+            %Chaque matrice a le drone par ligne, et ses contacts par
+            %dépendance sur la ligne. Ainsi, on peut, en fonction de rhon,
+            %qui définit la distance euclidienne, définir si le drone de la
+            %case est dans le cercle d'attraction, de répulsion,
+            %d'orientation ou d'évitement
+
+            %Règles de pondération
+            weight_matrix = zeros(size(rhon));
+            weight_matrix(rhon < r(1)) = w(1); % Cercle de répulsion
+            weight_matrix(rhon >= r(1)) = w(2); % Cercle d'orientation
+            
+
+            % Maintentant, pour chaque drone, on fait la pondération des influeneces et on les sommes
+            % Il ne faut pas oublier de pondérer les influences avec son propre vecteur
+            % vitesse, weighté en fonction du type de drone, pour simuler l'inertie.
+            % GROS POINT BLOQUANT, je ne vois pas comment intégrer les
+            % valeurs d'angles max, etc. Attendu qu'on l'intègre en
+            % pondération, axe de travail à pousser en second temps
+
+            %distances pondérées et normalisées = matrices d'attraction
+            a = 1;
+            b = 1;
+            c = 1; %REMPLACER c PAR W(3)
+
+            Pond_x = ((nansum(weight_matrix.*rho_x./rhon, 2)./sum(weight_matrix,2))*a + speedStateMatrix(:,1)*b + T_x_pond*c)/(a+b+c);
+            Pond_y = ((nansum(weight_matrix.*rho_y./rhon, 2)./sum(weight_matrix,2))*a + speedStateMatrix(:,2)*b + T_y_pond*c)/(a+b+c);
+            Pond_z = ((nansum(weight_matrix.*rho_z./rhon, 2)./sum(weight_matrix,2))*a + speedStateMatrix(:,3)*b + T_z_pond*c)/(a+b+c);
+
+            %sum(weight_matrix,2) poids par ligne à diviser pour pondérer de la somme
+            %On multiplie la projection sur un axe par le poids, qu'on
+            %normalise par la norme euclidienne, pour obtenir un nouveau
+            %vecteur
+
+            %Concrètement, on pondère une fois les cercles de répulsion,
+            %orientation des drones, puis on repondère avec la vitesse
+            %actuelle + L'attractivité de la target
+
+            %A voir si on ne rajoute pas le troisième cercle concentrique
+            %d'attraction avec les autres drones
+            
+            newSpeedMatrix = [Pond_x Pond_y Pond_z];
+
+            
+            for i = 1:n
+                obj.Drones{i}.speedState = newSpeedMatrix(i,:)
+            
 
             end
 
-        end
-
-        function [theta2 phi2] = getangle(teta, phi, rhox, rhoy, rhoz,rhom) % renvoie les projection d'angles sur xy et xz de l'angle entre un vecteur définit par 3 coordonnées et un vecteur défini par 2 angles
-            
-            if nargin < 4, rhom = sqrt(rhox.^2 + rhoy.^2 + rhoz.^2); end
-            rhox = rhox./rhom;
-            rhoy = rhoy./rhom;
-            rhoz = rhoz./rhom;
-
-            ex = sin(teta) * cos(phi);
-            ey = sin(teta) * sin(phi);
-            ez = cos(teta);
-            
-            prod_scal = ex .* rx + ey .* ry + ez .* rz; %produit scalaire des 2 vecteurs
-
-            angle_polaire = acos(prod_scal); % angle à transposer en 2 angles
-            %J'EN SUIS LA ET J'ARRIVE PAS PTN DE MERDE
-
-            sgn = sign(ex.*rhoy - ey.*rhox);
-            sgn(sgn == 0) = 1;
-            
-            theta = sgn.*acos(ex.*rhox + ey.*rhoy);
-            
         end
 
     end
