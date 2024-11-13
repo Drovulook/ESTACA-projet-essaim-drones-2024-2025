@@ -6,7 +6,7 @@ env = Environment(10, 200, [-10, 10, 10, -10], [-10, -10, 10, 10], [0, 0, 0, 0])
 setupZones; % Configuration des zones de l'espace aérien
 
 swarm = SwarmManager(env.Env); % Initialiser le gestionnaire d'essaim avec l'environnement
-numMultirotor = 4; % Nombre de drones multirotors
+numMultirotor = 6; % Nombre de drones multirotors
 
 
 % Ajouter les drones multirotors à l'essaim, placés à la coordonnée de la base
@@ -16,10 +16,30 @@ end
 
 %assignation des pos init, du à l'algo de delaunay, si coplanaire ou
 %colinéaire, kaput
-swarm.Drones{1}.posState = [0 1 1];
-swarm.Drones{2}.posState = [0 0 0];
-swarm.Drones{3}.posState = [1 0 0];
-swarm.Drones{4}.posState = [1 1 0];
+
+zone_size=5;
+min_distance=0.5;
+for i = 1:numMultirotor
+    % Position aléatoire dans la zone définie (ici entre 0 et 'zone_size' sur x et y)
+    valid_position = false;
+    while ~valid_position
+        % Génère une position aléatoire dans la zone
+        new_pos = [rand*zone_size, rand*zone_size, rand*zone_size];
+        
+        % Vérifier si la position est trop proche d'un autre drone
+        valid_position = true;
+        for j = 1:i-1
+            % Calculer la distance entre le drone actuel et les drones précédents
+            dist = norm(new_pos - swarm.Drones{j}.posState);
+            if dist < min_distance
+                valid_position = false;
+                break;  % Si trop proche, on quitte la boucle et on génère une nouvelle position
+            end
+        end
+    end
+    % Assigner la position valide au drone i
+    swarm.Drones{i}.posState = new_pos;
+end
 
 % figure;
 % testplot(swarm)
