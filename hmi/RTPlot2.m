@@ -1,10 +1,10 @@
-function RTPlot2(env, swarm, temps, r, swarm_weights, weights, pondeTarg, sat)
+function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sat, Target)
 
     %% Échelle, Angle d'observation et Légende
     % Configurer la figure avec une taille de fenêtre fixe plus grande
     figure('Position', [100, 100, 1200, 800]); % Largeur 1200px, Hauteur 800px
     ax = gca;
-    set(ax, 'XLim', [-10 10], 'YLim', [-10 10], 'ZLim', [0 10]);
+    set(ax, 'XLim', [-20 20], 'YLim', [-20 20], 'ZLim', [-10 20]);
     view(45, 30); % Définir un angle de vue en perspective (azimut=45, élévation=30)
     grid on;
     hold on;
@@ -29,6 +29,9 @@ function RTPlot2(env, swarm, temps, r, swarm_weights, weights, pondeTarg, sat)
     drone4 = swarm.Drones{4}.posState;
 
     % Initialiser les objets de tracé pour les éléments animés
+    target1 = scatter3(Target(1,1), Target(1,2), Target(1,2), 30)
+    target2 = scatter3(Target(2,1), Target(2,2), Target(2,2), 30)
+
     head1 = scatter3(drone1(1), drone1(2), drone1(3), 50, 'filled', 'MarkerFaceColor', 'b');
     head2 = scatter3(drone2(1), drone2(2), drone2(3), 50, 'filled', 'MarkerFaceColor', 'g');
     head3 = scatter3(drone3(1), drone3(2), drone3(3), 'filled', 'MarkerFaceColor', 'b');
@@ -43,7 +46,7 @@ function RTPlot2(env, swarm, temps, r, swarm_weights, weights, pondeTarg, sat)
     k =0;
     while true
         %Fonction qui calcule la speed T+1 et update la pos T0
-        swarm.update_speed(1,r,swarm_weights, weights, pondeTarg, sat)
+        swarm.update_speed(dt,r,swarm_weights, weights, pondeTarg, sat)
         
         %Hard codé à modifier pour que ce soit variable
         drone1 = swarm.Drones{1}.posState;

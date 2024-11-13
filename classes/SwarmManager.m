@@ -164,9 +164,9 @@ classdef SwarmManager < handle
             weight_matrix(rhon < r(1)) = -swarm_weights(1); % Cercle de répulsion
             weight_matrix(rhon >= r(1)) = swarm_weights(2); % Cercle d'orientation
 
-            swarminfluence_x = (nansum(weight_matrix.*rho_x./rhon, 2)./sum(weight_matrix,2))
-            swarminfluence_y = (nansum(weight_matrix.*rho_y./rhon, 2)./sum(weight_matrix,2));
-            swarminfluence_z = (nansum(weight_matrix.*rho_z./rhon, 2)./sum(weight_matrix,2));
+            swarminfluence_x = (nansum(weight_matrix.*rho_x./rhon, 2));
+            swarminfluence_y = (nansum(weight_matrix.*rho_y./rhon, 2));
+            swarminfluence_z = (nansum(weight_matrix.*rho_z./rhon, 2));
          
             %sum(weight_matrix,2) poids par ligne à diviser pour pondérer de la somme
             %On multiplie la projection sur un axe par le poids, qu'on
@@ -180,7 +180,7 @@ classdef SwarmManager < handle
             speedinfluence_y = speedStateMatrix(:,2)./speedNorm;
             speedinfluence_z = speedStateMatrix(:,3)./speedNorm;
 
-            speedinfluence_x(isnan(speedinfluence_x)) = 0
+            speedinfluence_x(isnan(speedinfluence_x)) = 0;
             speedinfluence_y(isnan(speedinfluence_y)) = 0;
             speedinfluence_z(isnan(speedinfluence_z)) = 0;
             

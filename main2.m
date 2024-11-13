@@ -23,14 +23,15 @@ swarm.Drones{4}.posState = [1 1 0];
 
 % figure;
 % testplot(swarm)
-
-swarm.Target = [3 2 7 ; -5 -7 30]; % 2 targets pour l'instant, sinon c'est cassé mdr, pas plus, pas moins
-r = [10 30 50]; %Répulsion, évitement, attraction max (rayons)
-swarm_weights = [10 50 5 30]; %Pondérations répulsion, alignement, attraction drone, évitement obstacle
-weights = [0.5 0.9 1]; %Influence sur le vecteur vitesse de : l'environnement ; la vitesse du drone a t-1 (maniabilité) ; la target
-pondeTarg = [100 1]; %Pondération de la value des 2 targets
-satextrem = 2; %Saturation de vitesse projetée
+Target = [3 2 7 ; -5 -7 30]
+swarm.Target = Target; % 2 targets pour l'instant, sinon c'est cassé mdr, pas plus, pas moins
+r = [10 50 100]; %Répulsion, évitement, attraction max (rayons)
+swarm_weights = [1.1 1 1.2 2]; %Pondérations répulsion, alignement, attraction drone, évitement obstacle
+weights = [0.5 1.2 0.2]; %Influence sur le vecteur vitesse de : l'environnement ; la vitesse du drone a t-1 (maniabilité) ; la target
+pondeTarg = [10 1]; %Pondération de la value des 2 targets
+satextrem = 1; %Saturation de vitesse projetée
 sat = [-satextrem satextrem];
 temps = 1000;
+dt = 1;
 
-RTPlot2(env, swarm,temps, r, swarm_weights, weights, pondeTarg, sat)
+RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sat, Target)
