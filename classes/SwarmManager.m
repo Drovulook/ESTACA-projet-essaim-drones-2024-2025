@@ -164,8 +164,8 @@ classdef SwarmManager < handle
             T_y = obj.Target(:,2)' - posStateMatrix(:,2);
             T_z = obj.Target(:,3)' - posStateMatrix(:,3);
 
-            T_eucli = sqrt(T_x.^2 + T_y.^2 + T_z.^2) % On peut y ajouter de la pondération de cible en fct de la distance ; distance d'attraction max à ajouter (r(3)/w(3))
-            T_x_pond = T_x./T_eucli  % 10 arbitraire, il faut remplacer par w(3), puis repondérer une deuxième fois par l'attractivité de la cible, à définir dans Target
+            T_eucli = sqrt(T_x.^2 + T_y.^2 + T_z.^2); % On peut y ajouter de la pondération de cible en fct de la distance ; distance d'attraction max à ajouter (r(3)/w(3))
+            T_x_pond = T_x./T_eucli;  % 10 arbitraire, il faut remplacer par w(3), puis repondérer une deuxième fois par l'attractivité de la cible, à définir dans Target
             T_y_pond = T_y./T_eucli;
             T_z_pond = T_z./T_eucli;
 
