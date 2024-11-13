@@ -106,7 +106,7 @@ classdef SwarmManager < handle
             speedStateMatrix = zeros (n,3);
 
             for i = 1:n
-                obj.Drones{i}.update_pos(dt);
+                obj.Drones{i}.update_pos(dt); %On update la position avec la dernière vitesse et la dernière position
                 posStateMatrix(i,:) = obj.Drones{i}.posState; % Crée matrice de positions
                 speedStateMatrix(i,:) = obj.Drones{i}.speedState; % Crée matrice de vitesses
             end
@@ -131,22 +131,19 @@ classdef SwarmManager < handle
             %donner une matrice ou sur la ligne, on a le drone, et sur
             %chaque colonne, le numéro de ligne de ses voisins dans un
             %tétraèdre
-            % Actuellement la partie du dessus fonctionne en thétradon, si
+            % Actuellement la partie du dessus fonctionne en tétraèdre, si
             % on veut la changer pour utiliser TOUS les voisins
             % (fonctionnement omniscient télépathique), il faut boucler
             % pour chaque drone, tous les autres drones, et computer leur
             % distances comme fait dessous, je trouve que c'est plus
             % élégant au-dessus
+            %La pb avec ça, c'est le comportement dans un cas
+            %coplanaire/colinéaire, ça marche pas
 
 
 
-            % vision control induced angular velocity
+            % On fusionne les matrices + on gère l'indice de fin
             stateA = [posStateMatrix speedStateMatrix ; nan(1,6)];
-
-            % % Différence d'angle entre les drones et leurs voisins
-            % phi_diff = reshape(stateA(neighborI,6),n,nnmax) - posStateMatrix(:,6); % Différence phi
-            % theta_diff = reshape(stateA(neighborI,5),n,nnmax) - posStateMatrix(:,5); % Différence theta
-
 
             % Différence de position entre les drones et leurs voisins
             rho_x = reshape(stateA(neighborI,1),n,nnmax) - posStateMatrix(:,1); % Différence axe x
@@ -165,23 +162,21 @@ classdef SwarmManager < handle
             T_z = obj.Target(:,3)' - posStateMatrix(:,3);
 
             T_eucli = sqrt(T_x.^2 + T_y.^2 + T_z.^2); % On peut y ajouter de la pondération de cible en fct de la distance ; distance d'attraction max à ajouter (r(3)/w(3))
-            T_x_pond = T_x./T_eucli;  % 10 arbitraire, il faut remplacer par w(3), puis repondérer une deuxième fois par l'attractivité de la cible, à définir dans Target
+            T_x_pond = T_x./T_eucli;
             T_y_pond = T_y./T_eucli;
             T_z_pond = T_z./T_eucli;
 
-            %Pondération target de test
+            %Pondération target de test à modifier plus tard (2targets
+            %harcodé du coup)
             T_x_pond(:,2) = T_x_pond(:,2) * pondeTarg(2);
             T_y_pond(:,2) = T_y_pond(:,2) * pondeTarg(2);
             T_z_pond(:,2) = T_z_pond(:,2) * pondeTarg(2);
              
-            %Pondération target de test
+            %Pondération target de test (idem que précédemment)
             T_x_pond(:,1) = T_x_pond(:,1) * pondeTarg(1);
             T_y_pond(:,1) = T_y_pond(:,1) * pondeTarg(1);
             T_z_pond(:,1) = T_z_pond(:,1) * pondeTarg(1);
-
-
-            %Changer le 3 par la valeur de pondération mdr (3 car 2 pr
-            %target 2 et 1 pour target 1), arbitraire pour test
+   
             T_x_pond = sum(T_x_pond,2)/sum(pondeTarg);
             T_y_pond = sum(T_y_pond,2)/sum(pondeTarg);
             T_z_pond = sum(T_z_pond,2)/sum(pondeTarg);
@@ -198,18 +193,17 @@ classdef SwarmManager < handle
             weight_matrix(rhon < r(1)) = w(1); % Cercle de répulsion
             weight_matrix(rhon >= r(1)) = w(2); % Cercle d'orientation
             
-
             % Maintentant, pour chaque drone, on fait la pondération des influeneces et on les sommes
             % Il ne faut pas oublier de pondérer les influences avec son propre vecteur
             % vitesse, weighté en fonction du type de drone, pour simuler l'inertie.
             % GROS POINT BLOQUANT, je ne vois pas comment intégrer les
-            % valeurs d'angles max, etc. Attendu qu'on l'intègre en
+            % valeurs d'angles max, de G, de vario, etc. Attendu qu'on l'intègre en
             % pondération, axe de travail à pousser en second temps
 
             %distances pondérées et normalisées = matrices d'attraction
             a = ABC(1);
             b = ABC(2);
-            c = ABC(3); %REMPLACER c PAR W(3)
+            c = ABC(3); %REMPLACER c PAR w(3)
             
             Pond_x = ((nansum(weight_matrix.*rho_x./rhon, 2)./sum(weight_matrix,2))*a + speedStateMatrix(:,1)*b + T_x_pond*c)/(a+b+c);
             Pond_y = ((nansum(weight_matrix.*rho_y./rhon, 2)./sum(weight_matrix,2))*a + speedStateMatrix(:,2)*b + T_y_pond*c)/(a+b+c);
@@ -231,6 +225,7 @@ classdef SwarmManager < handle
 
             
             for i = 1:n
+                %On réinjecte la nouvelle vitesse
                 obj.Drones{i}.speedState = newSpeedMatrix(i,:);
             end
           
