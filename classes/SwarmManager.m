@@ -161,7 +161,7 @@ classdef SwarmManager < handle
 
             %Règles de pondération
             weight_matrix = zeros(size(rhon));
-            weight_matrix(rhon < r(1)) = swarm_weights(1); % Cercle de répulsion
+            weight_matrix(rhon < r(1)) = -swarm_weights(1); % Cercle de répulsion
             weight_matrix(rhon >= r(1)) = swarm_weights(2); % Cercle d'orientation
 
             swarminfluence_x = (nansum(weight_matrix.*rho_x./rhon, 2)./sum(weight_matrix,2));
@@ -174,11 +174,15 @@ classdef SwarmManager < handle
             %vecteur d'influence
 
             %% SPEED INFLUENCE
-
-            speedNorm = sqrt(sum(speedStateMatrix(:,1:3).^2));
+            
+            speedNorm = sqrt(sum(speedStateMatrix.^2,2));
             speedinfluence_x = speedStateMatrix(:,1)./speedNorm;
             speedinfluence_y = speedStateMatrix(:,2)./speedNorm;
             speedinfluence_z = speedStateMatrix(:,3)./speedNorm;
+
+            speedinfluence_x(isnan(speedinfluence_x)) = 0;
+            speedinfluence_y(isnan(speedinfluence_y)) = 0;
+            speedinfluence_z(isnan(speedinfluence_z)) = 0;
             
 
             %% Target
@@ -225,9 +229,9 @@ classdef SwarmManager < handle
             speed_weight = weights(2);
             target_weight = weights(3); 
             
-            Pond_x = (swarminfluence_x*swarm_weight + speedStateMatrix(:,1)*speed_weight + T_x_pond*target_weight)/(swarm_weight+speed_weight+target_weight);
-            Pond_y = (swarminfluence_y*swarm_weight + speedStateMatrix(:,2)*speed_weight + T_y_pond*target_weight)/(swarm_weight+speed_weight+target_weight);
-            Pond_z = (swarminfluence_z*swarm_weight + speedStateMatrix(:,3)*speed_weight + T_z_pond*target_weight)/(swarm_weight+speed_weight+target_weight);
+            Pond_x = (swarminfluence_x*swarm_weight + speedStateMatrix(:,1)*speed_weight + T_x_pond*target_weight);
+            Pond_y = (swarminfluence_y*swarm_weight + speedStateMatrix(:,2)*speed_weight + T_y_pond*target_weight);
+            Pond_z = (swarminfluence_z*swarm_weight + speedStateMatrix(:,3)*speed_weight + T_z_pond*target_weight);
 
             %Concrètement, on pondère une fois les cercles de répulsion,
             %orientation des drones, puis on repondère avec la vitesse
