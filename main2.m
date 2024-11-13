@@ -40,16 +40,16 @@ for i = 1:numMultirotor
     % Assigner la position valide au drone i
     swarm.Drones{i}.posState = new_pos;
 end
-
+    
 % figure;
 % testplot(swarm)
-Target = [3 2 7 ; -5 -7 30]
+Target = [3 2 7 ; -5 -7 30];
 swarm.Target = Target; % 2 targets pour l'instant, sinon c'est cassé mdr, pas plus, pas moins
 r = [10 50 100]; %Répulsion, évitement, attraction max (rayons)
-swarm_weights = [1.1 1 1.2 2]; %Pondérations répulsion, alignement, attraction drone, évitement obstacle
-weights = [0.5 1.2 0.2]; %Influence sur le vecteur vitesse de : l'environnement ; la vitesse du drone a t-1 (maniabilité) ; la target
-pondeTarg = [10 1]; %Pondération de la value des 2 targets
-satextrem = 1; %Saturation de vitesse projetée
+swarm_weights = [1.4 1 1.2 2]; %Pondérations répulsion, alignement, attraction drone, évitement obstacle
+weights = [0.5 1.2 0.8]/10; %Influence sur le vecteur vitesse de : l'environnement ; la vitesse du drone a t-1 (maniabilité) ; la target
+pondeTarg = [10 0]; %Pondération de la value des 2 targets
+satextrem = 2; %Saturation de vitesse projetée
 sat = [-satextrem satextrem];
 temps = 1000;
 dt = 1;

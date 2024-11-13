@@ -9,7 +9,8 @@ classdef SwarmManager < handle
         %% Swarm PROPERTIES
         
         Target = [10 10 10 ; 100 100 10]; %1 ligne par target en coordonées xyz, A changer + tard en classe pour définir niveau d'intérêt (pondération d'attraction) + mouvement
-
+        instant_trimesh
+        instant_allpos
     end
     
     methods
@@ -94,6 +95,9 @@ classdef SwarmManager < handle
         end
 
 
+        function update_target(obj, newTarget)
+            obj.Target = newTarget;
+        end
 
         % Méthode pour mettre à jour la vitesse de chaque drone dans l'essaim
         
@@ -110,13 +114,13 @@ classdef SwarmManager < handle
                 posStateMatrix(i,:) = obj.Drones{i}.posState; % Crée matrice de positions
                 speedStateMatrix(i,:) = obj.Drones{i}.speedState; % Crée matrice de vitesses
             end
-            
+            obj.instant_allpos = posStateMatrix;
 
             % Calcul des voisins de voronoi avec une triangulation de chaque drone
             dTri = delaunay(posStateMatrix); %Création de la matrice de triangulation
             vn = sparse(dTri, dTri(:,[2 3 4 1]),1); % décalage des indices et on crée la matrice des voisins de voroi (vn)
             vn = vn | vn'; %On rend vn symétrique pour s'assurer que la relation de voisinage ets bijective
-
+            obj.instant_trimesh = dTri ;
             
             listI = repmat(1:n,1,n);
             ns = listI(vn);
@@ -212,7 +216,7 @@ classdef SwarmManager < handle
             T_y_pond(:,1) = T_y_pond(:,1) * pondeTarg(1);
             T_z_pond(:,1) = T_z_pond(:,1) * pondeTarg(1);
    
-            T_x_pond = sum(T_x_pond,2)/sum(pondeTarg)
+            T_x_pond = sum(T_x_pond,2)/sum(pondeTarg);
             T_y_pond = sum(T_y_pond,2)/sum(pondeTarg);
             T_z_pond = sum(T_z_pond,2)/sum(pondeTarg);
 
@@ -229,9 +233,9 @@ classdef SwarmManager < handle
             speed_weight = weights(2);
             target_weight = weights(3); 
             
-            Pond_x = (swarminfluence_x*swarm_weight + speedStateMatrix(:,1)*speed_weight + T_x_pond*target_weight);
-            Pond_y = (swarminfluence_y*swarm_weight + speedStateMatrix(:,2)*speed_weight + T_y_pond*target_weight);
-            Pond_z = (swarminfluence_z*swarm_weight + speedStateMatrix(:,3)*speed_weight + T_z_pond*target_weight);
+            Pond_x = (swarminfluence_x*swarm_weight + speedinfluence_x*speed_weight + T_x_pond*target_weight);
+            Pond_y = (swarminfluence_y*swarm_weight + speedinfluence_y*speed_weight + T_y_pond*target_weight);
+            Pond_z = (swarminfluence_z*swarm_weight + speedinfluence_z*speed_weight + T_z_pond*target_weight);
 
             %Concrètement, on pondère une fois les cercles de répulsion,
             %orientation des drones, puis on repondère avec la vitesse
@@ -242,8 +246,8 @@ classdef SwarmManager < handle
             
             newSpeedMatrix = [Pond_x Pond_y Pond_z];
 
-            newSpeedMatrix(newSpeedMatrix < sat(1)) = sat(1)
-            newSpeedMatrix(newSpeedMatrix > sat(2)) = sat(2)
+            newSpeedMatrix(newSpeedMatrix < sat(1)) = sat(1);
+            newSpeedMatrix(newSpeedMatrix > sat(2)) = sat(2);
             
             for i = 1:n
                 %On réinjecte la nouvelle vitesse
