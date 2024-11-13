@@ -176,9 +176,9 @@ classdef SwarmManager < handle
             %% SPEED INFLUENCE
 
             speedNorm = sqrt(sum(speedStateMatrix(:,1:3).^2));
-            speedinfluence_x = speedStateMatrix(:,1)/speedNorm
-            speedinfluence_y = speedStateMatrix(:,2)/speedNorm
-            speedinfluence_z = speedStateMatrix(:,3)/speedNorm
+            speedinfluence_x = speedStateMatrix(:,1)./speedNorm;
+            speedinfluence_y = speedStateMatrix(:,2)./speedNorm;
+            speedinfluence_z = speedStateMatrix(:,3)./speedNorm;
             
 
             %% Target
