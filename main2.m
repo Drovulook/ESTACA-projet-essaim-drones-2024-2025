@@ -5,7 +5,9 @@ clc;
 env = Environment(10, 200, [-150, 150, 150, -150], [-150, -150, 150, 150], [0, 0, 0, 0]);
 setupZones; % Configuration des zones de l'espace aérien
 
-swarm = SwarmManager(env.Env); % Initialiser le gestionnaire d'essaim avec l'environnement
+Target = [100 50 50 ; 50 100 50];
+
+swarm = SwarmManager(env.Env, Target); % Initialiser le gestionnaire d'essaim avec l'environnement
 numMultirotor = 10; % Nombre de drones multirotors
 
 
@@ -43,15 +45,13 @@ end
     
 % figure;
 % testplot(swarm)
-Target = [100 50 50 ; 50 100 50];
-swarm.Target = Target; % 2 targets pour l'instant, sinon c'est cassé mdr, pas plus, pas moins
-r = [10 50 100]; %Répulsion, évitement, attraction max (rayons)
+r = [10 50 100]/2; %Répulsion, évitement, attraction max (rayons)
 swarm_weights = [1.4 1 1.2 2]; %Pondérations répulsion, alignement, attraction drone, évitement obstacle
-weights = [0.5 1.2 0.8]/10; %Influence sur le vecteur vitesse de : l'environnement ; la vitesse du drone a t-1 (maniabilité) ; la target
-pondeTarg = [10 20]; %Pondération de la value des 2 targets
-satextrem = 2; %Saturation de vitesse projetée
+weights = [0.5 1.2 0.8]; %Influence sur le vecteur vitesse de : l'environnement ; la vitesse du drone a t-1 (maniabilité) ; la target
+pondeTarg = [10 15]; %Pondération de la value des 2 targets
+pondDistTarg = 0.5; %accorde une importance variable aux cibles en fonction de la distance
+satextrem = 10; %Saturation de vitesse projetée
 sat = [-satextrem satextrem];
 temps = 1000;
-dt = 1;
-rand
+dt = 0.3;
 RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sat, Target)

@@ -18,3 +18,7 @@ récupérer les dernières modifications enregistrées sur github:
 test
 
 ##############################################################################
+
+tâches à faire:
+
+-supprimer le code inutilisé;

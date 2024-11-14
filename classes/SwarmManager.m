@@ -8,16 +8,17 @@ classdef SwarmManager < handle
 
         %% Swarm PROPERTIES
         
-        Target = [10 10 10 ; 100 100 10]; %1 ligne par target en coordonées xyz, A changer + tard en classe pour définir niveau d'intérêt (pondération d'attraction) + mouvement
+        target_list %1 ligne par target en coordonées xyz, A changer + tard en classe pour définir niveau d'intérêt (pondération d'attraction) + mouvement
         instant_trimesh
         instant_allpos
     end
     
     methods
         % Constructeur pour initialiser le gestionnaire d'essaim avec l'environnement
-        function obj = SwarmManager(env)
+        function obj = SwarmManager(env, target_list)
             obj.Drones = {};  % Initialiser le tableau de drones comme vide
             obj.Environment = env; % Assigner l'environnement de simulation
+            obj.target_list = target_list
         end
         
         % Méthode pour ajouter un drone à l'essaim
@@ -95,8 +96,8 @@ classdef SwarmManager < handle
         end
 
 
-        function update_target(obj, newTarget)
-            obj.Target = newTarget;
+        function update_target(obj, target_list)
+            obj.target_list = target_list;
         end
 
         % Méthode pour mettre à jour la vitesse de chaque drone dans l'essaim
@@ -121,7 +122,7 @@ classdef SwarmManager < handle
             vn = sparse(dTri, dTri(:,[2 3 4 1]),1); % décalage des indices et on crée la matrice des voisins de voroi (vn)
             vn = vn | vn'; %On rend vn symétrique pour s'assurer que la relation de voisinage ets bijective
             obj.instant_trimesh = dTri ;
-            
+
             listI = repmat(1:n,1,n);
             ns = listI(vn);
             nn = sum(vn);
@@ -130,7 +131,6 @@ classdef SwarmManager < handle
             neighborI = cumsum(neighborI(1:end-1,:),1); 
             neighborI(neighborI==0) = ns;
             neighborI = neighborI';
-
             %La matrice NeighborI permet, lorsque parsée avec stateA, de
             %donner une matrice ou sur la ligne, on a le drone, et sur
             %chaque colonne, le numéro de ligne de ses voisins dans un
@@ -149,14 +149,12 @@ classdef SwarmManager < handle
 
             % On fusionne les matrices + on gère l'indice de fin
             stateA = [posStateMatrix speedStateMatrix ; nan(1,6)];
-
             % Différence de position entre les drones et leurs voisins
             rho_x = reshape(stateA(neighborI,1),n,nnmax) - posStateMatrix(:,1); % Différence axe x
             rho_y = reshape(stateA(neighborI,2),n,nnmax) - posStateMatrix(:,2); % Différence axe y
             rho_z = reshape(stateA(neighborI,3),n,nnmax) - posStateMatrix(:,3); % Différence axe z
             rhon = sqrt(rho_x.^2 + rho_y.^2 + rho_z.^2); % Distance euclidienne en 3D
 
-          
             %Chaque matrice a le drone par ligne, et ses contacts par
             %dépendance sur la ligne. Ainsi, on peut, en fonction de rhon,
             %qui définit la distance euclidienne, définir si le drone de la
@@ -171,14 +169,13 @@ classdef SwarmManager < handle
             swarminfluence_x = (sum(weight_matrix.*rho_x./rhon, 2, 'omitnan'));
             swarminfluence_y = (sum(weight_matrix.*rho_y./rhon, 2, 'omitnan'));
             swarminfluence_z = (sum(weight_matrix.*rho_z./rhon, 2, 'omitnan'));
-         
+
             %sum(weight_matrix,2) poids par ligne à diviser pour pondérer de la somme
             %On multiplie la projection sur un axe par le poids, qu'on
             %normalise par la norme euclidienne, pour obtenir un nouveau
             %vecteur d'influence
 
             %% SPEED INFLUENCE
-            
             speedNorm = sqrt(sum(speedStateMatrix.^2,2));
             speedinfluence_x = speedStateMatrix(:,1)./speedNorm;
             speedinfluence_y = speedStateMatrix(:,2)./speedNorm;
@@ -188,33 +185,28 @@ classdef SwarmManager < handle
             speedinfluence_y(isnan(speedinfluence_y)) = 0;
             speedinfluence_z(isnan(speedinfluence_z)) = 0;
             
-
             %% Target
 
             %Différence de position aux targets, en ligne, les drones, en
             %colonne la diff à chaque target
             %Rajouter un IF si pas de target + Comportement retour maison
-           
-
-            T_x = obj.Target(:,1)' - posStateMatrix(:,1);
-            T_y = obj.Target(:,2)' - posStateMatrix(:,2);
-            T_z = obj.Target(:,3)' - posStateMatrix(:,3);
+            
+            T_x = obj.target_list(:,1)' - posStateMatrix(:,1);
+            T_y = obj.target_list(:,2)' - posStateMatrix(:,2);
+            T_z = obj.target_list(:,3)' - posStateMatrix(:,3);
 
             T_eucli = sqrt(T_x.^2 + T_y.^2 + T_z.^2); % On peut y ajouter de la pondération de cible en fct de la distance ; distance d'attraction max à ajouter (r(3)/w(3))
             T_x_pond = T_x./T_eucli;
             T_y_pond = T_y./T_eucli;
             T_z_pond = T_z./T_eucli;
 
-            %Pondération target de test à modifier plus tard (2targets
-            %harcodé du coup)
-            T_x_pond(:,2) = T_x_pond(:,2) * pondeTarg(2);
-            T_y_pond(:,2) = T_y_pond(:,2) * pondeTarg(2);
-            T_z_pond(:,2) = T_z_pond(:,2) * pondeTarg(2);
-             
-            %Pondération target de test (idem que précédemment)
-            T_x_pond(:,1) = T_x_pond(:,1) * pondeTarg(1);
-            T_y_pond(:,1) = T_y_pond(:,1) * pondeTarg(1);
-            T_z_pond(:,1) = T_z_pond(:,1) * pondeTarg(1);
+            numTargets = size(T_x_pond, 2);
+            for i = 1:numTargets
+                % Appliquer la pondération de chaque cible aux coordonnées (x, y, z)
+                T_x_pond(:,i) = T_x_pond(:,i) * pondeTarg(i);
+                T_y_pond(:,i) = T_y_pond(:,i) * pondeTarg(i);
+                T_z_pond(:,i) = T_z_pond(:,i) * pondeTarg(i);
+            end
    
             T_x_pond = sum(T_x_pond,2)/sum(pondeTarg);
             T_y_pond = sum(T_y_pond,2)/sum(pondeTarg);

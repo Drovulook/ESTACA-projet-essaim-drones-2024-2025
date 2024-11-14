@@ -56,7 +56,6 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
 
     n_drone=size(swarm.Drones,2);
     drone_pos=zeros(n_drone,3);
-    drone_pos
     for i=1:n_drone
         drone_pos(i,:)=swarm.Drones{i}.posState;
 
