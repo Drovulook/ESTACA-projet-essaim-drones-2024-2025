@@ -53,5 +53,5 @@ satextrem = 2; %Saturation de vitesse projetée
 sat = [-satextrem satextrem];
 temps = 1000;
 dt = 1;
-rand
-RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sat, Target)
+rand;
+RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sat, Target);

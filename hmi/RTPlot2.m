@@ -56,7 +56,7 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
 
     n_drone=size(swarm.Drones,2);
     drone_pos=zeros(n_drone,3);
-    drone_pos
+    drone_pos;
     for i=1:n_drone
         drone_pos(i,:)=swarm.Drones{i}.posState;
 
@@ -103,7 +103,7 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
        
         % Rafraîchir le tracé pour montrer les nouvelles positions et vecteurs
         to = update(slider);
-        Target(1, 1) = to
+        Target(1, 1) = to;
         set(targ(1), 'XData', Target(1,1), 'YData', Target(1,2), 'ZData', Target(1,3));
         swarm.update_target(Target);
 

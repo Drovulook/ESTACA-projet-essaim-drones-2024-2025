@@ -53,6 +53,15 @@ classdef MultirotorDrone < DroneBase & handle
             % Mettre à jour la position en appliquant la vitesse et le taux de montée
             newPos = currentPos + [velocity(1:2); climbRate] * dt;
             obj.Platform.updatePose('Position', newPos); % Appliquer la nouvelle position au drone
+
+            %calcul puissance développée (non teste)
+            obj.Puissance=[obj.Puissance 0]; %glhf
+            if (obj.Capacite_max == 0)
+                % moteur thermique
+            else
+                capacite_consomme=power(obj.Puissance(end)/obj.Tension_batterie, obj.k_peukert)*dt;
+                obj.Autonomie=obj.Autonomie-capacite_consomme*obj.Tension_batterie
+            end
         end
     end
 end

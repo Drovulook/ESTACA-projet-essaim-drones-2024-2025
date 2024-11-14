@@ -11,7 +11,17 @@ classdef (Abstract) DroneBase < handle
         speedState = [0 0 0]     % Vecteur de vitesse à tn (1,3) [r, teta, phi]
         flightTime = 0  % Temps de vol en sec
         Target          % Coordonnées de la cible
+        
+        Puissance       % Puissances consommées à chaque pas (1,n)
+        
 
+        %energie a bord
+        Capacite_max        % si batterie
+        Tension_batterie    % si batterie
+        k_peukert           % si batterie (cte de Peukert)
+        Volume_reservoir    % si carburant
+        Rendement           % pour les deux
+        Autonomie           % idem
     end
     
     methods
@@ -20,6 +30,7 @@ classdef (Abstract) DroneBase < handle
             obj.ID = id; % Assigner l'identifiant unique
             obj.Type = type; % Assigner le type de drone
             
+            obj.Tension_batterie=10; % pour éviter une division par zéro;
 
             % Générer un nom unique en utilisant le type et l'ID du drone
             uniqueName = sprintf('%sDrone%d_%s', upper(type(1)), id, datestr(now, 'HHMMSSFFF'));
@@ -57,7 +68,6 @@ classdef (Abstract) DroneBase < handle
         function update_pos(obj, dt) %Update la position du drone en fct de sa vitesse
             dpos = dt*obj.speedState; %on peut ajouter du noise
             obj.posState = obj.posState + dpos;
-
         end
     end
 end
