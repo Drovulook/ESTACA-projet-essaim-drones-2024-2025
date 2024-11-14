@@ -8,16 +8,17 @@ classdef SwarmManager < handle
 
         %% Swarm PROPERTIES
         
-        Target = [10 10 10 ; 100 100 10]; %1 ligne par target en coordonées xyz, A changer + tard en classe pour définir niveau d'intérêt (pondération d'attraction) + mouvement
-        instant_trimesh
-        instant_allpos
+        Target %1 ligne par target en coordonées xyz, A changer + tard en classe pour définir niveau d'intérêt (pondération d'attraction) + mouvement
+        target_history_matrix
+        drones_pos_history_matrix
     end
     
     methods
         % Constructeur pour initialiser le gestionnaire d'essaim avec l'environnement
-        function obj = SwarmManager(env)
+        function obj = SwarmManager(env, temps)
             obj.Drones = {};  % Initialiser le tableau de drones comme vide
             obj.Environment = env; % Assigner l'environnement de simulation
+
         end
         
         % Méthode pour ajouter un drone à l'essaim
@@ -29,7 +30,7 @@ classdef SwarmManager < handle
             %départ au sol. Ici je les fait juste commencer espacés
             count = 1;
             while true
-                if length(obj.Drones) == 0 
+                if isempty(obj.Drones)
                     break;
                 end
 
@@ -114,13 +115,13 @@ classdef SwarmManager < handle
                 posStateMatrix(i,:) = obj.Drones{i}.posState; % Crée matrice de positions
                 speedStateMatrix(i,:) = obj.Drones{i}.speedState; % Crée matrice de vitesses
             end
-            obj.instant_allpos = posStateMatrix;
+
+            obj.drones_pos_history_matrix(:,:,size(obj.drones_pos_history_matrix,3)+1) = posStateMatrix;
 
             % Calcul des voisins de voronoi avec une triangulation de chaque drone
             dTri = delaunay(posStateMatrix); %Création de la matrice de triangulation
             vn = sparse(dTri, dTri(:,[2 3 4 1]),1); % décalage des indices et on crée la matrice des voisins de voroi (vn)
             vn = vn | vn'; %On rend vn symétrique pour s'assurer que la relation de voisinage ets bijective
-            obj.instant_trimesh = dTri ;
             
             listI = repmat(1:n,1,n);
             ns = listI(vn);
@@ -205,16 +206,10 @@ classdef SwarmManager < handle
             T_y_pond = T_y./T_eucli;
             T_z_pond = T_z./T_eucli;
 
-            %Pondération target de test à modifier plus tard (2targets
-            %harcodé du coup)
-            T_x_pond(:,2) = T_x_pond(:,2) * pondeTarg(2);
-            T_y_pond(:,2) = T_y_pond(:,2) * pondeTarg(2);
-            T_z_pond(:,2) = T_z_pond(:,2) * pondeTarg(2);
-             
-            %Pondération target de test (idem que précédemment)
-            T_x_pond(:,1) = T_x_pond(:,1) * pondeTarg(1);
-            T_y_pond(:,1) = T_y_pond(:,1) * pondeTarg(1);
-            T_z_pond(:,1) = T_z_pond(:,1) * pondeTarg(1);
+            %Pondération target de test
+            T_x_pond = T_x_pond .* pondeTarg;
+            T_y_pond = T_y_pond .* pondeTarg;
+            T_z_pond = T_z_pond .* pondeTarg;
    
             T_x_pond = sum(T_x_pond,2)/sum(pondeTarg);
             T_y_pond = sum(T_y_pond,2)/sum(pondeTarg);

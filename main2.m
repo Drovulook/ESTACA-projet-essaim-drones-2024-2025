@@ -5,8 +5,11 @@ clc;
 env = Environment(10, 200, [-150, 150, 150, -150], [-150, -150, 150, 150], [0, 0, 0, 0]);
 setupZones; % Configuration des zones de l'espace aérien
 
-swarm = SwarmManager(env.Env); % Initialiser le gestionnaire d'essaim avec l'environnement
-numMultirotor = 10; % Nombre de drones multirotors
+temps = 500;
+
+
+swarm = SwarmManager(env.Env, temps); % Initialiser le gestionnaire d'essaim avec l'environnement
+numMultirotor = 7; % Nombre de drones multirotors
 
 
 % Ajouter les drones multirotors à l'essaim, placés à la coordonnée de la base
@@ -43,23 +46,19 @@ end
     
 % figure;
 % testplot(swarm)
-<<<<<<< Updated upstream
-Target = [100 50 50 ; 50 100 50];
+
+Target = [100 50 50];
 swarm.Target = Target; % 2 targets pour l'instant, sinon c'est cassé mdr, pas plus, pas moins
-r = [10 60 100]; %Répulsion, évitement, attraction max (rayons)
-swarm_weights = [1.4 1.2 2]; %Pondérations répulsion, attraction drone, évitement obstacle
-weights = [0.5 1.2 0.8]/4; %Influence sur le vecteur vitesse de : l'environnement ; la vitesse du drone a t-1 (maniabilité) ; la target
+r = [20 40 100]; %Répulsion, évitement, attraction max (rayons)
+swarm_weights = [1.4 0.8 2]; %Pondérations répulsion, alignement, attraction drone, évitement obstacle
+weights = [0.5 1.2 1]/10; %Influence sur le vecteur vitesse de : l'environnement ; la vitesse du drone a t-1 (maniabilité) ; la target
 %J'ai remarqué qu'en divisant tout par 10, on réduit les comportements HF,
 %et les drones sont plus posés
-pondeTarg = [10 0]; %Pondération de la value des 2 targets
-satextrem = 2; %Saturation de vitesse projetée
-sat = [-satextrem satextrem];
-temps = 1000;
-dt = 1;
-<<<<<<< Updated upstream
-rand;
-RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sat, Target);
-=======
 
-RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sat, Target)
->>>>>>> Stashed changes
+pondeTarg = [10]; %Pondération de la value des 2 targets
+satextrem = 3; %Saturation de vitesse projetée
+sat = [-satextrem satextrem];
+dt = 1;
+
+RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sat, Target);
+

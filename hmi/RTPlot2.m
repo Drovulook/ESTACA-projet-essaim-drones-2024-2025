@@ -4,7 +4,6 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
     % Configurer la figure avec une taille de fenêtre fixe plus grande
     f = figure('Position', [100, 100, 1200, 800]); % Largeur 1200px, Hauteur 800px
     rotate3d on
-
     ax = gca;
     
     XLim = [-150 150];
@@ -57,11 +56,7 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
 
     n_drone=size(swarm.Drones,2);
     drone_pos=zeros(n_drone,3);
-<<<<<<< Updated upstream
-    drone_pos;
-=======
-    
->>>>>>> Stashed changes
+
     for i=1:n_drone
         drone_pos(i,:)=swarm.Drones{i}.posState;
 
@@ -76,15 +71,26 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
         quiver_handle(i)=quiver3(drone_pos(i,1), drone_pos(i,2), drone_pos(i,3), 0, 0, 0, 'r', 'LineWidth', 1.5, 'MaxHeadSize', 0.5);
     end
 
-    slider = uicontrol('Style', 'slider', ...
-               'Min', 0, 'Max', 50, 'Value', 1, ...
+    sliderX = uicontrol('Style', 'slider', ...
+               'Min', -150, 'Max', 150, 'Value', 0, ...
                'Units', 'normalized', ...
-               'Position', [0.2 0.02 0.6 0.03], ...
+               'Position', [0.2 0.02 0.2 0.03], ...
+               'Callback', @(src, event) update(src));
+    sliderY = uicontrol('Style', 'slider', ...
+               'Min', -150, 'Max', 150, 'Value', 0, ...
+               'Units', 'normalized', ...
+               'Position', [0.4 0.02 0.2 0.03], ...
+               'Callback', @(src, event) update(src));
+    sliderZ = uicontrol('Style', 'slider', ...
+               'Min', -10, 'Max', 150, 'Value', 0, ...
+               'Units', 'normalized', ...
+               'Position', [0.6 0.02 0.2 0.03], ...
                'Callback', @(src, event) update(src));
 
-    function toto = update(src, event)
+
+    function toto = update(slider)
         % Récupérer la valeur actuelle du slider
-        toto = src.Value;
+        toto = get(slider, 'Value');
     end
 
     %% Boucle de simulation
@@ -103,18 +109,20 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
         for i=1:n_drone
              set(head(i), 'XData', drone_pos(i,1), 'YData', drone_pos(i,2), 'ZData', drone_pos(i,3));
              set(quiver_handle(i), 'XData', drone_pos(i,1), 'YData', drone_pos(i,2), 'ZData', drone_pos(i,3), ...
-                 'UData', drone_speed(i,1), 'VData', drone_speed(i,2), 'WData', drone_speed(i,3));
+                 'UData', drone_speed(i,1)*20, 'VData', drone_speed(i,2)*20, 'WData', drone_speed(i,3)*20);
         end
        
+
         % Rafraîchir le tracé pour montrer les nouvelles positions et vecteurs
 
         %Test Slider
-        to = update(slider);
-        Target(1, 1) = to;
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
+        Target(1, 1) = update(sliderX);
+        Target(1, 2) = update(sliderY);
+        Target(1, 3) = update(sliderZ);
+        
+        swarm.target_history_matrix = [swarm.target_history_matrix; Target(1,:)];
+
         set(targ(1), 'XData', Target(1,1), 'YData', Target(1,2), 'ZData', Target(1,3));
         swarm.update_target(Target);
 
@@ -122,7 +130,7 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
         drawnow limitrate
    
         % Pause optionnelle pour contrôler la vitesse de visualisation
-        pause(0.001);  % Ajuster ou supprimer selon les besoins
+        %pause(0.001);  % Ajuster ou supprimer selon les besoins
 
         k = k + 1;
         if k == temps
@@ -130,6 +138,44 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
         end
     end
     
+    pause(0.1)
+
+    % Traçage temps différé de toutes les positions
+    figure('Position', [100, 100, 1200, 800]);
+    rotate3d on
+    ax = gca;
+    set(ax, 'XLim', XLim, 'YLim', YLim, 'ZLim', ZLim);
+    grid on;
+    axis equal
+
+    hold on;
+
+    xlabel('X'); % Étiquette de l'axe x
+    ylabel('Y'); % Étiquette de l'axe y
+    zlabel('Altitude (Z)'); % Étiquette de l'axe z
+    title('Rendu de Simulation en Temps Différé'); % Titre de la figure
+
+    fill3(env.GroundCoordinates.x, env.GroundCoordinates.y, env.GroundCoordinates.z, [0.5 0.5 0.5], 'FaceAlpha', 0.3); % Couleur grise avec transparence
+    
+    swarm.drones_pos_history_matrix = cat(3,zeros(n_drone,3,15), swarm.drones_pos_history_matrix);
+
+    head=gobjects(1,n_drone);
+    for i=1:n_drone
+        head(i)=scatter3(swarm.drones_pos_history_matrix(i,1,16), swarm.drones_pos_history_matrix(i,2,16), swarm.drones_pos_history_matrix(i,3,16), 50, 'filled', 'MarkerFaceColor', 'b');
+    end
+
+    target = scatter3(swarm.target_history_matrix(1,1), swarm.target_history_matrix(1,2), swarm.target_history_matrix(1,3), 50, 'filled', 'MarkerFaceColor', 'r');
+
+    for t = 16:temps
+        for i=1:n_drone
+            set(head(i), 'XData', swarm.drones_pos_history_matrix(i,1,t), 'YData', swarm.drones_pos_history_matrix(i,2,t), 'ZData', swarm.drones_pos_history_matrix(i,3,t));
+            set(target, 'XData', swarm.target_history_matrix(t-15,1), 'YData', swarm.target_history_matrix(t-15,2), 'ZData', swarm.target_history_matrix(t-15,3));
+
+        end
+        drawnow;
+        
+    end
+
 end
 
 
