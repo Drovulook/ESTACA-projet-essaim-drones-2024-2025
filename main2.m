@@ -43,11 +43,14 @@ end
     
 % figure;
 % testplot(swarm)
+<<<<<<< Updated upstream
 Target = [100 50 50 ; 50 100 50];
 swarm.Target = Target; % 2 targets pour l'instant, sinon c'est cassé mdr, pas plus, pas moins
 r = [10 60 100]; %Répulsion, évitement, attraction max (rayons)
 swarm_weights = [1.4 1.2 2]; %Pondérations répulsion, attraction drone, évitement obstacle
 weights = [0.5 1.2 0.8]/4; %Influence sur le vecteur vitesse de : l'environnement ; la vitesse du drone a t-1 (maniabilité) ; la target
+%J'ai remarqué qu'en divisant tout par 10, on réduit les comportements HF,
+%et les drones sont plus posés
 pondeTarg = [10 0]; %Pondération de la value des 2 targets
 satextrem = 2; %Saturation de vitesse projetée
 sat = [-satextrem satextrem];
