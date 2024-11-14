@@ -50,5 +50,16 @@ classdef FixedWingDrone < DroneBase & handle
             newPos = currentPos + [velocity(1:2); climbRate] * dt;
             obj.Platform.updatePose('Position', newPos); % Appliquer la nouvelle position au drone
         end
+
+        function SetSpeedWithConstraints(obj, dt, newSpeedVec)
+            climbRate = newSpeedVec(3);
+            if climbRate > obj.MaxClimbRate
+                climbRate = obj.MaxClimbRate;
+            elseif climbRate < obj.MaxDescentRate
+                climbRate = obj.MaxDescentRate;
+            end
+            RealnewSpeedVec = [newSpeedVec(1), newSpeedVec(2), climbRate]
+            obj.speedState = RealnewSpeedVec;
+        end
     end
 end

@@ -142,7 +142,8 @@ classdef (Abstract) DroneBase < handle
             newSpeedVec(newSpeedVec < sat(1)) = sat(1);
             newSpeedVec(newSpeedVec > sat(2)) = sat(2);
 
-            obj.speedState = newSpeedVec;
+            obj.SetSpeedWithConstraints(dt, newSpeedVec);
+            %obj.speedState = newSpeedVec;
             end
     end
 end
