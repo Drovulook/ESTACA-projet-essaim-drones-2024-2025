@@ -6,7 +6,11 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
     
     ax = gca;
     
-    set(ax, 'XLim', [-15 15], 'YLim', [-15 15], 'ZLim', [-10 15]);
+    XLim = [-150 150];
+    YLim = [-150 150];
+    ZLim = [-10 150];
+
+    set(ax, 'XLim', XLim, 'YLim', YLim, 'ZLim', ZLim);
 
     view(45, 30); % Définir un angle de vue en perspective (azimut=45, élévation=30)
     grid on;
@@ -26,6 +30,25 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
     % Ajouter une surface de sol grise à z = 0
     fill3(env.GroundCoordinates.x, env.GroundCoordinates.y, env.GroundCoordinates.z, [0.5 0.5 0.5], 'FaceAlpha', 0.3); % Couleur grise avec transparence
     
+    % Afficher chaque zone de l'environnement avec un code couleur selon sa catégorie
+    for i = 1:length(env.ZonesList)
+        zone = env.ZonesList{i};
+
+        switch zone.Category
+            case 'A'
+                zoneColor = 'g'; % Zones autorisées en vert
+            case 'P'
+                zoneColor = 'r'; % Zones prohibées en rouge
+            case 'M'
+                zoneColor = 'b'; % Zones de manœuvre en bleu
+            otherwise
+                zoneColor = 'y'; % Autres zones en jaune
+        end
+
+        % Créer la forme de la zone avec le type, la couleur, la position et les dimensions spécifiées
+        create_shape(zone.Type, zoneColor, zone.CenterPosition, zone.Dimensions, zone.TiltAngle);
+    end
+
     targ = gobjects(1, size(Target,1));
     for k = 1:size(Target,1)
         targ(k)=scatter3(Target(k,1), Target(k,2), Target(k,3), 50, 'filled', 'MarkerFaceColor', 'r');
@@ -33,7 +56,7 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
 
     n_drone=size(swarm.Drones,2);
     drone_pos=zeros(n_drone,3);
-    
+    drone_pos
     for i=1:n_drone
         drone_pos(i,:)=swarm.Drones{i}.posState;
 
@@ -84,7 +107,7 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
         set(targ(1), 'XData', Target(1,1), 'YData', Target(1,2), 'ZData', Target(1,3));
         swarm.update_target(Target);
 
-        set(ax, 'XLim', [-15 15], 'YLim', [-15 15], 'ZLim', [-10 15]);
+        set(ax, 'XLim', XLim, 'YLim', YLim, 'ZLim', ZLim);
         drawnow limitrate
    
         % Pause optionnelle pour contrôler la vitesse de visualisation

@@ -1,21 +1,22 @@
 @echo off
-REM Ce fichier batch sert à initialiser un dépôt git et à effectuer un commit avec une description donnée par l'utilisateur.
-REM Il va se déplacer vers le répertoire de travail du projet, ajouter tous les fichiers et pousser les modifications.
+REM Vérifie si Git est installé
+git --version >nul 2>&1
+IF ERRORLEVEL 1 (
+    echo Git n'est pas installé ou non configuré dans le PATH.
+    pause
+    exit /b
+)
 
-cd ..
-cd ..
-
-cd D:\gitRepositories\ESTACA-projet-essaim-drones-2024-2025
-
-REM Initialisation du dépôt Git (si nécessaire)
-git init
+REM Instructions Git pour ajouter, commit et push
+echo Préparation des changements pour Git...
 git add .
 
-REM Demande à l'utilisateur de fournir une description pour le commit
-set /p input= Description des Modifications : 
+echo Commit des changements avec un message par défaut...
+set /p commitMessage="Entrez un message de commit : "
+git commit -m "%commitMessage%"
 
-REM Effectue le commit avec la description fournie par l'utilisateur
-git commit -m "%input%"
-
-REM Pousse les modifications sur la branche principale
+echo Envoi des changements sur GitHub...
 git push origin main
+
+echo Commit et push terminés.
+pause
