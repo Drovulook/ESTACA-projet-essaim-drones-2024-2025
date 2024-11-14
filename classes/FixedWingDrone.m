@@ -58,7 +58,7 @@ classdef FixedWingDrone < DroneBase & handle
             elseif climbRate < obj.MaxDescentRate
                 climbRate = obj.MaxDescentRate;
             end
-            RealnewSpeedVec = [newSpeedVec(1), newSpeedVec(2), climbRate]
+            RealnewSpeedVec = [newSpeedVec(1), newSpeedVec(2), climbRate];
             obj.speedState = RealnewSpeedVec;
         end
     end

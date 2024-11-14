@@ -62,7 +62,7 @@ classdef MultirotorDrone < DroneBase & handle
             elseif climbRate < -100
                 climbRate = -100;
             end
-            RealnewSpeedVec = [newSpeedVec(1), newSpeedVec(2), climbRate]
+            RealnewSpeedVec = [newSpeedVec(1), newSpeedVec(2), climbRate];
             obj.speedState = RealnewSpeedVec;
         end
     end

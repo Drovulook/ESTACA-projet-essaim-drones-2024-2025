@@ -4,12 +4,13 @@ classdef AppBackend < handle
         zones;
         targetList
         swarm
+        settings
         numMultirotor
     end
     methods
         function Init(obj);
-            clear all;
-            close all;
+            %clear all;
+            %close all;
             clc;
 
             obj.env = Environment(10, 200, [-150, 150, 150, -150], [-150, -150, 150, 150], [0, 0, 0, 0]);
@@ -18,8 +19,10 @@ classdef AppBackend < handle
             obj.targetList = [100 50 50 ; 50 100 50];
 
             obj.swarm = SwarmManager(obj.env.Env, obj.targetList); % Initialiser le gestionnaire d'essaim avec l'environnement
-            obj.numMultirotor = 10 % Nombre de drones multirotors
-
+            obj.numMultirotor = 10; % Nombre de drones multirotors
+            
+            obj.settings = Settings();
+        
             for i = 1:obj.numMultirotor
                 obj.swarm.addDrone('multirotor', obj.zones.homeBaseCoord);
             end
@@ -48,18 +51,13 @@ classdef AppBackend < handle
                 % Assigner la position valide au drone i
                 obj.swarm.Drones{i}.posState = new_pos;
             end
-                
-            % figure;
-            % testplot(swarm)
-            r = [10 50 100]/2; %Répulsion, évitement, attraction max (rayons)
-            swarm_weights = [1.4 1 1.2 2]; %Pondérations répulsion, alignement, attraction drone, évitement obstacle
-            weights = [0.5 1.2 0.8]/2; %Influence sur le vecteur vitesse de : l'environnement ; la vitesse du drone a t-1 (maniabilité) ; la target
-            pondeTarg = [10 15]; %Pondération de la value des 2 targets
-            %pondDistTarg = 0.5; %accorde une importance variable aux cibles en fonction de la distance
-            satextrem = 10; %Saturation de vitesse projetée
-            sat = [-satextrem satextrem];
-            temps = 1000;
-            dt = 0.3;
+        end
+    
+        function update(obj)
+            obj.swarm.update_speeds(obj.settings.dt, obj.settings.r, obj.settings.swarm_weights, obj.settings.weights, obj.settings.pondeTarg, obj.settings.sat)
+
+            % Pause optionnelle pour contrôler la vitesse de visualisation
+            pause(0.001);  % Ajuster ou supprimer selon les besoins
         end
 
     end
