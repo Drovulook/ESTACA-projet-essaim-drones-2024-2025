@@ -102,7 +102,7 @@ classdef SwarmManager < handle
 
         % Méthode pour mettre à jour la vitesse de chaque drone dans l'essaim
         
-        function update_speed(obj, dt, r, swarm_weights, weights, pondeTarg, sat) %r est la liste de rayon (répulsion, évitement, attraction_max), w la liste de pondération (répulsion, orientation, attraction, évitement)
+        function [posStateMatrix, speedStateMatrix, neighborI] = Get_neighborList(obj, dt, r, swarm_weights, weights, pondeTarg, sat) %r est la liste de rayon (répulsion, évitement, attraction_max), w la liste de pondération (répulsion, orientation, attraction, évitement)
             %répulsion pour les drones, évitement pour le terrain ;
             %attraction max, distance d'attraction maximum
             n = length(obj.Drones);
@@ -126,11 +126,15 @@ classdef SwarmManager < handle
             listI = repmat(1:n,1,n);
             ns = listI(vn);
             nn = sum(vn);
-            nnmax = max(nn);
             neighborI = full(sparse(nn+1,1:n,n+1));
             neighborI = cumsum(neighborI(1:end-1,:),1); 
             neighborI(neighborI==0) = ns;
-            neighborI = neighborI';
+            neighborI = neighborI';    
+
+        end
+
+        function update_speeds(obj, dt, r, swarm_weights, weights, pondeTarg, sat)
+            [posStateMatrix, speedStateMatrix, neighborList] = Get_neighborList(obj, dt, r, swarm_weights, weights, pondeTarg, sat);
             %La matrice NeighborI permet, lorsque parsée avec stateA, de
             %donner une matrice ou sur la ligne, on a le drone, et sur
             %chaque colonne, le numéro de ligne de ses voisins dans un
@@ -143,111 +147,13 @@ classdef SwarmManager < handle
             % élégant au-dessus
             %La pb avec ça, c'est le comportement dans un cas
             %coplanaire/colinéaire, ça marche pas
-
-            
-            %% SWARM INFLUENCE
-
-            % On fusionne les matrices + on gère l'indice de fin
-            stateA = [posStateMatrix speedStateMatrix ; nan(1,6)];
-            % Différence de position entre les drones et leurs voisins
-            rho_x = reshape(stateA(neighborI,1),n,nnmax) - posStateMatrix(:,1); % Différence axe x
-            rho_y = reshape(stateA(neighborI,2),n,nnmax) - posStateMatrix(:,2); % Différence axe y
-            rho_z = reshape(stateA(neighborI,3),n,nnmax) - posStateMatrix(:,3); % Différence axe z
-            rhon = sqrt(rho_x.^2 + rho_y.^2 + rho_z.^2); % Distance euclidienne en 3D
-
-            %Chaque matrice a le drone par ligne, et ses contacts par
-            %dépendance sur la ligne. Ainsi, on peut, en fonction de rhon,
-            %qui définit la distance euclidienne, définir si le drone de la
-            %case est dans le cercle d'attraction, de répulsion,
-            %d'orientation ou d'évitement
-
-            %Règles de pondération
-            weight_matrix = zeros(size(rhon));
-            weight_matrix(rhon < r(1)) = -swarm_weights(1); % Cercle de répulsion
-            weight_matrix(rhon >= r(1)) = swarm_weights(2); % Cercle d'orientation
-
-            swarminfluence_x = (sum(weight_matrix.*rho_x./rhon, 2, 'omitnan'));
-            swarminfluence_y = (sum(weight_matrix.*rho_y./rhon, 2, 'omitnan'));
-            swarminfluence_z = (sum(weight_matrix.*rho_z./rhon, 2, 'omitnan'));
-
-            %sum(weight_matrix,2) poids par ligne à diviser pour pondérer de la somme
-            %On multiplie la projection sur un axe par le poids, qu'on
-            %normalise par la norme euclidienne, pour obtenir un nouveau
-            %vecteur d'influence
-
-            %% SPEED INFLUENCE
-            speedNorm = sqrt(sum(speedStateMatrix.^2,2));
-            speedinfluence_x = speedStateMatrix(:,1)./speedNorm;
-            speedinfluence_y = speedStateMatrix(:,2)./speedNorm;
-            speedinfluence_z = speedStateMatrix(:,3)./speedNorm;
-
-            speedinfluence_x(isnan(speedinfluence_x)) = 0;
-            speedinfluence_y(isnan(speedinfluence_y)) = 0;
-            speedinfluence_z(isnan(speedinfluence_z)) = 0;
-            
-            %% Target
-
-            %Différence de position aux targets, en ligne, les drones, en
-            %colonne la diff à chaque target
-            %Rajouter un IF si pas de target + Comportement retour maison
-            
-            T_x = obj.target_list(:,1)' - posStateMatrix(:,1);
-            T_y = obj.target_list(:,2)' - posStateMatrix(:,2);
-            T_z = obj.target_list(:,3)' - posStateMatrix(:,3);
-
-            T_eucli = sqrt(T_x.^2 + T_y.^2 + T_z.^2); % On peut y ajouter de la pondération de cible en fct de la distance ; distance d'attraction max à ajouter (r(3)/w(3))
-            T_x_pond = T_x./T_eucli;
-            T_y_pond = T_y./T_eucli;
-            T_z_pond = T_z./T_eucli;
-
-            numTargets = size(T_x_pond, 2);
-            for i = 1:numTargets
-                % Appliquer la pondération de chaque cible aux coordonnées (x, y, z)
-                T_x_pond(:,i) = T_x_pond(:,i) * pondeTarg(i);
-                T_y_pond(:,i) = T_y_pond(:,i) * pondeTarg(i);
-                T_z_pond(:,i) = T_z_pond(:,i) * pondeTarg(i);
+            n_drones = length(obj.Drones);
+            parfor i = 1:n_drones %exécution du code en parallèle, sur plusieurs threads (un pour chaque drone)
+                neighbors = neighborList(i, neighborList(i,:) ~= n_drones+1);
+                neighborPos = posStateMatrix(neighbors, :);
+                neighborSpeed = speedStateMatrix(neighbors, :);
+                obj.Drones{i}.Set_NextVelVector(dt, r, swarm_weights, weights, pondeTarg, sat, neighborPos, neighborSpeed, obj.target_list);
             end
-   
-            T_x_pond = sum(T_x_pond,2)/sum(pondeTarg);
-            T_y_pond = sum(T_y_pond,2)/sum(pondeTarg);
-            T_z_pond = sum(T_z_pond,2)/sum(pondeTarg);
-
-
-            %% Maintentant, pour chaque drone, on fait la pondération des influeneces swarm/target/speed et on les sommes
-            % Il ne faut pas oublier de pondérer les influences avec son propre vecteur
-            % vitesse, weighté en fonction du type de drone, pour simuler l'inertie.
-            % GROS POINT BLOQUANT, je ne vois pas comment intégrer les
-            % valeurs d'angles max, de G, de vario, etc. Attendu qu'on l'intègre en
-            % pondération, axe de travail à pousser en second temps
-
-            %distances pondérées et normalisées = matrices d'attraction
-            swarm_weight = weights(1);
-            speed_weight = weights(2);
-            target_weight = weights(3); 
-            
-            Pond_x = (swarminfluence_x*swarm_weight + speedinfluence_x*speed_weight + T_x_pond*target_weight);
-            Pond_y = (swarminfluence_y*swarm_weight + speedinfluence_y*speed_weight + T_y_pond*target_weight);
-            Pond_z = (swarminfluence_z*swarm_weight + speedinfluence_z*speed_weight + T_z_pond*target_weight);
-
-            %Concrètement, on pondère une fois les cercles de répulsion,
-            %orientation des drones, puis on repondère avec la vitesse
-            %actuelle + L'attractivité de la target
-
-            %A voir si on ne rajoute pas le troisième cercle concentrique
-            %d'attraction avec les autres drones
-            
-            newSpeedMatrix = [Pond_x Pond_y Pond_z];
-
-            newSpeedMatrix(newSpeedMatrix < sat(1)) = sat(1);
-            newSpeedMatrix(newSpeedMatrix > sat(2)) = sat(2);
-            
-            for i = 1:n
-                %On réinjecte la nouvelle vitesse
-                obj.Drones{i}.speedState = newSpeedMatrix(i,:);
-            end
-          
-
         end
-
     end
 end

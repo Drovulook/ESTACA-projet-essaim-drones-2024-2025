@@ -39,6 +39,7 @@ classdef MultirotorDrone < DroneBase & handle
         
         % Méthode de mise à jour pour recalculer la position du drone
         function update(obj, dt)
+            dt
             % Obtenir la position actuelle et calculer la vitesse et le taux de montée
             currentPos = obj.Platform.Pose(1:3); % Position actuelle du drone
             [velocity, climbRate] = obj.Controller.computeControlSignal(currentPos, obj.Destination, dt);

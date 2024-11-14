@@ -47,9 +47,9 @@ end
 % testplot(swarm)
 r = [10 50 100]/2; %Répulsion, évitement, attraction max (rayons)
 swarm_weights = [1.4 1 1.2 2]; %Pondérations répulsion, alignement, attraction drone, évitement obstacle
-weights = [0.5 1.2 0.8]; %Influence sur le vecteur vitesse de : l'environnement ; la vitesse du drone a t-1 (maniabilité) ; la target
+weights = [0.5 1.2 0.8]/2; %Influence sur le vecteur vitesse de : l'environnement ; la vitesse du drone a t-1 (maniabilité) ; la target
 pondeTarg = [10 15]; %Pondération de la value des 2 targets
-pondDistTarg = 0.5; %accorde une importance variable aux cibles en fonction de la distance
+%pondDistTarg = 0.5; %accorde une importance variable aux cibles en fonction de la distance
 satextrem = 10; %Saturation de vitesse projetée
 sat = [-satextrem satextrem];
 temps = 1000;
