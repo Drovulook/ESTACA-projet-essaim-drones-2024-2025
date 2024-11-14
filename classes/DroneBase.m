@@ -60,6 +60,8 @@ classdef (Abstract) DroneBase < handle
 
         end
 
+        %est appelée par update_speeds de SwarmManager
+        %!! à vérifier
         function Set_NextVelVector(obj, dt, r, swarm_weights, weights, pondeTarg, sat, neighborPos, neighborSpeed, target_list)
             
             % Différence de position avec les voisins

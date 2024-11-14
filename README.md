@@ -22,3 +22,4 @@ test
 tâches à faire:
 
 -supprimer le code inutilisé;
+-rajouter des fonctionnalités à l'interface utilisateur;

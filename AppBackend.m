@@ -1,4 +1,5 @@
 classdef AppBackend < handle
+    %cette classe gère tout ce qui ne concerne pas l'affichage
     properties
         env
         zones;
@@ -9,7 +10,7 @@ classdef AppBackend < handle
     end
     methods
         function Init(obj);
-            %clear all;
+            %clear all; 
             %close all;
             clc;
 

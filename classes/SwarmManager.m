@@ -153,6 +153,8 @@ classdef SwarmManager < handle
                 neighborPos = posStateMatrix(neighbors, :);
                 neighborSpeed = speedStateMatrix(neighbors, :);
                 obj.Drones{i}.Set_NextVelVector(dt, r, swarm_weights, weights, pondeTarg, sat, neighborPos, neighborSpeed, obj.target_list);
+                %calcule le prochain vecteur vitesse pour chaque drone
+                %!!à terme, prendre en compte les contraintes liées à la communication
             end
         end
     end
