@@ -101,7 +101,7 @@ classdef SwarmManager < handle
 
         % Méthode pour mettre à jour la vitesse de chaque drone dans l'essaim
         
-        function update_speed(obj, dt, r, swarm_weights, weights, pondeTarg, sat) %r est la liste de rayon (répulsion, évitement, attraction_max), w la liste de pondération (répulsion, orientation, attraction, évitement)
+        function update_speed(obj, dt, r, swarm_weights, weights, pondeTarg, sat) %r est la liste de rayon (répulsion, évitement, attraction_max), w la liste de pondération (répulsion, attraction, évitement)
             %répulsion pour les drones, évitement pour le terrain ;
             %attraction max, distance d'attraction maximum
             n = length(obj.Drones);
@@ -166,8 +166,8 @@ classdef SwarmManager < handle
             %Règles de pondération
             weight_matrix = zeros(size(rhon));
             weight_matrix(rhon < r(1)) = -swarm_weights(1); % Cercle de répulsion
-            weight_matrix(rhon >= r(1)) = swarm_weights(2); % Cercle d'orientation
-
+            weight_matrix(rhon >= r(1)) = swarm_weights(2); % Cercle d'attraction
+        
             swarminfluence_x = (sum(weight_matrix.*rho_x./rhon, 2, 'omitnan'));
             swarminfluence_y = (sum(weight_matrix.*rho_y./rhon, 2, 'omitnan'));
             swarminfluence_z = (sum(weight_matrix.*rho_z./rhon, 2, 'omitnan'));

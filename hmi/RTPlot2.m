@@ -3,7 +3,8 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
     %% Échelle, Angle d'observation et Légende
     % Configurer la figure avec une taille de fenêtre fixe plus grande
     f = figure('Position', [100, 100, 1200, 800]); % Largeur 1200px, Hauteur 800px
-    
+    rotate3d on
+
     ax = gca;
     
     XLim = [-150 150];
@@ -56,7 +57,11 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
 
     n_drone=size(swarm.Drones,2);
     drone_pos=zeros(n_drone,3);
+<<<<<<< Updated upstream
     drone_pos;
+=======
+    
+>>>>>>> Stashed changes
     for i=1:n_drone
         drone_pos(i,:)=swarm.Drones{i}.posState;
 
@@ -72,7 +77,7 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
     end
 
     slider = uicontrol('Style', 'slider', ...
-               'Min', 0, 'Max', 20, 'Value', 1, ...
+               'Min', 0, 'Max', 50, 'Value', 1, ...
                'Units', 'normalized', ...
                'Position', [0.2 0.02 0.6 0.03], ...
                'Callback', @(src, event) update(src));
@@ -102,8 +107,14 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
         end
        
         % Rafraîchir le tracé pour montrer les nouvelles positions et vecteurs
+
+        %Test Slider
         to = update(slider);
         Target(1, 1) = to;
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
         set(targ(1), 'XData', Target(1,1), 'YData', Target(1,2), 'ZData', Target(1,3));
         swarm.update_target(Target);
 
