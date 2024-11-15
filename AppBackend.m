@@ -1,12 +1,11 @@
 classdef AppBackend < handle
     %cette classe gère tout ce qui ne concerne pas l'affichage
     properties
-        env
+        env;
         zones;
-        targetList
-        swarm
-        settings
-        numMultirotor
+        targetList;
+        swarm;
+        settings;
     end
     methods
         function Init(obj);
@@ -20,18 +19,17 @@ classdef AppBackend < handle
             obj.targetList = [100 50 50 ; 50 100 50];
 
             obj.swarm = SwarmManager(obj.env.Env, obj.targetList); % Initialiser le gestionnaire d'essaim avec l'environnement
-            obj.numMultirotor = 10; % Nombre de drones multirotors
             
             obj.settings = Settings();
         
-            for i = 1:obj.numMultirotor
+            for i = 1:obj.settings.numMultirotor
                 obj.swarm.addDrone('multirotor', obj.zones.homeBaseCoord);
             end
 
-            spawn_size=50;
+            spawn_size=30;
             min_distance=0.5;
 
-            for i = 1:obj.numMultirotor
+            for i = 1:obj.settings.numMultirotor
                 % Position aléatoire dans la zone définie (ici entre 0 et 'zone_size' sur x et y)
                 valid_position = false;
                 while ~valid_position

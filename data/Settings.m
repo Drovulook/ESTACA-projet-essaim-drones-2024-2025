@@ -1,6 +1,8 @@
 classdef Settings
 
     properties
+        numMultirotor;
+
         r; %Répulsion, évitement, attraction max (rayons)
         swarm_weights; %Pondérations répulsion, alignement, attraction drone, évitement obstacle
         weights; %Influence sur le vecteur vitesse de : l'environnement ; la vitesse du drone a t-1 (maniabilité) ; la target
@@ -14,6 +16,8 @@ classdef Settings
     
     methods
         function obj = Settings()
+            obj.numMultirotor = 100;
+
             obj.r = [10 50 100]/2; 
             obj.swarm_weights = [1.4 1 1.2 2];
             obj.weights = [0.5 1.2 0.8]/2; 
