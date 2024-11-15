@@ -62,6 +62,17 @@ classdef MultirotorDrone < DroneBase & handle
                 capacite_consomme=power(obj.Puissance(end)/obj.Tension_batterie, obj.k_peukert)*dt;
                 obj.Autonomie=obj.Autonomie-capacite_consomme*obj.Tension_batterie
             end
+
+            function SetSpeedWithConstraints(obj, dt, newSpeedVec) %est appelée juste avant d'update la vitesse, pour prendre en compte d'éventuelles contraintes
+                climbRate = newSpeedVec(3); % à modifier 
+                if climbRate > 100
+                    climbRate = 100;
+                elseif climbRate < -100
+                    climbRate = -100;
+                end
+                RealnewSpeedVec = [newSpeedVec(1), newSpeedVec(2), climbRate];
+                obj.speedState = RealnewSpeedVec;
+            end
         end
     end
 end

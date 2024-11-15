@@ -46,7 +46,7 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
         end
 
         % Créer la forme de la zone avec le type, la couleur, la position et les dimensions spécifiées
-        create_shape(zone.Type, zoneColor, zone.CenterPosition, zone.Dimensions, zone.TiltAngle);
+        create_shape(zone.Type, zoneColor, zone.CenterPosition, zone.Dimensions, zone.TiltAngle, ax);
     end
 
     targ = gobjects(1, size(Target,1));

@@ -1,4 +1,4 @@
-function shape = create_shape(shape_type, color, center, dimensions, angle)
+function shape = create_shape(shape_type, color, center, dimensions, angle, ax)
     % Paramètres
     x_center = center(1); % Coordonnée x du centre de la forme
     y_center = center(2); % Coordonnée y du centre de la forme
@@ -18,7 +18,7 @@ function shape = create_shape(shape_type, color, center, dimensions, angle)
             rotX = xc * cos(theta) - yc * sin(theta) + x_center;
             rotY = xc * sin(theta) + yc * cos(theta) + y_center;
             zc = zc + z_center;
-            shape = surf(rotX, rotY, zc, 'FaceColor', color, 'EdgeColor', color, 'FaceAlpha', 0.3);
+            shape = surf(ax, rotX, rotY, zc, 'FaceColor', color, 'EdgeColor', color, 'FaceAlpha', 0.3);
             
         case 'box'
             % Création d'un parallélépipède
@@ -30,7 +30,7 @@ function shape = create_shape(shape_type, color, center, dimensions, angle)
             rotX = X * cos(theta) - Y * sin(theta) + x_center;
             rotY = X * sin(theta) + Y * cos(theta) + y_center;
             Z = Z + z_center;
-            shape = patch('Vertices', [rotX(:), rotY(:), Z(:)], ...
+            shape = patch(ax, 'Vertices', [rotX(:), rotY(:), Z(:)], ...
                           'Faces', convhull(rotX(:), rotY(:), Z(:)), ...
                           'FaceColor', color, 'EdgeColor', color, 'FaceAlpha', 0.3);
 
@@ -44,7 +44,7 @@ function shape = create_shape(shape_type, color, center, dimensions, angle)
             rotX = xs * cos(theta) - ys * sin(theta) + x_center;
             rotY = xs * sin(theta) + ys * cos(theta) + y_center;
             zs = zs + z_center;
-            shape = surf(rotX, rotY, zs, 'FaceColor', color, 'EdgeColor', color, 'FaceAlpha', 0.3);
+            shape = surf(ax, rotX, rotY, zs, 'FaceColor', color, 'EdgeColor', color, 'FaceAlpha', 0.3);
 
         otherwise
             error('Type de forme inconnu.');

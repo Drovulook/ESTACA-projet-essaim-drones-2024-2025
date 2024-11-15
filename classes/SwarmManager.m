@@ -8,7 +8,7 @@ classdef SwarmManager < handle
 
         %% Swarm PROPERTIES
         
-        Target %1 ligne par target en coordonées xyz, A changer + tard en classe pour définir niveau d'intérêt (pondération d'attraction) + mouvement
+        target_list %1 ligne par target en coordonées xyz, A changer + tard en classe pour définir niveau d'intérêt (pondération d'attraction) + mouvement
         target_history_matrix
         drones_pos_history_matrix
     end
@@ -97,7 +97,7 @@ classdef SwarmManager < handle
 
 
         function update_target(obj, newTarget)
-            obj.Target = newTarget;
+            obj.target_list = newTarget;
         end
 
     
@@ -205,9 +205,9 @@ classdef SwarmManager < handle
             %Rajouter un IF si pas de target + Comportement retour maison
            
 
-            T_x = obj.Target(:,1)' - posStateMatrix(:,1);
-            T_y = obj.Target(:,2)' - posStateMatrix(:,2);
-            T_z = obj.Target(:,3)' - posStateMatrix(:,3);
+            T_x = obj.target_list(:,1)' - posStateMatrix(:,1);
+            T_y = obj.target_list(:,2)' - posStateMatrix(:,2);
+            T_z = obj.target_list(:,3)' - posStateMatrix(:,3);
 
             T_eucli = sqrt(T_x.^2 + T_y.^2 + T_z.^2); % On peut y ajouter de la pondération de cible en fct de la distance ; distance d'attraction max à ajouter (r(3)/w(3))
             T_x_pond = T_x./T_eucli;

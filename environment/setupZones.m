@@ -1,3 +1,6 @@
+%Devrait être une méthode de env non ?
+
+
 % environment/obstacles.m
 % Définit les obstacles dans l'environnement
 
