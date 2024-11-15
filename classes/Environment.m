@@ -33,5 +33,14 @@ classdef Environment < handle
             fprintf("Dimensions du sol : [%.2f, %.2f]\n", obj.GroundDimensions);
             fprintf("Nombre total de zones : %d\n", numel(obj.ZonesList)); % Afficher le nombre de zones
         end
+
+        %A agrémenter, avec les besoins évoqués dans swarm manager
+        function [zone_pos_weight_matrix] = get_zones_pos_weights(obj) 
+            zone_pos_weight_matrix = [];
+            for i = 1:length(obj.ZonesList);
+                zone_pos_weight_matrix = [zone_pos_weight_matrix ; obj.ZonesList{i}];
+            end
+
+        end
     end
 end

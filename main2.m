@@ -2,14 +2,16 @@ clear all;
 close all;
 clc;
 
+tic
+
 env = Environment(10, 200, [-150, 150, 150, -150], [-150, -150, 150, 150], [0, 0, 0, 0]);
 setupZones; % Configuration des zones de l'espace aérien
 
 temps = 1000;
 
 
-swarm = SwarmManager(env.Env, temps); % Initialiser le gestionnaire d'essaim avec l'environnement
-numMultirotor = 7; % Nombre de drones multirotors
+swarm = SwarmManager(env, temps); % Initialiser le gestionnaire d'essaim avec l'environnement
+numMultirotor = 20; % Nombre de drones multirotors
 
 
 % Ajouter les drones multirotors à l'essaim, placés à la coordonnée de la base
@@ -44,8 +46,6 @@ for i = 1:numMultirotor
     swarm.Drones{i}.posState = new_pos;
 end
     
-% figure;
-% testplot(swarm)
 
 Target = [100 50 50];
 swarm.Target = Target; % 2 targets pour l'instant, sinon c'est cassé mdr, pas plus, pas moins
@@ -61,4 +61,6 @@ sat = [-satextrem satextrem];
 dt = 1;
 
 RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sat, Target);
+
+toc
 

@@ -15,7 +15,7 @@ classdef SwarmManager < handle
     
     methods
         % Constructeur pour initialiser le gestionnaire d'essaim avec l'environnement
-        function obj = SwarmManager(env, temps)
+        function obj = SwarmManager(env, temps) % Bien prendre l'objet env
             obj.Drones = {};  % Initialiser le tableau de drones comme vide
             obj.Environment = env; % Assigner l'environnement de simulation
 
@@ -100,8 +100,8 @@ classdef SwarmManager < handle
             obj.Target = newTarget;
         end
 
+    
         % Méthode pour mettre à jour la vitesse de chaque drone dans l'essaim
-        
         function update_speed(obj, dt, r, swarm_weights, weights, pondeTarg, sat) %r est la liste de rayon (répulsion, évitement, attraction_max), w la liste de pondération (répulsion, attraction, évitement)
             %répulsion pour les drones, évitement pour le terrain ;
             %attraction max, distance d'attraction maximum
@@ -117,6 +117,8 @@ classdef SwarmManager < handle
             end
 
             obj.drones_pos_history_matrix(:,:,size(obj.drones_pos_history_matrix,3)+1) = posStateMatrix; % pour le temps diff
+
+
 
             % Calcul des voisins de voronoi avec une triangulation de chaque drone
             dTri = delaunay(posStateMatrix); %Création de la matrice de triangulation
@@ -221,6 +223,19 @@ classdef SwarmManager < handle
             T_y_pond = sum(T_y_pond,2)/sum(pondeTarg);
             T_z_pond = sum(T_z_pond,2)/sum(pondeTarg);
 
+            %% Calcul des zones d'évitement
+
+
+            %Le besoin c'est une matrice qui renvoie coords + diamètre
+            %sphère (à mettre dans Environnement)
+            zones_object_list = obj.Environment.get_zones_pos_weights();
+
+            for i = 1:length(zones_object_list);
+                
+                zones_object_list(i).CenterPosition
+                zones_object_list(i).Dimensions
+
+            end
 
             %% Maintentant, pour chaque drone, on fait la pondération des influeneces swarm/target/speed et on les sommes
             % Il ne faut pas oublier de pondérer les influences avec son propre vecteur
@@ -258,8 +273,10 @@ classdef SwarmManager < handle
                 obj.Drones{i}.speedState = newSpeedMatrix(i,:);
             end
           
-
+  
         end
-
     end
 end
+
+
+
