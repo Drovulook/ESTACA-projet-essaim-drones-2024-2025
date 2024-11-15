@@ -1,4 +1,7 @@
 %Devrait être une méthode de env non ?
+%Ne peut pas rester en script libre, il faut l'inclure dans une classe ou
+%méthode
+
 
 
 % environment/obstacles.m
