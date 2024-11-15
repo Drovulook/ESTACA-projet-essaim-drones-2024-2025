@@ -5,7 +5,7 @@ clc;
 env = Environment(10, 200, [-150, 150, 150, -150], [-150, -150, 150, 150], [0, 0, 0, 0]);
 setupZones; % Configuration des zones de l'espace aérien
 
-temps = 500;
+temps = 1000;
 
 
 swarm = SwarmManager(env.Env, temps); % Initialiser le gestionnaire d'essaim avec l'environnement

@@ -111,23 +111,29 @@ classdef SwarmManager < handle
             speedStateMatrix = zeros (n,3);
 
             for i = 1:n
-                obj.Drones{i}.update_pos(dt); %On update la position avec la dernière vitesse et la dernière position
+                obj.Drones{i}.update_pos(dt); %On update les matrices avec la dernière vitesse et la dernière position
                 posStateMatrix(i,:) = obj.Drones{i}.posState; % Crée matrice de positions
                 speedStateMatrix(i,:) = obj.Drones{i}.speedState; % Crée matrice de vitesses
             end
 
-            obj.drones_pos_history_matrix(:,:,size(obj.drones_pos_history_matrix,3)+1) = posStateMatrix;
+            obj.drones_pos_history_matrix(:,:,size(obj.drones_pos_history_matrix,3)+1) = posStateMatrix; % pour le temps diff
 
             % Calcul des voisins de voronoi avec une triangulation de chaque drone
             dTri = delaunay(posStateMatrix); %Création de la matrice de triangulation
-            vn = sparse(dTri, dTri(:,[2 3 4 1]),1); % décalage des indices et on crée la matrice des voisins de voroi (vn)
+            vn = sparse(dTri, dTri(:,[2 3 4 1]),1); % décalage des indices qui permet de créer la matrice des voisins de voroi (matrice d'adjacence)
+            %vn est une matrice sparce, on a viré les zeros pour gain de
+            %place
+
             vn = vn | vn'; %On rend vn symétrique pour s'assurer que la relation de voisinage ets bijective
             
-            listI = repmat(1:n,1,n);
+            listI = repmat(1:n,1,n); % liste de [1,2,3,..,n_drones,1,2,3,... nfois]
             ns = listI(vn);
-            nn = sum(vn);
-            nnmax = max(nn);
-            neighborI = full(sparse(nn+1,1:n,n+1));
+            %en indexant listI par vn, on obtient les indices des voisins
+
+            nn = sum(vn); % Toujours en sparse, on a le nb de voisin par drone (1 drone/ligne)
+            nnmax = max(nn); % Le drone qui a le plus de voisins
+
+            neighborI = full(sparse(nn+1,1:n,n+1)); %Init matrice de voisinage finale
             neighborI = cumsum(neighborI(1:end-1,:),1); 
             neighborI(neighborI==0) = ns;
             neighborI = neighborI';
@@ -236,16 +242,19 @@ classdef SwarmManager < handle
             %orientation des drones, puis on repondère avec la vitesse
             %actuelle + L'attractivité de la target
 
-            %A voir si on ne rajoute pas le troisième cercle concentrique
-            %d'attraction avec les autres drones
             
             newSpeedMatrix = [Pond_x Pond_y Pond_z];
+            
 
+            %temp
             newSpeedMatrix(newSpeedMatrix < sat(1)) = sat(1);
             newSpeedMatrix(newSpeedMatrix > sat(2)) = sat(2);
             
             for i = 1:n
                 %On réinjecte la nouvelle vitesse
+                %ici il faut ajouter une fonction qui permet de mettre les
+                %saturations de vitesse qui vont bien, la fonction peut
+                %être nestée dans obj.Drones
                 obj.Drones{i}.speedState = newSpeedMatrix(i,:);
             end
           
