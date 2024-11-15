@@ -47,16 +47,17 @@ for i = 1:numMultirotor
 end
     
 
-Target = [100 50 50];
+Target = [100 50 50]; 
 swarm.target_list = Target; % 2 targets pour l'instant, sinon c'est cassé mdr, pas plus, pas moins
-r = [20 40 100]; %Répulsion, évitement, attraction max (rayons)
-swarm_weights = [1.4 0.8 2]; %Pondérations répulsion, alignement, attraction drone, évitement obstacle
-weights = [0.5 1.2 1]/10; %Influence sur le vecteur vitesse de : l'environnement ; la vitesse du drone a t-1 (maniabilité) ; la target
+r = [30 60 100]; %Répulsion, évitement, attraction max (rayons)
+swarm_weights = [1.4 0.8 1.6]; %Pondérations répulsion, alignement, attraction drone, évitement obstacle
+
+weights = [0.5 1.2 1 10]/10; %(répulsion entre drones, attraction entre drones, target, évitement)
 %J'ai remarqué qu'en divisant tout par 10, on réduit les comportements HF,
 %et les drones sont plus posés
 
 pondeTarg = [10]; %Pondération de la value des 2 targets
-satextrem = 3; %Saturation de vitesse projetée
+satextrem = 1.5; %Saturation de vitesse projetée
 sat = [-satextrem satextrem];
 dt = 1;
 

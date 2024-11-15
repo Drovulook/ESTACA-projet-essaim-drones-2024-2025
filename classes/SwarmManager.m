@@ -104,7 +104,7 @@ classdef SwarmManager < handle
         function update_speed(obj, dt, r, swarm_weights, weights, target_weights, sat)
         % Compute le vecteur vitesse t+1 du drone en fonction de l'influence de l'essaim, de sa vitesse, des targets et des zones d'exclusion 
         % r est la liste de rayon (répulsion, évitement, attraction_max), 
-        % w la liste de pondération (répulsion, attraction, évitement),
+        % weights la liste de pondération (répulsion, attraction, target, évitement),
         % répulsion pour les drones, évitement pour le terrain,
         % attraction max, distance d'attraction maximum (bruit de communication)
 
@@ -133,24 +133,11 @@ classdef SwarmManager < handle
             targetInfluence = target_pond(obj.target_list, posStateMatrix, target_weights); % Utils.Algo
             
             %% Calcul des zones d'évitement 
-            %%%%%%%%%%%%%%%%%%%%%%
-            % WIP WIP WIP WIP WIP
-            %%%%%%%%%%%%%%%%%%%%%%
-
-            %Le besoin c'est une matrice qui renvoie coords + diamètre
-            %sphère (à mettre dans Environnement)
-            zones_object_list = obj.Environment.get_zones_pos_weights();
-
-            for i = 1:length(zones_object_list)
-                
-                zones_object_list(i).CenterPosition
-                zones_object_list(i).Dimensions
-
-            end
+            avoidInfluence = avoid_pond(posStateMatrix, obj.Environment.get_zones_pos_weights());
 
             %% Maintentant, pour chaque drone, on fait la pondération des influeneces swarm/target/speed et on les somme
 
-            newSpeedMatrix = whole_pond(swarmInfluence, speedInfluence, targetInfluence, weights); % Utils.Algo
+            newSpeedMatrix = whole_pond(swarmInfluence, speedInfluence, targetInfluence, avoidInfluence, weights); % Utils.Algo
 
             %temp
             newSpeedMatrix(newSpeedMatrix < sat(1)) = sat(1);
