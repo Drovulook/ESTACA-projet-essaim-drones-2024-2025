@@ -26,6 +26,8 @@ classdef FixedWingDrone < DroneBase & handle
             obj.Controller = BasicAttitudeController(obj);
             obj.posState = initialPosition; % Définir la position actuelle
             obj.Destination = initialPosition; % Définir la destination initiale comme la position de départ
+
+            obj.Radius = 1.5;
         end
 
         % Méthode pour définir une nouvelle destination pour le drone

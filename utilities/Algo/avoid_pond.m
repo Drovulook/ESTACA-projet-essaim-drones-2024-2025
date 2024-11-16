@@ -9,7 +9,6 @@ function [avoidInfluence] = avoid_pond(posStateMatrix, zones_object_list)
         % stockage des zones d'exclusion + dim
     end
     
-    
     zoneCenter_delta_x = avoidZones_posDim(:,1)' - posStateMatrix(:,1); % (n_drones * n_zones)
     zoneCenter_delta_y = avoidZones_posDim(:,2)' - posStateMatrix(:,2);
     zoneCenter_delta_z = avoidZones_posDim(:,3)' - posStateMatrix(:,3);

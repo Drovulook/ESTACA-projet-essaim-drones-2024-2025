@@ -1,0 +1,16 @@
+################################################################
+Pour lancer l'application: ouvrir App.mlapp, ou mettre "App" dans la console 
+
+################################################################
+à faire:
+
+#
+HMI:
+-pouvoir déplacer les cibles en temps réel;
+-pouvoir placer les obstacles avant le début de la simulation;
+-afficher des infos dans la console;
+
+#
+collisions:
+-prendre en compte les obstacles;
+-mieux prendre en compte la chute du drone

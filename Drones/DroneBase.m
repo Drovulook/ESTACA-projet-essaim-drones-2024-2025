@@ -11,7 +11,9 @@ classdef (Abstract) DroneBase < handle
         speedState = [0 0 0]     % Vecteur de vitesse à tn (1,3) [r, teta, phi]
         flightTime = 0  % Temps de vol en sec
         Target          % Coordonnées de la cible
-        
+        Radius
+        IsAlive = true;
+
         Puissance       % Puissances consommées à chaque pas (1,n)
         
 
@@ -69,5 +71,7 @@ classdef (Abstract) DroneBase < handle
             dpos = dt*obj.speedState; %on peut ajouter du noise
             obj.posState = obj.posState + dpos;
         end
+        
+
     end
 end

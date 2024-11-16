@@ -1,6 +1,7 @@
 classdef AppBackend < handle
     %cette classe gère tout ce qui ne concerne pas l'affichage
     properties
+        App; 
         env;
         zones;
         targetList;
@@ -8,28 +9,32 @@ classdef AppBackend < handle
         settings;
     end
     methods
-        function Init(obj);
+        
+        function Init(obj, app)
             %clear all; 
             %close all;
             clc;
 
+            obj.App = app;
+
+            obj.settings = Settings();
+
             obj.env = Environment(10, 200, [-150, 150, 150, -150], [-150, -150, 150, 150], [0, 0, 0, 0]);
             obj.zones = Zones(obj); % Configuration des zones de l'espace aérien
 
-            obj.targetList = [100 50 50 ; 50 100 50];
+            obj.targetList = obj.settings.targetListInit;
 
-            obj.swarm = SwarmManager(obj.env.Env, obj.targetList); % Initialiser le gestionnaire d'essaim avec l'environnement
-            
-            obj.settings = Settings();
+            obj.swarm = SwarmManager(obj, obj.env, obj.targetList); % Initialiser le gestionnaire d'essaim avec l'environnement
+            obj.swarm.update_target(obj.targetList);
         
-            for i = 1:obj.settings.numMultirotor
+            for i = 1:obj.settings.numMultirotorInit
                 obj.swarm.addDrone('multirotor', obj.zones.homeBaseCoord);
             end
 
-            spawn_size=30;
-            min_distance=0.5;
+            spawn_size=obj.settings.spawn_size;
+            min_distance=obj.settings.min_distance;
 
-            for i = 1:obj.settings.numMultirotor
+            for i = 1:obj.settings.numMultirotorInit
                 % Position aléatoire dans la zone définie (ici entre 0 et 'zone_size' sur x et y)
                 valid_position = false;
                 while ~valid_position
@@ -57,6 +62,10 @@ classdef AppBackend < handle
 
             % Pause optionnelle pour contrôler la vitesse de visualisation
             pause(0.001);  % Ajuster ou supprimer selon les besoins
+        end
+
+        function OnDronesCollision(obj, ID1, ID2)
+            obj.App.OnDronesCollision(ID1, ID2);
         end
 
     end

@@ -97,7 +97,7 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
     k =0;
     while true
         %Fonction qui calcule la speed T+1 et update la pos T0
-        swarm.update_speed(dt,r,swarm_weights, weights, pondeTarg, sat)
+        swarm.update_speeds(dt,r,swarm_weights, weights, pondeTarg, sat)
                 
         drone_pos=zeros(n_drone,3);
         drone_speed=zeros(n_drone,3);

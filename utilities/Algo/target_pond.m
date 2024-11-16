@@ -10,7 +10,7 @@ function targetInfluence = target_pond(target_list, posStateMatrix, target_weigh
 
 %Différence de position aux targets, en ligne, les drones, en
 %colonne la diff à chaque target
-    
+
     T_x = target_list(:,1)' - posStateMatrix(:,1);
     T_y = target_list(:,2)' - posStateMatrix(:,2);
     T_z = target_list(:,3)' - posStateMatrix(:,3);
