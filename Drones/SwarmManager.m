@@ -112,31 +112,38 @@ classdef SwarmManager < handle
             drone = obj.AliveDrones{ind};
             drone.IsAlive = false;
             drone.posState(3) = 0;
-            obj.AliveDrones(ind) = [];
+            obj.AliveDrones{ind} = [];
+            to_remove = cellfun(@isempty, obj.AliveDrones);  % Trouve les indices des éléments vides
+            obj.AliveDrones(to_remove) = [];                % Supprime ces éléments
+            %obj.AliveDrones = [obj.AliveDrones(1:ind-1), obj.AliveDrones(ind+1:end)] 
             obj.DeadDrones{end+1} = drone;
 
         end
     
-        function check_collisions(obj, drones_pos, n, zones_list)
+        function check_collisions(obj, drones_pos, zones_list)
+            drones_to_remove = [];
+            n = length(obj.AliveDrones);
+            value_to_avoid = 0;
             for i = 1:n
                 i_drone =  obj.AliveDrones{i};
-                for k = [1:i-1, i+1:n];
+                for k = 1:i-1;
                     k_drone = obj.AliveDrones{k};
                     dist = sqrt((i_drone.posState(1) - k_drone.posState(1))^2 ...
                               + (i_drone.posState(2) - k_drone.posState(2))^2 ...
                               + (i_drone.posState(3) - k_drone.posState(3))^2);
                     if dist < i_drone.Radius + k_drone.Radius;
-                        if i> k
-                            obj.Destroy_drone(i);
-                            obj.Destroy_drone(k);
-                        else
-                            obj.Destroy_drone(k);
-                            obj.Destroy_drone(i);
-                        end
+                        drones_to_remove = [drones_to_remove, i, k];
 
                         obj.backend.OnDronesCollision(i_drone.ID, k_drone.ID);
                     end
                 end
+            end
+            drones_to_remove = unique(drones_to_remove);
+            for i = numel(drones_to_remove):-1:1  % Supprimer de la fin pour éviter les problèmes d'indice
+                obj.Destroy_drone(drones_to_remove(i));  % Appel de Destroy_drone pour retirer le drone
+            end
+            if isempty(drones_to_remove)
+                obj.backend.OnDronesNbUpdate();
             end
         end
 
@@ -151,17 +158,20 @@ classdef SwarmManager < handle
 
             zones = obj.Environment.get_zones_pos_weights();
 
-            n = length(obj.AliveDrones);
+            n = length(obj.Drones);
             posStateMatrix = zeros(n,3);
             speedStateMatrix = zeros (n,3);
 
             for i = 1:n
-                obj.AliveDrones{i}.update_pos(dt); % On update les drones à leur nouvelle position en fonction du dernier vecteur vitesse computé
-                posStateMatrix(i,:) = obj.AliveDrones{i}.posState; 
-                speedStateMatrix(i,:) = obj.AliveDrones{i}.speedState;
+                drone = obj.Drones{i};
+                if drone.IsAlive;
+                    obj.Drones{i}.update_pos(dt); % On update les drones à leur nouvelle position en fonction du dernier vecteur vitesse computé
+                end
+                posStateMatrix(i,:) = obj.Drones{i}.posState; 
+                speedStateMatrix(i,:) = obj.Drones{i}.speedState;
             end
 
-            obj.check_collisions(posStateMatrix, n, zones);
+            obj.check_collisions(posStateMatrix, zones);
 
             obj.drones_pos_history_matrix(:,:,size(obj.drones_pos_history_matrix,3)+1) = posStateMatrix; % historique des positions pour le temps diff
             
@@ -190,8 +200,11 @@ classdef SwarmManager < handle
             newSpeedMatrix(newSpeedMatrix > sat(2)) = sat(2);
             
             %manque système de saturation conique
-            for i = 1:n
-                obj.AliveDrones{i}.speedState = newSpeedMatrix(i,:);
+            for i = 1:length(obj.AliveDrones)
+                drone = obj.AliveDrones{i};
+                if drone.IsAlive
+                    drone.speedState = newSpeedMatrix(i,:);
+                end
             end
           
   

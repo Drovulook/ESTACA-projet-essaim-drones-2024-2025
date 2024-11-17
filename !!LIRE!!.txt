@@ -7,10 +7,11 @@ Pour lancer l'application: ouvrir App.mlapp, ou mettre "App" dans la console
 #
 HMI:
 -pouvoir déplacer les cibles en temps réel;
--pouvoir placer les obstacles avant le début de la simulation;
--afficher des infos dans la console;
+-pouvoir placer les obstacles avant le début de la simulation et afficher/modifier les paramètres de la simu;
+-afficher des infos dans la console de l'application;
 
 #
 collisions:
+-dans update_speeds de swarm_manager, actualiser posStateMatrix et speedStateMatrix de manière à empêcher les drones détruits d'influer sur les autres
 -prendre en compte les obstacles;
--mieux prendre en compte la chute du drone
+-mieux prendre en compte la chute du drone.

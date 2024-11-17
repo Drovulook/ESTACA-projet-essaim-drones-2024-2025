@@ -37,7 +37,7 @@ classdef Settings
             obj.temps = 1000;
             obj.dt = 0.3;
             obj.spawn_size=30;
-            obj.min_distance=0.5;
+            obj.min_distance=1.5;
         end
         
 

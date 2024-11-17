@@ -68,6 +68,10 @@ classdef AppBackend < handle
             obj.App.OnDronesCollision(ID1, ID2);
         end
 
+        function OnDronesNbUpdate(obj)
+            obj.App.OnDronesNbUpdate();
+        end
+
     end
 
 end
