@@ -12,6 +12,6 @@ HMI:
 
 #
 collisions:
--dans update_speeds de swarm_manager, actualiser posStateMatrix et speedStateMatrix de manière à empêcher les drones détruits d'influer sur les autres
+-dans update_speeds de swarm_manager, corriger ligne 176;
 -prendre en compte les obstacles;
 -mieux prendre en compte la chute du drone.

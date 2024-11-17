@@ -120,7 +120,7 @@ classdef SwarmManager < handle
 
         end
     
-        function check_collisions(obj, drones_pos, zones_list)
+        function check_collisions(obj, zones_list)
             drones_to_remove = [];
             n = length(obj.AliveDrones);
             value_to_avoid = 0;
@@ -158,22 +158,22 @@ classdef SwarmManager < handle
 
             zones = obj.Environment.get_zones_pos_weights();
 
-            n = length(obj.Drones);
+            n = length(obj.AliveDrones);
             posStateMatrix = zeros(n,3);
             speedStateMatrix = zeros (n,3);
 
             for i = 1:n
-                drone = obj.Drones{i};
-                if drone.IsAlive;
-                    obj.Drones{i}.update_pos(dt); % On update les drones à leur nouvelle position en fonction du dernier vecteur vitesse computé
-                end
-                posStateMatrix(i,:) = obj.Drones{i}.posState; 
-                speedStateMatrix(i,:) = obj.Drones{i}.speedState;
+                drone = obj.AliveDrones{i};
+                drone.update_pos(dt); % On update les drones à leur nouvelle position en fonction du dernier vecteur vitesse computé
+                
+                posStateMatrix(i,:) = drone.posState; 
+                speedStateMatrix(i,:) = drone.speedState;
             end
 
-            obj.check_collisions(posStateMatrix, zones);
-
-            obj.drones_pos_history_matrix(:,:,size(obj.drones_pos_history_matrix,3)+1) = posStateMatrix; % historique des positions pour le temps diff
+            obj.check_collisions(zones);
+            
+            %à corriger
+            %obj.drones_pos_history_matrix(:,:,size(obj.drones_pos_history_matrix,3)+1) = posStateMatrix; % historique des positions pour le temps diff
             
             %% CALCUL DES VOISINS
             [neighborI, nnmax] = VoroiNeighbor(posStateMatrix, n); % Utils.Algo
@@ -202,9 +202,7 @@ classdef SwarmManager < handle
             %manque système de saturation conique
             for i = 1:length(obj.AliveDrones)
                 drone = obj.AliveDrones{i};
-                if drone.IsAlive
-                    drone.speedState = newSpeedMatrix(i,:);
-                end
+                drone.speedState = newSpeedMatrix(i,:);
             end
           
   
