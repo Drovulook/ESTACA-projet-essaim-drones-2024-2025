@@ -59,9 +59,6 @@ classdef AppBackend < handle
     
         function update(obj)
             obj.swarm.update_speeds(obj.settings.dt, obj.settings.r, obj.settings.swarm_weights, obj.settings.weights, obj.settings.pondeTarg, obj.settings.sat)
-
-            % Pause optionnelle pour contrôler la vitesse de visualisation
-            pause(0.001);  % Ajuster ou supprimer selon les besoins
         end
 
         function OnDronesCollision(obj, ID1, ID2)
