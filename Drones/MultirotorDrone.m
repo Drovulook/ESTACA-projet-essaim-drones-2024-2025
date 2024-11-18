@@ -31,7 +31,7 @@ classdef MultirotorDrone < DroneBase & handle
             obj.posState = initialPosition; % Définir la position actuelle
             obj.Destination = initialPosition; % Définir la destination initiale comme la position de départ
 
-            obj.Radius = 1;
+            obj.Radius = 0.5;
         end
 
         % Méthode pour définir une nouvelle destination pour le drone

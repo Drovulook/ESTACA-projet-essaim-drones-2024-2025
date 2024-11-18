@@ -123,7 +123,6 @@ classdef SwarmManager < handle
         function check_collisions(obj, zones_list)
             drones_to_remove = [];
             n = length(obj.AliveDrones);
-            value_to_avoid = 0;
             for i = 1:n
                 i_drone =  obj.AliveDrones{i};
                 for k = 1:i-1;

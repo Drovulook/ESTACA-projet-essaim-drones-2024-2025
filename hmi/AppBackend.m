@@ -39,7 +39,7 @@ classdef AppBackend < handle
                 valid_position = false;
                 while ~valid_position
                     % Génère une position aléatoire dans la zone
-                    new_pos = [rand*spawn_size, rand*spawn_size, rand*spawn_size];
+                    new_pos = [20 + rand*spawn_size, 20 + rand*spawn_size, rand*spawn_size];
                     
                     % Vérifier si la position est trop proche d'un autre drone
                     valid_position = true;

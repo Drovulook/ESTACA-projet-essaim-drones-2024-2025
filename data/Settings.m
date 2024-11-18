@@ -29,7 +29,7 @@ classdef Settings
     methods
         function obj = Settings()
             obj.dt = 0.3;
-            obj.temps = 100000;
+            obj.temps = 1000;
             obj.dims = [-150 150; -150 150; -10 150];
 
             obj.numMultirotorInit = 20;
