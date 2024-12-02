@@ -176,7 +176,7 @@ classdef SwarmManager < handle
                 speedStateMatrix(i,:) = drone.speedState;
             end
 
-            %obj.check_collisions(zones);
+            obj.check_collisions(zones);
             
             %à corriger
             %obj.drones_pos_history_matrix(:,:,size(obj.drones_pos_history_matrix,3)+1) = posStateMatrix; % historique des positions pour le temps diff
