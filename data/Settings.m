@@ -19,6 +19,9 @@ classdef Settings
         
         weights; %Influence sur le vecteur vitesse de : l'environnement ; la vitesse du drone a t-1 (maniabilité) ; la target
         
+        %%%%%%%%%%%%%%%%%%%%%%%%%% HMI %%%%%%%%%%%%%%%%%%%%%%%%%%
+        nb_donnees_courbe; %nombre maximal de points qui seront affichées sur un graphe 2D
+
         %%%%%%%%%%%%%%%%%%%%%%%%%% autres paramètres %%%%%%%%%%%%%%%%%%%%%%%%%%
         pondeTarg; %Pondération de la value des 2 targets
         %pondDistTarg; %accorde une importance variable aux cibles en fonction de la distance
@@ -36,6 +39,8 @@ classdef Settings
             obj.targetListInit = [100 50 50 ; 50 100 50];
             obj.spawn_size=30;
             obj.min_distance=1.5;
+
+            obj.nb_donnees_courbe = 1000;
 
             obj.r = [10 50 100]/2; 
             obj.swarm_weights = [1.4 1 1.2 2];
