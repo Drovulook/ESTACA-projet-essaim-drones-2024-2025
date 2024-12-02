@@ -4,13 +4,14 @@
 classdef SwarmManager < handle
     properties
         backend             % Référence à l'application (pour afficher un message quand il y a collision par ex)
-        Drones          % Tableau de cellules contenant les objets DroneBase (drones de l'essaim)
-        AliveDrones
-        DeadDrones
+        settings
         Environment     % Objet uavScenario représentant l'environnement de simulation
 
         %% Swarm PROPERTIES
-        
+
+        Drones          % Tableau de cellules contenant les objets DroneBase (drones de l'essaim)
+        AliveDrones
+        DeadDrones
         target_list %1 ligne par target en coordonées xyz, A changer + tard en classe pour définir niveau d'intérêt (pondération d'attraction) + mouvement
         target_history_matrix
         drones_pos_history_matrix
@@ -28,8 +29,9 @@ classdef SwarmManager < handle
 
         end
 
-        function obj = update_backend(backend)
+        function update_backend(obj, backend)
             obj.backend = backend;
+            obj.settings = backend.settings;
         end
 
         

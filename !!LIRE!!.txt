@@ -1,5 +1,6 @@
 ################################################################
 Pour lancer l'application: ouvrir App.mlapp, ou mettre "App" dans la console 
+Tous les paramètres sont dans la classe Settings, dans data/Settings.m
 
 ################################################################
 à faire:
