@@ -18,8 +18,8 @@ classdef SwarmManager < handle
     
     methods
         % Constructeur pour initialiser le gestionnaire d'essaim avec l'environnement
-        function obj = SwarmManager(backend, env, temps) % Bien prendre l'objet env
-            obj.backend = backend;
+        function obj = SwarmManager(env, temps) % Bien prendre l'objet env
+            
             obj.Drones = {};  % Initialiser le tableau de drones comme vide
             obj.AliveDrones = {};
             obj.DeadDrones = {};
@@ -27,6 +27,11 @@ classdef SwarmManager < handle
             obj.Environment = env; % Assigner l'environnement de simulation
 
         end
+
+        function obj = update_backend(backend)
+            obj.backend = backend;
+        end
+
         
         % Méthode pour ajouter un drone à l'essaim
         function addDrone(obj, droneType, initialPosition)
@@ -169,7 +174,7 @@ classdef SwarmManager < handle
                 speedStateMatrix(i,:) = drone.speedState;
             end
 
-            obj.check_collisions(zones);
+            %obj.check_collisions(zones);
             
             %à corriger
             %obj.drones_pos_history_matrix(:,:,size(obj.drones_pos_history_matrix,3)+1) = posStateMatrix; % historique des positions pour le temps diff

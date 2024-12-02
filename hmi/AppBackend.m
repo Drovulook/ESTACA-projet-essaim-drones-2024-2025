@@ -23,8 +23,10 @@ classdef AppBackend < handle
             obj.zones = Zones(obj); % Configuration des zones de l'espace aérien
 
             obj.targetList = obj.settings.targetListInit;
-
-            obj.swarm = SwarmManager(obj, obj.env, obj.targetList); % Initialiser le gestionnaire d'essaim avec l'environnement
+            
+            temps = 1000
+            obj.swarm = SwarmManager(obj.env, temps); % Initialiser le gestionnaire d'essaim avec l'environnement
+            obj.swarm.update_backend(obj);
             obj.swarm.update_target(obj.targetList);
         
             for i = 1:obj.settings.numMultirotorInit
