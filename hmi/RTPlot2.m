@@ -5,10 +5,11 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
     f = figure('Position', [100, 100, 1200, 800]); % Largeur 1200px, Hauteur 800px
     rotate3d on
     ax = gca;
-    
-    XLim = [-150 150];
-    YLim = [-150 150];
-    ZLim = [-10 150];
+
+    XLim = [min(env.GroundCoordinates.x) max(env.GroundCoordinates.x)]; % dimension défini lors de la création de : Environment
+    YLim = [min(env.GroundCoordinates.y) max(env.GroundCoordinates.y)];
+
+    ZLim = [-10 150]; %valeur fixer pour le moment
 
     set(ax, 'XLim', XLim, 'YLim', YLim, 'ZLim', ZLim);
 
