@@ -10,20 +10,20 @@ classdef SwarmManager < handle
         %% Swarm PROPERTIES
 
         Drones          % Tableau de cellules contenant les objets DroneBase (drones de l'essaim)
-        AliveDrones
-        DeadDrones
         target_list %1 ligne par target en coordonées xyz, A changer + tard en classe pour définir niveau d'intérêt (pondération d'attraction) + mouvement
         target_history_matrix
         drones_pos_history_matrix
     end
     
+    properties (Dependent)
+        AliveDrones
+    end
+
     methods
         % Constructeur pour initialiser le gestionnaire d'essaim avec l'environnement
         function obj = SwarmManager(env, temps) % Bien prendre l'objet env
             
             obj.Drones = {};  % Initialiser le tableau de drones comme vide
-            obj.AliveDrones = {};
-            obj.DeadDrones = {};
             obj.target_list = {};
             obj.Environment = env; % Assigner l'environnement de simulation
 
@@ -72,10 +72,16 @@ classdef SwarmManager < handle
             end
             
             obj.Drones{end+1} = drone; % Ajouter le drone au tableau des drones
-            obj.AliveDrones{end+1} = drone;
             %disp(['Nombre actuel de drones : ', num2str(length(obj.Drones))]); % Afficher le nombre total de drones (commenté)
         end
     
+        function alive = get.AliveDrones(obj) 
+            alive = [];
+            for idx = 1:length(obj.Drones)
+                alive = [alive obj.Drones{idx}];
+            end
+        end
+
 
         % Méthode pour retirer un drone de l'essaim
         function removeDrone(obj, id)   %!! à modifier pour prendre en compte AliveDrones
@@ -111,19 +117,20 @@ classdef SwarmManager < handle
             end
         end
 
+        
         function update_target(obj, newTarget)
             obj.target_list = newTarget;
         end
 
         function Destroy_drone(obj, ind)
-            drone = obj.AliveDrones{ind};
+            drone = obj.AliveDrones(ind);
             drone.IsAlive = false;
             drone.posState(3) = 0;
-            obj.AliveDrones{ind} = [];
+            obj.AliveDrones(ind) = [];
             to_remove = cellfun(@isempty, obj.AliveDrones);  % Trouve les indices des éléments vides
             obj.AliveDrones(to_remove) = [];                % Supprime ces éléments
             %obj.AliveDrones = [obj.AliveDrones(1:ind-1), obj.AliveDrones(ind+1:end)] 
-            obj.DeadDrones{end+1} = drone;
+
 
         end
     
@@ -131,27 +138,29 @@ classdef SwarmManager < handle
             drones_to_remove = [];
             n = length(obj.AliveDrones);
             for i = 1:n
-                i_drone =  obj.AliveDrones{i};
+                i_drone =  obj.AliveDrones(i);
                 for k = 1:i-1;
-                    k_drone = obj.AliveDrones{k};
+                    k_drone = obj.AliveDrones(k);
                     dist = sqrt((i_drone.posState(1) - k_drone.posState(1))^2 ...
                               + (i_drone.posState(2) - k_drone.posState(2))^2 ...
                               + (i_drone.posState(3) - k_drone.posState(3))^2);
                     if dist < i_drone.Radius + k_drone.Radius;
                         drones_to_remove = [drones_to_remove, i, k];
 
-                        obj.backend.OnDronesCollision(i_drone.ID, k_drone.ID);
+                        %obj.backend.OnDronesCollision(i_drone.ID, k_drone.ID);
                     end
                 end
             end
+
             drones_to_remove = unique(drones_to_remove);
             for i = numel(drones_to_remove):-1:1  % Supprimer de la fin pour éviter les problèmes d'indice
                 obj.Destroy_drone(drones_to_remove(i));  % Appel de Destroy_drone pour retirer le drone
             end
             if isempty(drones_to_remove)
-                obj.backend.OnDronesNbUpdate();
+                %obj.backend.OnDronesNbUpdate();
             end
         end
+
 
         function update_speeds(obj, dt, r, swarm_weights, weights, target_weights, sat)
             % Compute le vecteur vitesse t+1 du drone en fonction de l'influence de l'essaim, de sa vitesse, des targets et des zones d'exclusion 
@@ -169,7 +178,7 @@ classdef SwarmManager < handle
             speedStateMatrix = zeros (n,3);
 
             for i = 1:n
-                drone = obj.AliveDrones{i};
+                drone = obj.AliveDrones(i);
                 drone.update_pos(dt); % On update les drones à leur nouvelle position en fonction du dernier vecteur vitesse computé
                 
                 posStateMatrix(i,:) = drone.posState; 
@@ -192,14 +201,19 @@ classdef SwarmManager < handle
 
             %% TARGET INFLUENCE
             targetInfluence = target_pond(obj.target_list, posStateMatrix, target_weights); % Utils.Algo
-            
+           
             %% Calcul des zones d'évitement 
             zones = obj.Environment.get_zones_pos_weights();
             avoidInfluence = avoid_pond(posStateMatrix, zones);
 
+            
+
+
             %% Maintentant, pour chaque drone, on fait la pondération des influeneces swarm/target/speed et on les somme
 
             newSpeedMatrix = whole_pond(swarmInfluence, speedInfluence, targetInfluence, avoidInfluence, weights); % Utils.Algo
+            
+            
 
             %temp
             newSpeedMatrix(newSpeedMatrix < sat(1)) = sat(1);
@@ -207,7 +221,7 @@ classdef SwarmManager < handle
             
             %manque système de saturation conique
             for i = 1:length(obj.AliveDrones)
-                drone = obj.AliveDrones{i};
+                drone = obj.AliveDrones(i);
                 drone.speedState = newSpeedMatrix(i,:);
             end
           
