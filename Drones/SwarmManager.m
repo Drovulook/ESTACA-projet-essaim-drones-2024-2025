@@ -13,10 +13,15 @@ classdef SwarmManager < handle
         target_list %1 ligne par target en coordonées xyz, A changer + tard en classe pour définir niveau d'intérêt (pondération d'attraction) + mouvement
         target_history_matrix
         drones_pos_history_matrix
+        waypoints %matrice n*3 avec waypoints dans l'ordre
+        threshold_radius = 5
+
     end
     
     properties (Dependent)
         AliveDrones
+        FixedWing
+        MultiRotor
     end
 
     methods
@@ -24,7 +29,7 @@ classdef SwarmManager < handle
         function obj = SwarmManager(env, temps) % Bien prendre l'objet env
             
             obj.Drones = {};  % Initialiser le tableau de drones comme vide
-            obj.target_list = {};
+            obj.target_list = zeros(0,3);
             obj.Environment = env; % Assigner l'environnement de simulation
 
         end
@@ -76,11 +81,32 @@ classdef SwarmManager < handle
         end
     
         function alive = get.AliveDrones(obj) 
-            alive = [];
+            alive = {};
             for idx = 1:length(obj.Drones)
-                alive = [alive obj.Drones{idx}];
+                if obj.Drones{idx}.IsAlive == 1
+                    alive{end + 1} = obj.Drones{idx};
+                end
             end
         end
+
+        function fixedwing = get.FixedWing(obj) 
+            fixedwing = {};
+            for idx = 1:length(obj.Drones)
+                if strcmp(obj.Drones{idx}.Type,'fixedwing')
+                    fixedwing{end + 1} = obj.Drones{idx};
+                end
+            end
+        end
+
+        function multirotor = get.MultiRotor(obj) 
+            multirotor = {};
+            for idx = 1:length(obj.Drones)
+                if strcmp(obj.Drones{idx}.Type,'multirotor')
+                    multirotor{end + 1} = obj.Drones{idx};
+                end
+            end
+        end
+
 
 
         % Méthode pour retirer un drone de l'essaim
@@ -123,12 +149,12 @@ classdef SwarmManager < handle
         end
 
         function Destroy_drone(obj, ind)
-            drone = obj.AliveDrones(ind);
+            drone = obj.AliveDrones{ind};
             drone.IsAlive = false;
             drone.posState(3) = 0;
-            obj.AliveDrones(ind) = [];
+            obj.AliveDrones{ind} = [];
             to_remove = cellfun(@isempty, obj.AliveDrones);  % Trouve les indices des éléments vides
-            obj.AliveDrones(to_remove) = [];                % Supprime ces éléments
+            obj.AliveDrones{to_remove} = [];                % Supprime ces éléments
             %obj.AliveDrones = [obj.AliveDrones(1:ind-1), obj.AliveDrones(ind+1:end)] 
 
 
@@ -138,13 +164,13 @@ classdef SwarmManager < handle
             drones_to_remove = [];
             n = length(obj.AliveDrones);
             for i = 1:n
-                i_drone =  obj.AliveDrones(i);
-                for k = 1:i-1;
-                    k_drone = obj.AliveDrones(k);
+                i_drone =  obj.AliveDrones{i};
+                for k = 1:i-1
+                    k_drone = obj.AliveDrones{k};
                     dist = sqrt((i_drone.posState(1) - k_drone.posState(1))^2 ...
                               + (i_drone.posState(2) - k_drone.posState(2))^2 ...
                               + (i_drone.posState(3) - k_drone.posState(3))^2);
-                    if dist < i_drone.Radius + k_drone.Radius;
+                    if dist < i_drone.Radius + k_drone.Radius
                         drones_to_remove = [drones_to_remove, i, k];
 
                         %obj.backend.OnDronesCollision(i_drone.ID, k_drone.ID);
@@ -163,6 +189,7 @@ classdef SwarmManager < handle
 
 
         function update_speeds(obj, dt, r, swarm_weights, weights, target_weights, sat)
+
             % Compute le vecteur vitesse t+1 du drone en fonction de l'influence de l'essaim, de sa vitesse, des targets et des zones d'exclusion 
             % Et gère les collisions éventuelles
         
@@ -172,56 +199,53 @@ classdef SwarmManager < handle
             % attraction max, distance d'attraction maximum (bruit de communication)
 
             zones = obj.Environment.get_zones_pos_weights();
-
             n = length(obj.AliveDrones);
+
             posStateMatrix = zeros(n,3);
             speedStateMatrix = zeros (n,3);
 
             for i = 1:n
-                drone = obj.AliveDrones(i);
+                drone = obj.AliveDrones{i};
+
                 drone.update_pos(dt); % On update les drones à leur nouvelle position en fonction du dernier vecteur vitesse computé
                 
                 posStateMatrix(i,:) = drone.posState; 
                 speedStateMatrix(i,:) = drone.speedState;
             end
 
-            obj.check_collisions(zones);
-            
+            %obj.check_collisions(zones);
+                
             %à corriger
             %obj.drones_pos_history_matrix(:,:,size(obj.drones_pos_history_matrix,3)+1) = posStateMatrix; % historique des positions pour le temps diff
             
             %% CALCUL DES VOISINS
             [neighborI, nnmax] = VoroiNeighbor(posStateMatrix, n); % Utils.Algo
-            
+
             %% SWARM INFLUENCE
-            swarmInfluence = swarm_pond(posStateMatrix, speedStateMatrix, neighborI, n, nnmax, swarm_weights, r); % Utils.Algo
+            swarmInfluence = swarm_pond(posStateMatrix, speedStateMatrix, neighborI, n, nnmax, swarm_weights, r, obj); % Utils.Algo
             
             %% SPEED INFLUENCE
             speedInfluence = speed_pond(speedStateMatrix); % Utils.Algo
 
             %% TARGET INFLUENCE
-            targetInfluence = target_pond(obj.target_list, posStateMatrix, target_weights); % Utils.Algo
+            targetInfluence = target_pond(obj.target_list, posStateMatrix, target_weights, obj.threshold_radius, obj); % Utils.Algo
            
             %% Calcul des zones d'évitement 
             zones = obj.Environment.get_zones_pos_weights();
             avoidInfluence = avoid_pond(posStateMatrix, zones);
 
-            
-
-
             %% Maintentant, pour chaque drone, on fait la pondération des influeneces swarm/target/speed et on les somme
 
             newSpeedMatrix = whole_pond(swarmInfluence, speedInfluence, targetInfluence, avoidInfluence, weights); % Utils.Algo
             
-            
-
+           
             %temp
             newSpeedMatrix(newSpeedMatrix < sat(1)) = sat(1);
             newSpeedMatrix(newSpeedMatrix > sat(2)) = sat(2);
             
             %manque système de saturation conique
             for i = 1:length(obj.AliveDrones)
-                drone = obj.AliveDrones(i);
+                drone = obj.AliveDrones{i};
                 drone.speedState = newSpeedMatrix(i,:);
             end
           

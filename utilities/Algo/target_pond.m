@@ -1,4 +1,4 @@
-function targetInfluence = target_pond(target_list, posStateMatrix, target_weights)
+function targetInfluence = target_pond(target_list, posStateMatrix, target_weights, threshold_radius, swarm)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -8,14 +8,28 @@ function targetInfluence = target_pond(target_list, posStateMatrix, target_weigh
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%Différence de position aux targets, en ligne, les drones, en
-%colonne la diff à chaque target
+    %HYPOTHESE SIMPLIFICATRICE, 1 SEULE CIBLE !!
 
-    T_x = target_list(:,1)' - posStateMatrix(:,1);
-    T_y = target_list(:,2)' - posStateMatrix(:,2);
-    T_z = target_list(:,3)' - posStateMatrix(:,3);
+    WpMatrix = [];
+    for idx = 1:length(swarm.FixedWing) 
+        wp_id = swarm.FixedWing{idx}.CurrentWaypoint;
+        WpMatrix = [WpMatrix ; swarm.FixedWing{idx}.Waypoints(wp_id,:)];
+    end
+
+    nmulti = size(swarm.MultiRotor, 2);
+
+    T_x = [target_list(:,1)' - posStateMatrix(1:nmulti, 1); WpMatrix(:,1) - posStateMatrix(nmulti + 1:end, 1)];
+    T_y = [target_list(:,2)' - posStateMatrix(1:nmulti, 2); WpMatrix(:,2) - posStateMatrix(nmulti + 1:end, 2)];
+    T_z = [target_list(:,3)' - posStateMatrix(1:nmulti, 3); WpMatrix(:,3) - posStateMatrix(nmulti + 1:end, 3)];
     
-    T_eucli = sqrt(T_x.^2 + T_y.^2 + T_z.^2); % On peut y ajouter de la pondération de cible en fct de la distance ; distance d'attraction max à ajouter (r(3)/w(3))
+    T_eucli = sqrt(T_x.^2 + T_y.^2 + T_z.^2); 
+
+    for idx = 1:length(swarm.FixedWing) 
+        if T_eucli(nmulti + idx) < threshold_radius
+            swarm.FixedWing{idx}.CycleWaypoint;
+        end
+    end
+
     T_x_pond = T_x./T_eucli;
     T_y_pond = T_y./T_eucli;
     T_z_pond = T_z./T_eucli;
@@ -30,5 +44,6 @@ function targetInfluence = target_pond(target_list, posStateMatrix, target_weigh
     T_z_pond = sum(T_z_pond,2)/sum(target_weights);
 
     targetInfluence = [T_x_pond T_y_pond T_z_pond];
+
 
 end

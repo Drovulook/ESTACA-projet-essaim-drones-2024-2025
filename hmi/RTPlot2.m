@@ -53,6 +53,9 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
     for k = 1:size(Target,1)
         targ(k)=scatter3(Target(k,1), Target(k,2), Target(k,3), 50, 'filled', 'MarkerFaceColor', 'r');
     end
+    
+    wp=gobjects(1,1);
+    wp(1) = scatter3(swarm.FixedWing{1}.Waypoints(1,1), swarm.FixedWing{1}.Waypoints(1,2), swarm.FixedWing{1}.Waypoints(1,3), 50, 'filled', 'MarkerFaceColor', 'g');
 
     n_drone=size(swarm.Drones,2);
     drone_pos=zeros(n_drone,3);
@@ -112,6 +115,7 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
                  'UData', drone_speed(i,1)*20, 'VData', drone_speed(i,2)*20, 'WData', drone_speed(i,3)*20);
         end
        
+        set(wp(1), 'XData', swarm.FixedWing{1}.Waypoints(swarm.FixedWing{1}.CurrentWaypoint,1), 'YData', swarm.FixedWing{1}.Waypoints(swarm.FixedWing{1}.CurrentWaypoint,2), 'ZData', swarm.FixedWing{1}(1).Waypoints(swarm.FixedWing{1}.CurrentWaypoint,3));
 
         % Rafraîchir le tracé pour montrer les nouvelles positions et vecteurs
 
@@ -159,22 +163,7 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sa
     
     swarm.drones_pos_history_matrix = cat(3,zeros(n_drone,3,15), swarm.drones_pos_history_matrix);
 
-    head=gobjects(1,n_drone);
-    for i=1:n_drone
-        head(i)=scatter3(swarm.drones_pos_history_matrix(i,1,16), swarm.drones_pos_history_matrix(i,2,16), swarm.drones_pos_history_matrix(i,3,16), 50, 'filled', 'MarkerFaceColor', 'b');
-    end
-
     target = scatter3(swarm.target_history_matrix(1,1), swarm.target_history_matrix(1,2), swarm.target_history_matrix(1,3), 50, 'filled', 'MarkerFaceColor', 'r');
-
-    for t = 16:temps
-        for i=1:n_drone
-            set(head(i), 'XData', swarm.drones_pos_history_matrix(i,1,t), 'YData', swarm.drones_pos_history_matrix(i,2,t), 'ZData', swarm.drones_pos_history_matrix(i,3,t));
-            set(target, 'XData', swarm.target_history_matrix(t-15,1), 'YData', swarm.target_history_matrix(t-15,2), 'ZData', swarm.target_history_matrix(t-15,3));
-
-        end
-        drawnow;
-        
-    end
 
 end
 

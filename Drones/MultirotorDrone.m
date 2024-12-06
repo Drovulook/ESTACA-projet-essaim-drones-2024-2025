@@ -11,6 +11,7 @@ classdef MultirotorDrone < DroneBase & handle
         MaxTurnGLoad     % Charge en G maximale lors d'un virage
         MaxTurnRate      % Taux de virage maximal [rad/s]
         Controller       % Instance du contrôleur d'attitude
+
     end
     
     methods

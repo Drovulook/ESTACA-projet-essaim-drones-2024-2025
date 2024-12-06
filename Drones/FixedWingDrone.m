@@ -9,6 +9,9 @@ classdef FixedWingDrone < DroneBase & handle
         MaxClimbRate     % Taux de montée maximal autorisé
         MaxDescentRate   % Taux de descente maximal autorisé
         Controller       % Instance de contrôleur d'attitude de base
+        Waypoints        % matrice n*3 des waypoints à cycler
+        CurrentWaypoint = 1; %Indice du wp actuel
+        threshold_radius = 5;
     end
     
     methods
@@ -63,5 +66,14 @@ classdef FixedWingDrone < DroneBase & handle
             RealnewSpeedVec = [newSpeedVec(1), newSpeedVec(2), climbRate];
             obj.speedState = RealnewSpeedVec;
         end
+        
+        function CycleWaypoint(obj)
+            obj.CurrentWaypoint = obj.CurrentWaypoint + 1 ;
+            if obj.CurrentWaypoint > size(obj.Waypoints,1)
+                obj.CurrentWaypoint = 1;
+            end         
+        end
+                    
+
     end
 end

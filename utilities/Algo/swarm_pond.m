@@ -1,4 +1,4 @@
-function swarmInfluence = swarm_pond(posStateMatrix, speedStateMatrix, neighborI, n, nnmax, swarm_weights, r)
+function swarmInfluence = swarm_pond(posStateMatrix, speedStateMatrix, neighborI, n, nnmax, swarm_weights, r, swarm)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -26,10 +26,16 @@ function swarmInfluence = swarm_pond(posStateMatrix, speedStateMatrix, neighborI
     %d'orientation ou d'évitement
     
     %Règles de pondération
-    weight_matrix = zeros(size(rhon));
-    weight_matrix(rhon < r(1)) = -swarm_weights(1); % Cercle de répulsion
-    weight_matrix(rhon >= r(1)) = swarm_weights(2); % Cercle d'attraction
-    
+    attraction = zeros(size(rhon));
+    repulsion = zeros(size(rhon));
+    repulsion(rhon < r(1)) = -swarm_weights(1); % Cercle de répulsion
+    attraction(rhon >= r(1)) = swarm_weights(2); % Cercle d'attraction
+
+    nmulti = size(swarm.MultiRotor, 2);
+    attraction(nmulti + 1:end, :) = 0; %Enlève les fixedwing
+
+    weight_matrix = attraction + repulsion;
+
     swarminfluence_x = (sum(weight_matrix.*rho_x./rhon, 2, 'omitnan'));
     swarminfluence_y = (sum(weight_matrix.*rho_y./rhon, 2, 'omitnan'));
     swarminfluence_z = (sum(weight_matrix.*rho_z./rhon, 2, 'omitnan'));
