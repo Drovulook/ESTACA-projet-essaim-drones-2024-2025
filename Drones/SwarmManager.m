@@ -237,7 +237,6 @@ classdef SwarmManager < handle
             %% Maintentant, pour chaque drone, on fait la pondération des influeneces swarm/target/speed et on les somme
 
             newSpeedMatrix = whole_pond(swarmInfluence, speedInfluence, targetInfluence, avoidInfluence, weights); % Utils.Algo
-            
            
             %temp
             newSpeedMatrix(newSpeedMatrix < sat(1)) = sat(1);

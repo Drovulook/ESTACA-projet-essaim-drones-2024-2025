@@ -5,8 +5,8 @@ clc;
 tic
 
 env = Environment(10, 200, [-150, 150, 150, -150], [-150, -150, 150, 150], [0, 0, 0, 0]);
-setupZones; % Configuration des zones de l'espace aérien
-
+%setupZones;
+homeBaseCoord = [0, 0, 0];
 temps = 100000;
 
 

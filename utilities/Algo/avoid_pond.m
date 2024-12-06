@@ -1,6 +1,6 @@
 function [avoidInfluence] = avoid_pond(posStateMatrix, zones_object_list)
 
-    avoidZones_posDim = [];
+    avoidZones_posDim = zeros(0,6);
    
     %Le besoin c'est une matrice qui renvoie coords + diamètre
     %sphère (à mettre dans Environnement)
