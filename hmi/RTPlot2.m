@@ -5,8 +5,11 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, Ta
     rotate3d on
     ax = gca;
 
-    XLim = [-150 150];
-    YLim = [-150 150];
+    %XLim = [-150 150];
+    %YLim = [-150 150];
+    XLim = [min(env.GroundCoordinates.x) max(env.GroundCoordinates.x)]; % dimension défini lors de la création de : Environment
+    YLim = [min(env.GroundCoordinates.y) max(env.GroundCoordinates.y)];
+
     ZLim = [0 150];
     traceSize = 1800;
 
