@@ -12,18 +12,19 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, Ta
 
     ZLim = [0 150];
     traceSize = 1800;
+    speedVectorSize = 2;
 
     set(ax, 'XLim', XLim, 'YLim', YLim, 'ZLim', ZLim);
 
-    view(300, 20);
+    view(-75, 15);
     grid on;
     hold on;
 
     axis equal;
 
-    xlabel('Y (Nord - Sud)');
-    ylabel('X (Ouest - Est)');
-    zlabel('Altitude (Z)');
+    xlabel('X (Nord - Sud)');
+    ylabel('Y (Ouest - Est)');
+    zlabel('Z (Altitude)');
     title('Rendu de Simulation en Temps Réel');
 
     %% Affichage des zones et de la surface de sol
@@ -107,7 +108,7 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, Ta
         for i = 1:n_drone
             set(head(i), 'XData', drone_pos(i, 1), 'YData', drone_pos(i, 2), 'ZData', drone_pos(i, 3));
             set(quiver_handle(i), 'XData', drone_pos(i, 1), 'YData', drone_pos(i, 2), 'ZData', drone_pos(i, 3), ...
-                'UData', drone_speed(i, 1) * 20, 'VData', drone_speed(i, 2) * 20, 'WData', drone_speed(i, 3) * 20);
+                'UData', drone_speed(i, 1) * speedVectorSize, 'VData', drone_speed(i, 2) * speedVectorSize, 'WData', drone_speed(i, 3) * speedVectorSize);
 
             % Update trace with the last positions
             last_positions = swarm.Drones{i}.posLog; 
