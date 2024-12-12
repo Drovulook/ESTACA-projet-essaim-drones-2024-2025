@@ -14,7 +14,7 @@ classdef SwarmManager < handle
         target_history_matrix
         drones_pos_history_matrix
         waypoints %matrice n*3 avec waypoints dans l'ordre
-        threshold_radius = 5
+        threshold_radius = 15
 
     end
     
@@ -188,7 +188,7 @@ classdef SwarmManager < handle
         end
 
 
-        function update_speeds(obj, dt, r, swarm_weights, weights, target_weights, sat)
+        function update_speeds(obj, dt, r, swarm_weights, weights, target_weights)
 
             % Compute le vecteur vitesse t+1 du drone en fonction de l'influence de l'essaim, de sa vitesse, des targets et des zones d'exclusion 
             % Et gère les collisions éventuelles
@@ -238,17 +238,14 @@ classdef SwarmManager < handle
 
             newSpeedMatrix = whole_pond(swarmInfluence, speedInfluence, targetInfluence, avoidInfluence, weights); % Utils.Algo
            
-            %temp
-            newSpeedMatrix(newSpeedMatrix < sat(1)) = sat(1);
-            newSpeedMatrix(newSpeedMatrix > sat(2)) = sat(2);
-            
             %manque système de saturation conique
             for i = 1:length(obj.AliveDrones)
                 drone = obj.AliveDrones{i};
-                drone.speedState = newSpeedMatrix(i,:);
+                
+                [vX, vY, vZ] = SpeedProcessing(drone, i, newSpeedMatrix, dt);
+            
+                drone.speedState = [vX, vY, vZ];
             end
-          
-  
         end
     end
 end

@@ -10,7 +10,7 @@ classdef MultirotorDrone < DroneBase & handle
         MaxVarioDown     % Taux de descente maximal autorisé
         MaxTurnGLoad     % Charge en G maximale lors d'un virage
         MaxTurnRate      % Taux de virage maximal [rad/s]
-        Controller       % Instance du contrôleur d'attitude
+        % Controller       % Instance du contrôleur d'attitude
 
     end
     
@@ -28,7 +28,7 @@ classdef MultirotorDrone < DroneBase & handle
             obj.MaxTurnRate = params.MaxTurnRate; % Initialiser le taux de virage maximal
             
             % Initialiser le contrôleur d'attitude pour le drone
-            obj.Controller = BasicAttitudeController(obj);
+            % obj.Controller = BasicAttitudeController(obj);
             obj.posState = initialPosition; % Définir la position actuelle
             obj.Destination = initialPosition; % Définir la destination initiale comme la position de départ
 

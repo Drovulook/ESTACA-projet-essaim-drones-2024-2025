@@ -8,7 +8,7 @@ classdef FixedWingDrone < DroneBase & handle
         MinSpeed         % Vitesse minimale du drone (vitesse de décrochage)
         MaxClimbRate     % Taux de montée maximal autorisé
         MaxDescentRate   % Taux de descente maximal autorisé
-        Controller       % Instance de contrôleur d'attitude de base
+        % Controller       % Instance de contrôleur d'attitude de base
         Waypoints        % matrice n*3 des waypoints à cycler
         CurrentWaypoint = 1; %Indice du wp actuel
         threshold_radius = 5;
@@ -26,7 +26,7 @@ classdef FixedWingDrone < DroneBase & handle
             obj.MaxDescentRate = params.MaxDescentRate; % Initialiser le taux de descente maximal
             
             % Initialiser le contrôleur d'attitude de base
-            obj.Controller = BasicAttitudeController(obj);
+            % obj.Controller = BasicAttitudeController(obj);
             obj.posState = initialPosition; % Définir la position actuelle
             obj.Destination = initialPosition; % Définir la destination initiale comme la position de départ
 

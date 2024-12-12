@@ -21,8 +21,8 @@ end
 %assignation des pos init, du à l'algo de delaunay, si coplanaire ou
 %colinéaire, kaput
 
-zone_size=50;
-min_distance=0.5;
+zone_size = 50;
+min_distance = 0.5;
 for i = 1:numMultirotor
     % Position aléatoire dans la zone définie (ici entre 0 et 'zone_size' sur x et y)
     valid_position = false;
@@ -49,30 +49,27 @@ end
 % Ajouter les drones multirotors à l'essaim, placés à la coordonnée de la base
 swarm.addDrone('fixedwing', homeBaseCoord);
 
-
 %assignation des pos init, du à l'algo de delaunay, si coplanaire ou
 %colinéaire, kaput
 
-Target = [100 50 50];
+Target = [0 0 75];
 swarm.update_target(Target); 
 
-Waypoints = [100 50 50 ; 50 50 50 ; 50 100 50 ; 100 100 50]; 
+Waypoints = [0 0 100; 0 0 50; 100 100 50 ; 100 -100 100 ; -100 -100 50 ; -100 100 100]; 
 swarm.waypoints = Waypoints; 
 swarm.FixedWing{1}.Waypoints = Waypoints;
 
 r = [30 60 100]; %Répulsion, évitement, attraction max (rayons)
 swarm_weights = [1.4 0.8 1.6]; %Pondérations répulsion, alignement, attraction drone, évitement obstacle
 
-weights = [0.5 1.2 1 10]/10; %(répulsion entre drones, attraction entre drones, target, évitement)
+weights = [0.5 1.2 1 10] / 10; %(répulsion entre drones, attraction entre drones, target, évitement)
 %J'ai remarqué qu'en divisant tout par 10, on réduit les comportements HF,
 %et les drones sont plus posés
 
 pondeTarg = [10]; %Pondération de la value des 2 targets
-satextrem = 1.5; %Saturation de vitesse projetée
-sat = [-satextrem satextrem];
-dt = 1;
+dt = 0.01;
 
-RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sat, Target);
+RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, Target);
 
 toc
 

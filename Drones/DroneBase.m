@@ -9,6 +9,8 @@ classdef (Abstract) DroneBase < handle
         Type            % Type de drone : 'multirotor' ou 'fixedwing' 
         posState        % Vecteur de position à tn (1,3) [x, y, z]
         speedState = [0 0 0]     % Vecteur de vitesse à tn (1,3) [r, teta, phi]
+        posLog
+        speedLog
         flightTime = 0  % Temps de vol en sec
         Target          % Coordonnées de la cible
         Radius
@@ -68,10 +70,21 @@ classdef (Abstract) DroneBase < handle
     
     methods
         function update_pos(obj, dt) %Update la position du drone en fct de sa vitesse
-            dpos = dt*obj.speedState; %on peut ajouter du noise
+            dpos = dt * obj.speedState; %on peut ajouter du noise
             obj.posState = obj.posState + dpos;
-        end
-        
 
+            % Logging de l'état du drone
+            if isempty(obj.posLog)
+                obj.posLog = obj.posState; % Initialise le log si vide
+            else
+                obj.posLog = [obj.posLog; obj.posState]; % Ajoute la nouvelle position à l'historique
+            end
+        
+            if isempty(obj.speedLog)
+                obj.speedLog = obj.speedState; % Initialise le log si vide
+            else
+                obj.speedLog = [obj.speedLog; obj.speedState]; % Ajoute la nouvelle vitesse à l'historique
+            end
+        end
     end
 end
