@@ -10,7 +10,8 @@ temps = 100000;
 
 
 swarm = SwarmManager(env, temps); % Initialiser le gestionnaire d'essaim avec l'environnement
-numMultirotor = 10; % Nombre de drones multirotors
+numMultirotor = 0; % Nombre de drones multirotors
+numFixedwing = 5;
 
 % Ajouter les drones multirotors à l'essaim, placés à la coordonnée de la base
 for i = 1:numMultirotor
@@ -41,12 +42,38 @@ for i = 1:numMultirotor
         end
     end
     % Assigner la position valide au drone i
-    swarm.Drones{i}.posState = new_pos;
+    swarm.MultiRotor{i}.posState = new_pos;
 end
 
 
 % Ajouter les drones multirotors à l'essaim, placés à la coordonnée de la base
-swarm.addDrone('fixedwing', homeBaseCoord);
+for i = 1:numFixedwing
+    swarm.addDrone('fixedwing', homeBaseCoord);
+end
+
+zone_size = 10;
+min_distance = 0.5;
+for i = 1:numFixedwing
+    % Position aléatoire dans la zone définie (ici entre 0 et 'zone_size' sur x et y)
+    valid_position = false;
+    while ~valid_position
+        % Génère une position aléatoire dans la zone
+        new_pos = [rand*zone_size, rand*zone_size, rand*zone_size];
+        
+        % Vérifier si la position est trop proche d'un autre drone
+        valid_position = true;
+        for j = 1:i-1
+            % Calculer la distance entre le drone actuel et les drones précédents
+            dist = norm(new_pos - swarm.Drones{j}.posState);
+            if dist < min_distance
+                valid_position = false;
+                break;  % Si trop proche, on quitte la boucle et on génère une nouvelle position
+            end
+        end
+    end
+    % Assigner la position valide au drone i
+    swarm.FixedWing{i}.posState = new_pos;
+end
 
 %assignation des pos init, du à l'algo de delaunay, si coplanaire ou
 %colinéaire, kaput
@@ -54,9 +81,11 @@ swarm.addDrone('fixedwing', homeBaseCoord);
 Target = [0 0 75];
 swarm.update_target(Target); 
 
-Waypoints = [0 50 100; 0 0 50; 100 100 50 ; 100 -100 100 ; -100 -100 50 ; -100 100 100 ; -100 -10 20]; 
+Waypoints = [0 50 100; 0 0 50; 100 100 50 ; 100 -100 100 ; -100 -100 50 ; -100 100 100 ; -100 -10 50]; 
 swarm.waypoints = Waypoints; 
-swarm.FixedWing{1}.Waypoints = Waypoints;
+for i = 1:length(swarm.FixedWing)
+    swarm.FixedWing{i}.Waypoints = Waypoints;
+end
 
 r = [30 60 100]; %Répulsion, évitement, attraction max (rayons)
 swarm_weights = [1.4 0.8]; %Pondérations répulsion, inertie, attraction drone

@@ -55,7 +55,10 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, Ta
     end
 
     wp = gobjects(1, 1);
-    wp(1) = scatter3(swarm.FixedWing{1}.Waypoints(1,1), swarm.FixedWing{1}.Waypoints(1,2), swarm.FixedWing{1}.Waypoints(1,3), 50, 'filled', 'MarkerFaceColor', 'g');
+    
+    for i = 1:length(swarm.FixedWing)
+        wp(i) = scatter3(swarm.FixedWing{i}.Waypoints(1,1), swarm.FixedWing{i}.Waypoints(1,2), swarm.FixedWing{i}.Waypoints(1,3), 50, 'filled', 'MarkerFaceColor', 'g');
+    end
 
     n_drone = size(swarm.Drones, 2);
     drone_pos = zeros(n_drone, 3);
@@ -123,9 +126,12 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, Ta
         end
 
         % Re-implemented feature from v1: updating the displayed waypoint
-        set(wp(1), 'XData', swarm.FixedWing{1}.Waypoints(swarm.FixedWing{1}.CurrentWaypoint,1), ...
-                    'YData', swarm.FixedWing{1}.Waypoints(swarm.FixedWing{1}.CurrentWaypoint,2), ...
-                    'ZData', swarm.FixedWing{1}.Waypoints(swarm.FixedWing{1}.CurrentWaypoint,3));
+         
+        for i = 1:length(swarm.FixedWing)
+            set(wp(i), 'XData', swarm.FixedWing{i}.Waypoints(swarm.FixedWing{i}.CurrentWaypoint,1), ...
+                        'YData', swarm.FixedWing{i}.Waypoints(swarm.FixedWing{i}.CurrentWaypoint,2), ...
+                        'ZData', swarm.FixedWing{i}.Waypoints(swarm.FixedWing{i}.CurrentWaypoint,3));
+        end
 
         Target(1, 1) = update(sliderX);
         Target(1, 2) = update(sliderY);
