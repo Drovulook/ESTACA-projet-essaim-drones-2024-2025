@@ -1,4 +1,4 @@
-function [newSpeedMatrix] = whole_pond(swarmInfluence, speedInfluence, targetInfluence, avoidInfluence, weights)
+function [desiredVector] = whole_pond(swarmInfluence, speedInfluence, targetInfluence, avoidInfluence, weights)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Permet de calculer le nouveau vecteur vitesse en comutant toutes les
@@ -20,6 +20,6 @@ function [newSpeedMatrix] = whole_pond(swarmInfluence, speedInfluence, targetInf
             %orientation des drones, puis on repondère avec la vitesse
             %actuelle + L'attractivité de la target
             
-            newSpeedMatrix = [speed_x speed_y speed_z];
+            desiredVector = [speed_x speed_y speed_z];
 end
 

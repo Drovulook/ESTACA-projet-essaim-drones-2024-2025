@@ -12,7 +12,7 @@ function swarmInfluence = swarm_pond(posStateMatrix, speedStateMatrix, neighborI
 
     % On fusionne les matrices + on gère l'indice de fin
     stateA = [posStateMatrix speedStateMatrix ; nan(1,6)];
-    
+
     % Différence de position entre les drones et leurs voisins
     rho_x = reshape(stateA(neighborI,1),n,nnmax) - posStateMatrix(:,1); % Différence axe x
     rho_y = reshape(stateA(neighborI,2),n,nnmax) - posStateMatrix(:,2); % Différence axe y

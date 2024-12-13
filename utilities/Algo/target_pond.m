@@ -10,7 +10,7 @@ function targetInfluence = target_pond(target_list, posStateMatrix, target_weigh
 
     %HYPOTHESE SIMPLIFICATRICE, 1 SEULE CIBLE !!
 
-    WpMatrix = [];
+    WpMatrix = zeros(0,3);
     for idx = 1:length(swarm.FixedWing) 
         wp_id = swarm.FixedWing{idx}.CurrentWaypoint;
         WpMatrix = [WpMatrix ; swarm.FixedWing{idx}.Waypoints(wp_id,:)];

@@ -236,13 +236,13 @@ classdef SwarmManager < handle
 
             %% Maintentant, pour chaque drone, on fait la pondération des influeneces swarm/target/speed et on les somme
 
-            newSpeedMatrix = whole_pond(swarmInfluence, speedInfluence, targetInfluence, avoidInfluence, weights); % Utils.Algo
+            desiredVector = whole_pond(swarmInfluence, speedInfluence, targetInfluence, avoidInfluence, weights); % Utils.Algo
            
             %manque système de saturation conique
             for i = 1:length(obj.AliveDrones)
                 drone = obj.AliveDrones{i};
                 
-                [vX, vY, vZ] = SpeedProcessing(drone, i, newSpeedMatrix, dt);
+                [vX, vY, vZ] = SpeedProcessing(drone, i, desiredVector, dt);
             
                 drone.speedState = [vX, vY, vZ];
             end

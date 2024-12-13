@@ -1,5 +1,7 @@
 function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, Target)
 
+    framerate = 1/20;
+
     %% Échelle, Angle d'observation et Légende
     f = figure('Position', [100, 100, 1200, 800]);
     rotate3d on
@@ -11,7 +13,7 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, Ta
     YLim = [min(env.GroundCoordinates.y) max(env.GroundCoordinates.y)];
 
     ZLim = [0 150];
-    traceSize = 1800;
+    traceSize = 100;
     speedVectorSize = 2;
 
     set(ax, 'XLim', XLim, 'YLim', YLim, 'ZLim', ZLim);
@@ -94,6 +96,7 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, Ta
 
     %% Boucle de simulation
     k = 0;
+    tic;
     while true
         swarm.update_speeds(dt, r, swarm_weights, weights, pondeTarg);
 
@@ -134,7 +137,14 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, Ta
         swarm.update_target(Target);
 
         set(ax, 'XLim', XLim, 'YLim', YLim, 'ZLim', ZLim);
-        drawnow limitrate;
+        
+        while true
+            if toc > framerate
+                drawnow limitrate;
+                break
+            end
+        end
+        tic;
 
         k = k + 1;
         if k == temps

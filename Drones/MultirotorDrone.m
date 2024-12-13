@@ -5,6 +5,7 @@ classdef MultirotorDrone < DroneBase & handle
     properties
         Destination      % Position cible actuelle du drone
         MaxSpeed         % Vitesse maximale autorisée
+        MinSpeed         % Vitesse minimale
         CruiseSpeed      % Vitesse de croisière du drone
         MaxVarioUp       % Taux de montée maximal autorisé
         MaxVarioDown     % Taux de descente maximal autorisé

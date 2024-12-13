@@ -30,7 +30,7 @@ end
 
 % Ajouter les zones prohibées
 proZoneType = {'half_sphere', 'cylinder'}; % Types de zones prohibées
-proZoneCoord = {[-50, -10, 0], [-100, 60, 0]}; % Coordonnées des zones prohibées [x, y, z] (en mètres)
+proZoneCoord = {[-100, -10, 0], [-100, 60, 0]}; % Coordonnées des zones prohibées [x, y, z] (en mètres)
 proZoneDims = {[100, 100, 50], [30, 30, 50]}; % Dimensions des zones prohibées [longueur, largeur, hauteur] (en mètres)
 proZoneTilt = {0, 0}; % Angle d'inclinaison pour les zones prohibées
 for i = 1:length(proZoneCoord)

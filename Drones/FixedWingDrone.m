@@ -6,6 +6,7 @@ classdef FixedWingDrone < DroneBase & handle
         Destination      % Position cible actuelle du drone
         MaxSpeed         % Vitesse maximale du drone
         MinSpeed         % Vitesse minimale du drone (vitesse de décrochage)
+        CruiseSpeed      % Vitesse de croisière du drone
         MaxClimbRate     % Taux de montée maximal autorisé
         MaxDescentRate   % Taux de descente maximal autorisé
         % Controller       % Instance de contrôleur d'attitude de base

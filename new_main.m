@@ -2,15 +2,15 @@ clear all;
 close all;
 clc;
 
-tic
+
 env = Environment(10, 200, [-200, 200, 200, -200], [-200, -200, 200, 200], [0, 0, 0, 0]);
-%setupZones;
+setupZones;
 homeBaseCoord = [0, 0, 0];
 temps = 100000;
 
 
 swarm = SwarmManager(env, temps); % Initialiser le gestionnaire d'essaim avec l'environnement
-numMultirotor = 0; % Nombre de drones multirotors
+numMultirotor = 10; % Nombre de drones multirotors
 
 % Ajouter les drones multirotors à l'essaim, placés à la coordonnée de la base
 for i = 1:numMultirotor
@@ -54,21 +54,19 @@ swarm.addDrone('fixedwing', homeBaseCoord);
 Target = [0 0 75];
 swarm.update_target(Target); 
 
-Waypoints = [0 0 100; 0 0 50; 100 100 50 ; 100 -100 100 ; -100 -100 50 ; -100 100 100]; 
+Waypoints = [0 50 100; 0 0 50; 100 100 50 ; 100 -100 100 ; -100 -100 50 ; -100 100 100 ; -100 -10 20]; 
 swarm.waypoints = Waypoints; 
 swarm.FixedWing{1}.Waypoints = Waypoints;
 
 r = [30 60 100]; %Répulsion, évitement, attraction max (rayons)
-swarm_weights = [1.4 0.8 1.6]; %Pondérations répulsion, alignement, attraction drone, évitement obstacle
+swarm_weights = [1.4 0.8]; %Pondérations répulsion, inertie, attraction drone
 
-weights = [0.5 1.2 1 10] / 10; %(répulsion entre drones, attraction entre drones, target, évitement)
+weights = [0.5 1.2 1 10] / 10; %(pondération essaim, inertie, target, évitement)
 %J'ai remarqué qu'en divisant tout par 10, on réduit les comportements HF,
 %et les drones sont plus posés
 
 pondeTarg = [10]; %Pondération de la value des 2 targets
-dt = 0.01;
+dt = 0.1;
 
 RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, Target);
-
-toc
 
