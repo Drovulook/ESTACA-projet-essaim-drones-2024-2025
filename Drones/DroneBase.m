@@ -16,16 +16,20 @@ classdef (Abstract) DroneBase < handle
         Radius
         IsAlive = true;
 
-        Puissance       % Puissances consommées à chaque pas (1,n)
+        mass
         
 
+        powerLog            % Puissances consommées à chaque pas (1,n)
+        mean_consumption    % Puissance moyenne consommée (pour l'optimisation)
+
         %energie a bord
-        Capacite_max        % si batterie
-        Tension_batterie    % si batterie
+        maxCapacity         % si batterie
+        batteryNominalVoltage       % si batterie
         k_peukert           % si batterie (cte de Peukert)
-        Volume_reservoir    % si carburant
-        Rendement           % pour les deux
-        Autonomie           % idem
+        tankVolume          % si carburant
+        yield=0.9               % pour les deux
+        remainingCapacity   % en Wh
+        autonomy            % en h
     end
     
     methods
@@ -34,7 +38,13 @@ classdef (Abstract) DroneBase < handle
             obj.ID = id; % Assigner l'identifiant unique
             obj.Type = type; % Assigner le type de drone
             
-            obj.Tension_batterie=10; % pour éviter une division par zéro;
+            %dimensionnement drone
+            % !! ne pas retirer ces valeurs, elles ne peuvent être nulles
+            obj.batteryNominalVoltage=22.2;
+            obj.maxCapacity=200;
+            obj.remainingCapacity=obj.maxCapacity;
+            obj.mass=50;
+            obj.k_peukert=1.2;
 
             % Générer un nom unique en utilisant le type et l'ID du drone
             uniqueName = sprintf('%sDrone%d_%s', upper(type(1)), id, datestr(now, 'HHMMSSFFF'));
@@ -52,8 +62,8 @@ classdef (Abstract) DroneBase < handle
             distance = 100 %calcul a implémenter
         end
 
-        function [autonomy] = autonomy(obj); % donne l'autonomie restante en fct de flightTime
-            autonomy = 100 %calcul a implémenter
+        function [autonomy] = getAutonomy(obj); % donne l'autonomie restante en fct des logs du vol
+            autonomy=obj.autonomy;
         end
 
         function [Vx Vy Vz] = velocityNorm(obj); % Normalise la vitesse
@@ -85,6 +95,8 @@ classdef (Abstract) DroneBase < handle
             else
                 obj.speedLog = [obj.speedLog; obj.speedState]; % Ajoute la nouvelle vitesse à l'historique
             end
+
+
         end
     end
 end
