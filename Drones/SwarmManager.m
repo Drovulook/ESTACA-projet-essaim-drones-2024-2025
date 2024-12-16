@@ -204,8 +204,15 @@ classdef SwarmManager < handle
             posStateMatrix = zeros(n,3);
             speedStateMatrix = zeros (n,3);
 
+
+
             for i = 1:n
                 drone = obj.AliveDrones{i};
+
+                if obj.Environment.DegradedMode == true
+                OLD_posStateMatrix(i,:) = drone.posState;
+                OLD_speedStateMatrix(i,:) = drone.speedState;
+                end
 
                 drone.update_pos(dt); % On update les drones à leur nouvelle position en fonction du dernier vecteur vitesse computé
                 
@@ -220,10 +227,19 @@ classdef SwarmManager < handle
             
             %% CALCUL DES VOISINS
             [neighborI, nnmax] = VoroiNeighbor(posStateMatrix, n); % Utils.Algo
-
+            %- ajouter pour le mode dégradé une erreur dans le calcul des
+            %voisins (néssecite de modifier la foncton Voroineighbor) 
+            %- créer une nouvelle fonction qui calcul avec des erreurs et
+            %alterner entre les 2 aléatoirement, évitera une régression du
+            %code et simplifie la modification du code
+         
             %% SWARM INFLUENCE
+            if obj.Environment.DegradedMode == true && randi(100)<=25 %pourcentage d'erreur (ici utilisation des anciennes valeurs de positions et de vitesses)
+            swarmInfluence = swarm_pond(OLD_posStateMatrix, OLD_speedStateMatrix, neighborI, n, nnmax, swarm_weights, r, obj); % Utils.Algo
+            else
             swarmInfluence = swarm_pond(posStateMatrix, speedStateMatrix, neighborI, n, nnmax, swarm_weights, r, obj); % Utils.Algo
-            
+            end 
+                    
             %% SPEED INFLUENCE
             speedInfluence = speed_pond(speedStateMatrix); % Utils.Algo
 
