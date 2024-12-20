@@ -1,4 +1,4 @@
-function targetInfluence = target_pond(target_list, posStateMatrix, target_weights, threshold_radius, swarm)
+function targetInfluence = target_pond(target_list, posStateMatrix, threshold_radius, swarm)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -22,7 +22,7 @@ function targetInfluence = target_pond(target_list, posStateMatrix, target_weigh
     T_y = [target_list(:,2)' - posStateMatrix(1:nmulti, 2); WpMatrix(:,2) - posStateMatrix(nmulti + 1:end, 2)];
     T_z = [target_list(:,3)' - posStateMatrix(1:nmulti, 3); WpMatrix(:,3) - posStateMatrix(nmulti + 1:end, 3)];
     
-    T_eucli = sqrt(T_x.^2 + T_y.^2 + T_z.^2); 
+    T_eucli = sqrt(T_x.^2 + T_y.^2 + T_z.^2);
 
     for idx = 1:length(swarm.FixedWing) 
         if T_eucli(nmulti + idx) < threshold_radius
@@ -30,18 +30,20 @@ function targetInfluence = target_pond(target_list, posStateMatrix, target_weigh
         end
     end
 
+    dist_min_target = 20;
+    k = 0.5;
+    f = @(x) (tanh(k * (x - dist_min_target)));
+
+    Y = f(T_eucli);    
+
     T_x_pond = T_x./T_eucli;
     T_y_pond = T_y./T_eucli;
     T_z_pond = T_z./T_eucli;
+
+    T_x_pond = T_x_pond.*Y;
+    T_y_pond = T_y_pond.*Y;
+    T_z_pond = T_z_pond.*Y;
     
-    %Pondération targets
-    T_x_pond = T_x_pond .* target_weights; % (n_drone x n_target)
-    T_y_pond = T_y_pond .* target_weights;
-    T_z_pond = T_z_pond .* target_weights;
-    
-    T_x_pond = sum(T_x_pond,2)/sum(target_weights); % (n_drone x 1)
-    T_y_pond = sum(T_y_pond,2)/sum(target_weights);
-    T_z_pond = sum(T_z_pond,2)/sum(target_weights);
 
     targetInfluence = [T_x_pond T_y_pond T_z_pond];
 

@@ -7,11 +7,11 @@ env = Environment(10, 200, [-200, 200, 200, -200], [-200, -200, 200, 200], [0, 0
 setupZones;
 homeBaseCoord = [0, 0, 0];
 temps = 100000;
-
+traceSize = 20;
 
 swarm = SwarmManager(env, temps); % Initialiser le gestionnaire d'essaim avec l'environnement
-numMultirotor = 0; % Nombre de drones multirotors
-numFixedwing = 5;
+numMultirotor = 10; % Nombre de drones multirotors
+numFixedwing = 2;
 
 % Ajouter les drones multirotors à l'essaim, placés à la coordonnée de la base
 for i = 1:numMultirotor
@@ -81,7 +81,7 @@ end
 Target = [0 0 75];
 swarm.update_target(Target); 
 
-Waypoints = [0 50 100; 0 0 50; 100 100 50 ; 100 -100 100 ; -100 -100 50 ; -100 100 100 ; -100 -10 50]; 
+Waypoints = [0 50 100; 0 0 50; 100 100 50 ; 100 -100 100 ; -100 -100 50 ; -100 100 100 ; -100 -10 10]; 
 swarm.waypoints = Waypoints; 
 for i = 1:length(swarm.FixedWing)
     swarm.FixedWing{i}.Waypoints = Waypoints;
@@ -94,8 +94,7 @@ weights = [0.5 1.2 1 10] / 10; %(pondération essaim, inertie, target, évitemen
 %J'ai remarqué qu'en divisant tout par 10, on réduit les comportements HF,
 %et les drones sont plus posés
 
-pondeTarg = [10]; %Pondération de la value des 2 targets
 dt = 0.1;
 
-RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, Target);
+RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, Target, traceSize);
 

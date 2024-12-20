@@ -25,12 +25,24 @@ function swarmInfluence = swarm_pond(posStateMatrix, speedStateMatrix, neighborI
     %case est dans le cercle d'attraction, de répulsion,
     %d'orientation ou d'évitement
     
+    %%
     %Règles de pondération
-    attraction = zeros(size(rhon));
-    repulsion = zeros(size(rhon));
-    repulsion(rhon < r(1)) = -swarm_weights(1); % Cercle de répulsion
-    attraction(rhon >= r(1)) = swarm_weights(2); % Cercle d'attraction
 
+    k = 0.5;
+    offset = -swarm_weights(1); % Cercle de répulsion
+    f = @(x) (tanh(k * (x - r(1))) * (-offset/2) + offset/2);
+    repulsion = f(rhon);
+    repulsion(isnan(repulsion)) = 0;
+
+
+    
+    offset = swarm_weights(2); % Cercle d'attraction
+    f = @(x) (tanh(k * (x - r(2))) * (offset/2) + offset/2);
+    attraction = f(rhon);
+    attraction(isnan(attraction)) = 0;
+
+
+    %%
     nmulti = size(swarm.MultiRotor, 2);
     attraction(nmulti + 1:end, :) = 0; %Enlève les fixedwing
 

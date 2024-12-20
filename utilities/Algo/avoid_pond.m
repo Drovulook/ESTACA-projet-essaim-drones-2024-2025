@@ -15,13 +15,16 @@ function [avoidInfluence] = avoid_pond(posStateMatrix, zones_object_list)
     zoneCenter_delta_eucli = sqrt(zoneCenter_delta_x.^2 + zoneCenter_delta_y.^2 + zoneCenter_delta_z.^2);
     % delta centre zone/drone depuis le drone 
     
-
     % Assignation du poids négatif pour fuir les zones dangereuses -> Fonctionnement par sphère uniquement
 
-    condition = zoneCenter_delta_eucli >= avoidZones_posDim(:,4)'/2; % Ceux en dehors reçoivent 0 pour que seuls ceux dedans soient pondérés en évitement
-    zoneCenter_delta_x(condition) = 0;
-    zoneCenter_delta_y(condition) = 0;
-    zoneCenter_delta_z(condition) = 0;
+    k = 0.5;
+    r = avoidZones_posDim(:,4)'/2;
+    f = @(x, r) (tanh(k * (x - r))*10 - 10);
+    Y = f(zoneCenter_delta_eucli, r);
+
+    zoneCenter_delta_x = zoneCenter_delta_x.*Y;
+    zoneCenter_delta_y = zoneCenter_delta_y.*Y;
+    zoneCenter_delta_z = zoneCenter_delta_z.*Y;
     
     zoneCenter_delta_x = sum(zoneCenter_delta_x./ zoneCenter_delta_eucli, 2, 'omitnan');
     zoneCenter_delta_y = sum(zoneCenter_delta_y./ zoneCenter_delta_eucli, 2, 'omitnan');

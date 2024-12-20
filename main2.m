@@ -11,7 +11,7 @@ temps = 1000;
 
 
 swarm = SwarmManager(env, temps); % Initialiser le gestionnaire d'essaim avec l'environnement
-numMultirotor = 20; % Nombre de drones multirotors
+numMultirotor = 0; % Nombre de drones multirotors
 
 
 % Ajouter les drones multirotors à l'essaim, placés à la coordonnée de la base
@@ -61,7 +61,7 @@ satextrem = 1.5; %Saturation de vitesse projetée
 sat = [-satextrem satextrem];
 dt = 1;
 
-RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, sat, Target);
+RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, Target);
 
 toc
 

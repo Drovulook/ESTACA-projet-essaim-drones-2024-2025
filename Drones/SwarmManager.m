@@ -188,7 +188,7 @@ classdef SwarmManager < handle
         end
 
 
-        function update_speeds(obj, dt, r, swarm_weights, weights, target_weights)
+        function update_speeds(obj, dt, r, swarm_weights, weights)
 
             % Compute le vecteur vitesse t+1 du drone en fonction de l'influence de l'essaim, de sa vitesse, des targets et des zones d'exclusion 
             % Et gère les collisions éventuelles
@@ -244,7 +244,7 @@ classdef SwarmManager < handle
             speedInfluence = speed_pond(speedStateMatrix); % Utils.Algo
 
             %% TARGET INFLUENCE
-            targetInfluence = target_pond(obj.target_list, posStateMatrix, target_weights, obj.threshold_radius, obj); % Utils.Algo
+            targetInfluence = target_pond(obj.target_list, posStateMatrix, obj.threshold_radius, obj); % Utils.Algo
            
             %% Calcul des zones d'évitement 
             zones = obj.Environment.get_zones_pos_weights();

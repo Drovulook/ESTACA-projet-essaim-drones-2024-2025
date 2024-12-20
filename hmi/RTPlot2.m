@@ -1,4 +1,4 @@
-function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, Target)
+function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, Target, traceSize)
 
     framerate = 1/20;
 
@@ -13,7 +13,6 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, Ta
     YLim = [min(env.GroundCoordinates.y) max(env.GroundCoordinates.y)];
 
     ZLim = [0 150];
-    traceSize = 100;
     speedVectorSize = 2;
 
     set(ax, 'XLim', XLim, 'YLim', YLim, 'ZLim', ZLim);
@@ -101,7 +100,7 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, pondeTarg, Ta
     k = 0;
     tic;
     while true
-        swarm.update_speeds(dt, r, swarm_weights, weights, pondeTarg);
+        swarm.update_speeds(dt, r, swarm_weights, weights);
 
         drone_pos = zeros(n_drone, 3);
         drone_speed = zeros(n_drone, 3);
