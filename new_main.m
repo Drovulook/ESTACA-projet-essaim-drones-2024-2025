@@ -43,6 +43,7 @@ for i = 1:numMultirotor
     end
     % Assigner la position valide au drone i
     swarm.MultiRotor{i}.posState = new_pos;
+    swarm.MultiRotor{i}.mode_Follow_waypoint = false;
 end
 
 
@@ -83,8 +84,8 @@ Target = [0 0 75];
 swarm.update_target(Target); 
 
 Waypoints = [0 50 100; 0 0 50; 100 100 50 ; 100 -100 100 ; -100 -100 50 ; -100 100 100 ; -100 -10 10]; 
-for i = 1:length(swarm.FixedWing)
-    swarm.FixedWing{i}.Waypoints = Waypoints;
+for i = 1:length(swarm.Drones)
+    swarm.Drones{i}.Waypoints = Waypoints;
 end
 
 r = [30 60 100]; %Répulsion, évitement, attraction max (rayons)

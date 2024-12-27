@@ -16,7 +16,9 @@ classdef (Abstract) DroneBase < handle
         Radius
         IsAlive = true;
         mode_Follow_waypoint = false; % False = follow target / True = follow waypoints
-        
+        Waypoints        % matrice n*3 des waypoints à cycler
+        CurrentWaypoint = 1; %Indice du wp actuel
+
         mass
         
 
@@ -96,8 +98,16 @@ classdef (Abstract) DroneBase < handle
             else
                 obj.speedLog = [obj.speedLog; obj.speedState]; % Ajoute la nouvelle vitesse à l'historique
             end
-
-
         end
+
+
+        function CycleWaypoint(obj)
+            obj.CurrentWaypoint = obj.CurrentWaypoint + 1 ;
+            if obj.CurrentWaypoint > size(obj.Waypoints,1)
+                obj.CurrentWaypoint = 1;
+            end
+        end
+
+
     end
 end
