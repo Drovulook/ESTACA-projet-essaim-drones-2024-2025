@@ -13,3 +13,5 @@ function speedinfluence = speed_pond(speedStateMatrix)
     speedinfluence(isnan(speedinfluence)) = 0;
 
 end
+
+% Il faut ajuter comportement ajustement des vecteurs vitesse.

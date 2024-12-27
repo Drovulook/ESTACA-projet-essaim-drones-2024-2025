@@ -12,9 +12,10 @@ classdef FixedWingDrone < DroneBase & handle
         % Controller       % Instance de contrôleur d'attitude de base
         Waypoints        % matrice n*3 des waypoints à cycler
         CurrentWaypoint = 1; %Indice du wp actuel
-        threshold_radius = 5;
         refSurface          % surface de référence en m^2
         finesse
+        
+        
     end
 
     methods

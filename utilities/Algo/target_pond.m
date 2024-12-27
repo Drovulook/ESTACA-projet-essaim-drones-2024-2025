@@ -1,4 +1,4 @@
-function targetInfluence = target_pond(target_list, posStateMatrix, threshold_radius, swarm)
+function targetInfluence = target_pond(target, posStateMatrix, swarm)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -12,27 +12,55 @@ function targetInfluence = target_pond(target_list, posStateMatrix, threshold_ra
 
     WpMatrix = zeros(0,3);
     for idx = 1:length(swarm.FixedWing) 
-        wp_id = swarm.FixedWing{idx}.CurrentWaypoint;
-        WpMatrix = [WpMatrix ; swarm.FixedWing{idx}.Waypoints(wp_id,:)];
+        if swarm.FixedWing{idx}.mode_Follow_waypoint == true
+            wp_id = swarm.FixedWing{idx}.CurrentWaypoint;
+            WpMatrix = [WpMatrix ; swarm.FixedWing{idx}.Waypoints(wp_id,:)];
+        else
+            WpMatrix = [WpMatrix ; swarm.target];
+        end
     end
 
     nmulti = size(swarm.MultiRotor, 2);
 
-    T_x = [target_list(:,1)' - posStateMatrix(1:nmulti, 1); WpMatrix(:,1) - posStateMatrix(nmulti + 1:end, 1)];
-    T_y = [target_list(:,2)' - posStateMatrix(1:nmulti, 2); WpMatrix(:,2) - posStateMatrix(nmulti + 1:end, 2)];
-    T_z = [target_list(:,3)' - posStateMatrix(1:nmulti, 3); WpMatrix(:,3) - posStateMatrix(nmulti + 1:end, 3)];
+    T_x = [target(:,1)' - posStateMatrix(1:nmulti, 1); WpMatrix(:,1) - posStateMatrix(nmulti + 1:end, 1)];
+    T_y = [target(:,2)' - posStateMatrix(1:nmulti, 2); WpMatrix(:,2) - posStateMatrix(nmulti + 1:end, 2)];
+    T_z = [target(:,3)' - posStateMatrix(1:nmulti, 3); WpMatrix(:,3) - posStateMatrix(nmulti + 1:end, 3)];
     
     T_eucli = sqrt(T_x.^2 + T_y.^2 + T_z.^2);
 
     for idx = 1:length(swarm.FixedWing) 
-        if T_eucli(nmulti + idx) < threshold_radius
+        if T_eucli(nmulti + idx) < swarm.threshold_radius & swarm.FixedWing{idx}.mode_Follow_waypoint == true
             swarm.FixedWing{idx}.CycleWaypoint;
         end
     end
 
-    dist_min_target = 20;
+
+    %% Orbite drones voilure fixe
+    % Pour fixedwing, une fois que target définie, une fois approché à une
+    % certaine dist de l'objectif, passer en mode orbite : vecteur tangent
+    % à la direction de la cible.
+
+    T_X_fixedwing_tangent = -T_y(nmulti + 1 : end);
+    T_Y_fixedwing_tangent = T_x(nmulti + 1 : end);
+
+    T_X_fixedwing_radial = T_x(nmulti + 1 : end);
+    T_Y_fixedwing_radial = T_y(nmulti + 1 : end);
+
+    T_eucli_fixedwing = T_eucli(nmulti + 1 : end);
+
+    T_X_fixedwing_tangent(T_eucli_fixedwing >= swarm.orbit_radius) = T_X_fixedwing_radial(T_eucli_fixedwing >= swarm.orbit_radius);
+    T_Y_fixedwing_tangent(T_eucli_fixedwing >= swarm.orbit_radius) = T_Y_fixedwing_radial(T_eucli_fixedwing >= swarm.orbit_radius);
+
+    T_x(nmulti + 1 : end) = T_X_fixedwing_tangent;
+    T_y(nmulti + 1 : end) = T_Y_fixedwing_tangent;
+
+    
+    %%
+    % Smoothing de l'attraction pour la distance min d'attraction (si trop
+    % proche répulsion)
+
     k = 0.5;
-    f = @(x) (tanh(k * (x - dist_min_target)));
+    f = @(x) (tanh(k * (x - swarm.dist_target_min)));
 
     Y = f(T_eucli);    
 
@@ -46,6 +74,5 @@ function targetInfluence = target_pond(target_list, posStateMatrix, threshold_ra
     
 
     targetInfluence = [T_x_pond T_y_pond T_z_pond];
-
 
 end

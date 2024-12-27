@@ -15,7 +15,8 @@ classdef (Abstract) DroneBase < handle
         Target          % Coordonnées de la cible
         Radius
         IsAlive = true;
-
+        mode_Follow_waypoint = false; % False = follow target / True = follow waypoints
+        
         mass
         
 

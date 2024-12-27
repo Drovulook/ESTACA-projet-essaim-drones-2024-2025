@@ -34,7 +34,6 @@ function swarmInfluence = swarm_pond(posStateMatrix, speedStateMatrix, neighborI
     repulsion = f(rhon);
     repulsion(isnan(repulsion)) = 0;
 
-
     
     offset = swarm_weights(2); % Cercle d'attraction
     f = @(x) (tanh(k * (x - r(2))) * (offset/2) + offset/2);
@@ -42,11 +41,10 @@ function swarmInfluence = swarm_pond(posStateMatrix, speedStateMatrix, neighborI
     attraction(isnan(attraction)) = 0;
 
 
-    %%
     nmulti = size(swarm.MultiRotor, 2);
-    attraction(nmulti + 1:end, :) = 0; %Enlève les fixedwing
-
+    attraction(nmulti + 1:end, :) = 0; % Enlève l'attraction des fixedwing pour ne pas fausser la traj
     weight_matrix = attraction + repulsion;
+
 
     swarminfluence_x = (sum(weight_matrix.*rho_x./rhon, 2, 'omitnan'));
     swarminfluence_y = (sum(weight_matrix.*rho_y./rhon, 2, 'omitnan'));

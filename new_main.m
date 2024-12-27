@@ -10,8 +10,8 @@ temps = 100000;
 traceSize = 20;
 
 swarm = SwarmManager(env, temps); % Initialiser le gestionnaire d'essaim avec l'environnement
-numMultirotor = 10; % Nombre de drones multirotors
-numFixedwing = 2;
+numMultirotor = 0; % Nombre de drones multirotors
+numFixedwing = 10;
 
 % Ajouter les drones multirotors à l'essaim, placés à la coordonnée de la base
 for i = 1:numMultirotor
@@ -73,6 +73,7 @@ for i = 1:numFixedwing
     end
     % Assigner la position valide au drone i
     swarm.FixedWing{i}.posState = new_pos;
+    swarm.FixedWing{i}.mode_Follow_waypoint = false;
 end
 
 %assignation des pos init, du à l'algo de delaunay, si coplanaire ou
@@ -82,7 +83,6 @@ Target = [0 0 75];
 swarm.update_target(Target); 
 
 Waypoints = [0 50 100; 0 0 50; 100 100 50 ; 100 -100 100 ; -100 -100 50 ; -100 100 100 ; -100 -10 10]; 
-swarm.waypoints = Waypoints; 
 for i = 1:length(swarm.FixedWing)
     swarm.FixedWing{i}.Waypoints = Waypoints;
 end

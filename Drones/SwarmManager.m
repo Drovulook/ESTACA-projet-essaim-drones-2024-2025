@@ -10,11 +10,13 @@ classdef SwarmManager < handle
         %% Swarm PROPERTIES
 
         Drones          % Tableau de cellules contenant les objets DroneBase (drones de l'essaim)
-        target_list %1 ligne par target en coordonées xyz, A changer + tard en classe pour définir niveau d'intérêt (pondération d'attraction) + mouvement
+        target % target en coordonées xyz
         target_history_matrix
         drones_pos_history_matrix
-        waypoints %matrice n*3 avec waypoints dans l'ordre
-        threshold_radius = 15
+        threshold_radius = 15 % Distance de trigger des waypoint cycliques
+        altitude_min = 10 % Altitude min des drones
+        dist_target_min = 20 % Distance minimal du drone à la target
+        orbit_radius = 60 % Distance des fixedwing à la cible à partir de laquelle ils orbitent
 
     end
     
@@ -29,7 +31,7 @@ classdef SwarmManager < handle
         function obj = SwarmManager(env, temps) % Bien prendre l'objet env
             
             obj.Drones = {};  % Initialiser le tableau de drones comme vide
-            obj.target_list = zeros(0,3);
+            obj.target = zeros(0,3);
             obj.Environment = env; % Assigner l'environnement de simulation
 
         end
@@ -126,27 +128,11 @@ classdef SwarmManager < handle
                 error('Aucun drone n''existe à cet indice.'); % Erreur si le drone n'existe pas
             end
         end
-
-        % Méthode pour définir une destination pour un drone spécifique dans l'essaim
-        function setDestination(obj, id, destination)
-            % Utiliser cellfun pour obtenir un tableau des IDs des drones
-            ids = cellfun(@(drone) drone.ID, obj.Drones);
-            
-            % Trouver l'indice correspondant à l'ID
-            idx = find(ids == id, 1);
-        
-            % Vérifier si le drone est présent dans l'essaim
-            if ~isempty(idx)
-                obj.Drones{idx}.setDestination(destination); % Mettre à jour la destination du drone
-            else
-                error('Aucun drone n''existe à cet indice.'); % Erreur si le drone n'existe pas
-            end
-        end
-
         
         function update_target(obj, newTarget)
-            obj.target_list = newTarget;
+            obj.target = newTarget;
         end
+
 
         function Destroy_drone(obj, ind)
             drone = obj.AliveDrones{ind};
@@ -188,6 +174,8 @@ classdef SwarmManager < handle
         end
 
 
+    
+
         function update_speeds(obj, dt, r, swarm_weights, weights)
 
             % Compute le vecteur vitesse t+1 du drone en fonction de l'influence de l'essaim, de sa vitesse, des targets et des zones d'exclusion 
@@ -203,7 +191,6 @@ classdef SwarmManager < handle
 
             posStateMatrix = zeros(n,3);
             speedStateMatrix = zeros (n,3);
-
 
 
             for i = 1:n
@@ -234,6 +221,7 @@ classdef SwarmManager < handle
             %code et simplifie la modification du code
          
             %% SWARM INFLUENCE
+            
             if obj.Environment.DegradedMode == true && randi(100)<=25 %pourcentage d'erreur (ici utilisation des anciennes valeurs de positions et de vitesses)
             swarmInfluence = swarm_pond(OLD_posStateMatrix, OLD_speedStateMatrix, neighborI, n, nnmax, swarm_weights, r, obj); % Utils.Algo
             else
@@ -244,11 +232,11 @@ classdef SwarmManager < handle
             speedInfluence = speed_pond(speedStateMatrix); % Utils.Algo
 
             %% TARGET INFLUENCE
-            targetInfluence = target_pond(obj.target_list, posStateMatrix, obj.threshold_radius, obj); % Utils.Algo
+            targetInfluence = target_pond(obj.target, posStateMatrix, obj); % Utils.Algo
            
             %% Calcul des zones d'évitement 
             zones = obj.Environment.get_zones_pos_weights();
-            avoidInfluence = avoid_pond(posStateMatrix, zones);
+            avoidInfluence = avoid_pond(posStateMatrix, zones, obj.altitude_min); % Utils.Algo
 
             %% Maintentant, pour chaque drone, on fait la pondération des influeneces swarm/target/speed et on les somme
 
