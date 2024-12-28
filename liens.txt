@@ -1,7 +1,0 @@
-Drive: https://drive.google.com/drive/folders/1xWFGBjGmpsD1JmlE8D8-FJcuqfzklBbj
-
-GitHub années précédentes: https://github.com/DroneSEN
-https://github.com/lis-epfl/swarmlab?tab=readme-ov-file
-
-Autre projet:
-https://github.com/lis-epfl/swarmlab?tab=readme-ov-file

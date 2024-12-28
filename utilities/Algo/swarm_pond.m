@@ -1,4 +1,4 @@
-function swarmInfluence = swarm_pond(posStateMatrix, speedStateMatrix, neighborI, n, nnmax, swarm_weights, r, swarm)
+function swarmInfluence = swarm_pond(posStateMatrix, neighborI, n, nnmax, swarm_weights, r, swarm)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -8,10 +8,15 @@ function swarmInfluence = swarm_pond(posStateMatrix, speedStateMatrix, neighborI
 % distance, sinon on le laisse tel quel, ça permet d'éloigner les drones
 % pour éviter les collisions)
 %
+% Actuellement, la simulation des communication n'utilise pas la position
+% réelle du drone, mais celle qu'il a transmise sur les ondes
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     % On fusionne les matrices + on gère l'indice de fin
-    stateA = [posStateMatrix speedStateMatrix ; nan(1,6)];
+    % La construction de cette matrice a mod uniquement si on veut de la
+    % granularité dans l'info de position
+    stateA = [posStateMatrix ; nan(1,3)];
 
     % Différence de position entre les drones et leurs voisins
     rho_x = reshape(stateA(neighborI,1),n,nnmax) - posStateMatrix(:,1); % Différence axe x

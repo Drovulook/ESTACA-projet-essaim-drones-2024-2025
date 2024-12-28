@@ -1,4 +1,4 @@
-function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, Target, traceSize)
+function RTPlot2(env, swarm, dt, temps, Target, traceSize)
 
     framerate = 1/20;
 
@@ -100,7 +100,7 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, Target, trace
     k = 0;
     tic;
     while true
-        swarm.update_speeds(dt, r, swarm_weights, weights);
+        swarm.update_speeds(dt);
 
         drone_pos = zeros(n_drone, 3);
         drone_speed = zeros(n_drone, 3);
@@ -136,7 +136,7 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, Target, trace
         Target(1, 2) = update(sliderY);
         Target(1, 3) = update(sliderZ);
 
-        swarm.target_history_matrix = [swarm.target_history_matrix; Target(1, :)];
+
 
         set(targ(1), 'XData', Target(1, 1), 'YData', Target(1, 2), 'ZData', Target(1, 3));
         swarm.update_target(Target);
@@ -177,6 +177,6 @@ function RTPlot2(env, swarm, dt, temps, r, swarm_weights, weights, Target, trace
 
     swarm.drones_pos_history_matrix = cat(3, zeros(n_drone, 3, 15), swarm.drones_pos_history_matrix);
 
-    target = scatter3(swarm.target_history_matrix(1, 1), swarm.target_history_matrix(1, 2), swarm.target_history_matrix(1, 3), 50, 'filled', 'MarkerFaceColor', 'r');
+
 
 end

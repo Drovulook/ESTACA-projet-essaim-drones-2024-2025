@@ -12,6 +12,7 @@ classdef MultirotorDrone < DroneBase & handle
         MaxTurnGLoad     % Charge en G maximale lors d'un virage
         MaxTurnRate      % Taux de virage maximal [rad/s]
         % Controller       % Instance du contrôleur d'attitude
+        Radius
 
         rotorNumber     % [1]
         rotorSurface    % [m^2] surface d'un rotor
@@ -40,39 +41,9 @@ classdef MultirotorDrone < DroneBase & handle
             obj.rotorSurface=0.05; % m^2 soit 1000 cm^2
         end
 
-        % Méthode pour définir une nouvelle destination pour le drone
-        function setDestination(obj, dest)
-            obj.Destination = dest; % Mettre à jour la position cible
-        end
 
-        % Méthode de mise à jour pour recalculer la position du drone
-        function update(obj, dt)
-            % Obtenir la position actuelle et calculer la vitesse et le taux de montée
-            currentPos = obj.Platform.Pose(1:3); % Position actuelle du drone
-            [velocity, climbRate] = obj.Controller.computeControlSignal(currentPos, obj.Destination, dt);
-
-            % Contraindre le taux de montée pour respecter les limites du multirotor
-            if climbRate > obj.MaxVarioUp
-                climbRate = obj.MaxVarioUp;
-            elseif climbRate < obj.MaxVarioDown
-                climbRate = obj.MaxVarioDown;
-            end
-
-            % Mettre à jour la position en appliquant la vitesse et le taux de montée
-            newPos = currentPos + [velocity(1:2); climbRate] * dt;
-            obj.Platform.updatePose('Position', newPos); % Appliquer la nouvelle position au drone
-
-
-            function SetSpeedWithConstraints(obj, dt, newSpeedVec) %est appelée juste avant d'update la vitesse, pour prendre en compte d'éventuelles contraintes
-                climbRate = newSpeedVec(3); % à modifier
-                if climbRate > 100
-                    climbRate = 100;
-                elseif climbRate < -100
-                    climbRate = -100;
-                end
-                RealnewSpeedVec = [newSpeedVec(1), newSpeedVec(2), climbRate];
-                obj.speedState = RealnewSpeedVec;
-            end
+        % Méthode de calcul de l'autonomie
+        function compute_autonomy(obj, dt)
 
             % calcul force développée
             if (size(obj.speedLog,1)>1)

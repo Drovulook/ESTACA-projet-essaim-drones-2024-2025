@@ -12,6 +12,7 @@ classdef FixedWingDrone < DroneBase & handle
         % Controller       % Instance de contrôleur d'attitude de base
         refSurface          % surface de référence en m^2
         finesse
+        Radius
         
 
     end
@@ -30,34 +31,11 @@ classdef FixedWingDrone < DroneBase & handle
             % Initialiser le contrôleur d'attitude de base
             % obj.Controller = BasicAttitudeController(obj);
             obj.posState = initialPosition; % Définir la position actuelle
-            obj.Destination = initialPosition; % Définir la destination initiale comme la position de départ
 
-            obj.Radius = 0.75;
-            obj.refSurface=10;
-            obj.finesse=10;
         end
 
-        % Méthode pour définir une nouvelle destination pour le drone
-        function setDestination(obj, dest)
-            obj.Destination = dest; % Mettre à jour la position cible
-        end
-
-        % Méthode de mise à jour pour recalculer la position du drone
-        function update(obj, dt)
-            % Obtenir la position actuelle et calculer la vitesse et le taux de montée
-            currentPos = obj.Platform.Pose(1:3); % Position actuelle du drone
-            [velocity, climbRate] = obj.Controller.computeControlSignal(currentPos, obj.Destination, dt);
-
-            % Contraindre le taux de montée pour respecter les limites du drone à voilure fixe
-            if climbRate > obj.MaxClimbRate
-                climbRate = obj.MaxClimbRate;
-            elseif climbRate < obj.MaxDescentRate
-                climbRate = obj.MaxDescentRate;
-            end
-
-            % Mise à jour la position en appliquant la vitesse et le taux de montée
-            newPos = currentPos + [velocity(1:2); climbRate] * dt;
-            obj.Platform.updatePose('Position', newPos); % Appliquer la nouvelle position au drone
+        % Méthode de calcul de l'autonomie
+        function compute_autonomy(obj, dt)
 
             % calcul acceleration
             if (size(obj.speedLog,1)>1)
@@ -99,18 +77,6 @@ classdef FixedWingDrone < DroneBase & handle
             % autonomie en heures
 
         end
-
-        function SetSpeedWithConstraints(obj, dt, newSpeedVec)
-            climbRate = newSpeedVec(3);
-            if climbRate > obj.MaxClimbRate
-                climbRate = obj.MaxClimbRate;
-            elseif climbRate < obj.MaxDescentRate
-                climbRate = obj.MaxDescentRate;
-            end
-            RealnewSpeedVec = [newSpeedVec(1), newSpeedVec(2), climbRate];
-            obj.speedState = RealnewSpeedVec;
-        end
-
 
     end
 end

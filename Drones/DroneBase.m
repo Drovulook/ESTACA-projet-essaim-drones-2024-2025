@@ -13,11 +13,12 @@ classdef (Abstract) DroneBase < handle
         speedLog
         flightTime = 0  % Temps de vol en sec
         Target          % Coordonnées de la cible
-        Radius
-        IsAlive = true;
-        mode_Follow_waypoint = false; % False = follow target / True = follow waypoints
+        IsAlive = true
+        mode_Follow_waypoint = false % False = follow target / True = follow waypoints
         Waypoints        % matrice n*3 des waypoints à cycler
-        CurrentWaypoint = 1; %Indice du wp actuel
+        CurrentWaypoint = 1 %Indice du wp actuel
+
+        hasCommunicated = 0 % 0 non, 1 oui
 
         mass
         
@@ -69,23 +70,20 @@ classdef (Abstract) DroneBase < handle
             autonomy=obj.autonomy;
         end
 
-        function [Vx Vy Vz] = velocityNorm(obj); % Normalise la vitesse
-            r = obj.speedState(1,1)
-            teta = obj.speedState(1,2)
-            phi = obj.speedState(1,3)
-
-            Vx = r*sin(phi)*cos(teta)
-            Vy = r*sin(phi)*sin(teta)
-            Vz = r*cos(phi)
-        end
+        % function [Vx Vy Vz] = velocityNorm(obj); % Normalise la vitesse
+        %     r = obj.speedState(1,1)
+        %     teta = obj.speedState(1,2)
+        %     phi = obj.speedState(1,3)
+        % 
+        %     Vx = r*sin(phi)*cos(teta)
+        %     Vy = r*sin(phi)*sin(teta)
+        %     Vz = r*cos(phi)
+        % end
         
     end
     
     methods
-        function update_pos(obj, dt) %Update la position du drone en fct de sa vitesse
-            dpos = dt * obj.speedState; %on peut ajouter du noise
-            obj.posState = obj.posState + dpos;
-
+        function logData(obj)
             % Logging de l'état du drone
             if isempty(obj.posLog)
                 obj.posLog = obj.posState; % Initialise le log si vide
@@ -98,6 +96,13 @@ classdef (Abstract) DroneBase < handle
             else
                 obj.speedLog = [obj.speedLog; obj.speedState]; % Ajoute la nouvelle vitesse à l'historique
             end
+        end
+
+
+        function update_pos(obj, dt) %Update la position du drone en fct de sa vitesse
+            dpos = dt * obj.speedState; %on peut ajouter du noise
+            obj.posState = obj.posState + dpos;
+            obj.logData()
         end
 
 
