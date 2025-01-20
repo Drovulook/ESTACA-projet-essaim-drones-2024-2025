@@ -1,4 +1,4 @@
-function targetInfluence = target_pond(target, posStateMatrix, swarm)
+function targetInfluence = target_pond(posStateMatrix, swarm)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -20,7 +20,7 @@ function targetInfluence = target_pond(target, posStateMatrix, swarm)
             WpMatrix = [WpMatrix ; swarm.Drones{idx}.Waypoints(wp_id,:)];
         else
             followMatrix = [followMatrix ; 1];
-            WpMatrix = [WpMatrix ; swarm.target];
+            WpMatrix = [WpMatrix ; swarm.Drones{idx}.getTarget(swarm)]; %%Il faut que le swarm target soir en fait 
         end
     end
 

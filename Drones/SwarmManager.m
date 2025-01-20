@@ -10,7 +10,7 @@ classdef SwarmManager < handle
         %% Swarm PROPERTIES
 
         Drones % Liste d'objet Drones_Base
-        target % target en coordonées xyz
+        targets % target en coordonées xyz, une target par ligne
         drones_pos_history_matrix % Matrice 3 dim de l'historique des positions
         communicationFrequency % Hz, le nombre de fois par itération que les drones peuvent communiquer. Si 1 Hz, 1 drone seulement communique par itération
         communicationMatrix = zeros(0,0,0) % La matrice de communication utilisée par les drones pour se repérer entre eux
@@ -20,6 +20,7 @@ classdef SwarmManager < handle
         altitude_min = 10 % Altitude min des drones
         dist_target_min = 20 % Distance minimal du drone à la target
         orbit_radius = 60 % Distance des fixedwing à la cible à partir de laquelle ils orbitent
+        min_dist_between_drones = 2 % si <, alors crash (distance en mètres)
 
         r = [30 60 100]  % Rayons Répulsion, attraction au sein de l'essaim
         swarm_weights = [1.4 0.8]; % Pondérations répulsion, attraction au sein de l'essaim
@@ -33,6 +34,7 @@ classdef SwarmManager < handle
         AliveDrones
         FixedWing
         MultiRotor
+        CrashedDrones
     end
 
     methods
@@ -40,7 +42,7 @@ classdef SwarmManager < handle
         function obj = SwarmManager(env, temps) % Bien prendre l'objet env
             
             obj.Drones = {};  % Initialiser le tableau de drones comme vide
-            obj.target = zeros(0,3);
+            obj.targets = zeros(0,3);
             obj.Environment = env; % Assigner l'environnement de simulation
 
         end
@@ -56,26 +58,19 @@ classdef SwarmManager < handle
             id = length(obj.Drones) + 1; % Déterminer un ID unique pour le nouveau drone
             load('data/params.mat', 'multirotorParams', 'fixedWingParams'); % Charger les paramètres des drones
             
-            %Ici il faut changer pour essayer de faire un quadrillage de
-            %départ au sol. Ici je les fait juste commencer espacés
-            count = 1;
-            while true
-                if isempty(obj.Drones)
-                    break;
-                end
+            index = id - 1;
 
-                if initialPosition ~= obj.Drones{count}.posState
-                    break;
-                end
+            dx = 5; % m
+            dy = 5; % m
 
-                initialPosition(1:2) = initialPosition(1:2) + 1;
+            side = 5;
+            row = floor(index / side);
+            col = mod(index, side);
 
-                if count == length(obj.Drones)
-                    break;
-                end
-                count = count + 1;
+            initialPosition(1) = initialPosition(1) + col * dx;
+            initialPosition(2) = initialPosition(2) + row * dy;
+            initialPosition(3) = rand;
 
-            end
 
             % Créer le drone en fonction de son type (multirotor ou fixedwing)
             switch droneType
@@ -84,13 +79,13 @@ classdef SwarmManager < handle
                 case 'fixedwing'
                     drone = FixedWingDrone(id, initialPosition, fixedWingParams);
                 otherwise
-                    error('Type de drone inconnu.'); % Gérer l'erreur si le type n'est pas reconnu
+                    error('Type de drone inconnu.'); 
             end
             
             obj.Drones{end+1} = drone; % Ajouter le drone au tableau des drones
-            %disp(['Nombre actuel de drones : ', num2str(length(obj.Drones))]); % Afficher le nombre total de drones (commenté)
         end
     
+
         function alive = get.AliveDrones(obj) 
             alive = {};
             for idx = 1:length(obj.Drones)
@@ -99,6 +94,29 @@ classdef SwarmManager < handle
                 end
             end
         end
+
+
+        function crashed = get.CrashedDrones(obj)
+            crashed = {};
+            for idx = 1:length(obj.Drones)
+                if obj.Drones{idx}.IsAlive == 0
+                    crashed{end + 1} = obj.Drones{idx};
+                end
+            end
+        end
+
+        function checkCrash(obj, rhon) % fonction utilisée dans swarm_pond
+            crashList = any(rhon < obj.min_dist_between_drones, 2);
+            liste = obj.AliveDrones;
+
+            for idx = 1:length(liste)
+                if crashList(idx, 1) == 1
+                    liste{idx}.crashDrone;
+                    disp([num2str(liste{idx}.ID) ' crashed' ]);
+                end
+            end
+        end
+
 
         function fixedwing = get.FixedWing(obj) 
             fixedwing = {};
@@ -126,39 +144,26 @@ classdef SwarmManager < handle
         end
 
         % Méthode pour retirer un drone de l'essaim
-        function removeDrone(obj, id)   %!! à modifier pour prendre en compte AliveDrones
-            % Utiliser cellfun pour obtenir un tableau des IDs des drones
-            ids = cellfun(@(drone) drone.ID, obj.Drones);
-            
-            % Trouver l'indice correspondant à l'ID
-            idx = find(ids == id, 1);
-
-            % Vérifier si le drone est présent dans l'essaim
-            if ~isempty(idx)
-                obj.Drones(idx) = []; % Supprimer le drone à l'indice spécifié
-                %disp(['Drone à l''indice ', num2str(id), ' a été supprimé.']); % Afficher un message de suppression (commenté)
-                %env.Platforms = obj.Drones; % Mettre à jour les plateformes dans l'environnement
-            else
-                error('Aucun drone n''existe à cet indice.'); % Erreur si le drone n'existe pas
+        function removeDrone(obj, id) 
+            for idx = 1:length(obj.Drones)
+                if obj.Drones{idx}.ID == id
+                    if obj.Drones{idx}.IsAlive == 1
+                        obj.Drones{idx} = [];
+                        return
+                    else
+                        return
+                    end
+                end
             end
-        end
-        
-        function update_target(obj, newTarget)
-            obj.target = newTarget;
+            %Past this point, no candidate was found
+            error('No drone at this ID found')
         end
 
 
-        function Destroy_drone(obj, ind)
-            drone = obj.AliveDrones{ind};
-            drone.IsAlive = false;
-            drone.posState(3) = 0;
-            obj.AliveDrones{ind} = [];
-            to_remove = cellfun(@isempty, obj.AliveDrones);  % Trouve les indices des éléments vides
-            obj.AliveDrones{to_remove} = [];                % Supprime ces éléments
-            %obj.AliveDrones = [obj.AliveDrones(1:ind-1), obj.AliveDrones(ind+1:end)] 
-
-
+        function update_target(obj, newTarget, targetGroup)
+            obj.targets(targetGroup, :) = newTarget;
         end
+
     
         function check_collisions(obj, zones_list)
             drones_to_remove = [];
@@ -201,14 +206,14 @@ classdef SwarmManager < handle
             % attraction max, distance d'attraction maximum (bruit de communication)
 
             zones = obj.Environment.get_zones_pos_weights();
-            n = length(obj.AliveDrones);
+            n = length(obj.Drones);
 
             posStateMatrix = zeros(n,3);
             speedStateMatrix = zeros (n,3);
 
 
             for i = 1:n
-                drone = obj.AliveDrones{i};
+                drone = obj.Drones{i};
 
                 drone.update_pos(dt); % On update les drones à leur nouvelle position en fonction du dernier vecteur vitesse computé
                 
@@ -230,7 +235,7 @@ classdef SwarmManager < handle
             % Actuellement, fonctionnement pas exact, tous les drones utilisent cette matrice, plutôt que cette matrice + leur position réelle
 
             if isempty(obj.communicationFrequency) == 1
-                obj.communicationFrequency = length(obj.Drones); % si pas de valeur de freq renseignée, les drones communiquent tous à chaque étape
+                obj.communicationFrequency = length(obj.AliveDrones); % si pas de valeur de freq renseignée, les drones communiquent tous à chaque étape
             end
 
             obj.communicationMatrix = communication_simulation(obj.communicationMatrix, obj.drones_pos_history_matrix, obj.communicationFrequency, obj);
@@ -238,10 +243,10 @@ classdef SwarmManager < handle
             %% CALCUL DES VOISINS
             % On utilise les positions connues par les drones pour le calcul
             [neighborI, nnmax] = VoroiNeighbor(obj.communicationMatrix, n); % Utils.Algo + a mod pour granularité info de comm (donner historique pos en entrée)
-         
+            
             %% SWARM INFLUENCE
             % On utilise les positions connues par les drones pour le calcul
-            swarmInfluence = swarm_pond(obj.communicationMatrix, neighborI, n, nnmax, obj.swarm_weights, obj.r, obj); % Utils.Algo + a mod pour granularité de comm (donner historique pos en entrée) 
+            swarmInfluence = swarm_pond(obj.communicationMatrix, neighborI, n, nnmax, obj); % Utils.Algo + a mod pour granularité de comm (donner historique pos en entrée) 
                     
             %% SPEED INFLUENCE
             % On utilise la position réelle pour le calcul
@@ -249,7 +254,7 @@ classdef SwarmManager < handle
 
             %% TARGET INFLUENCE
             % On utilise la position réelle pour le calcul
-            targetInfluence = target_pond(obj.target, posStateMatrix, obj); % Utils.Algo (On utilise position réelle)
+            targetInfluence = target_pond(posStateMatrix, obj); % Utils.Algo (On utilise position réelle)
            
             %% Calcul des zones d'évitement 
             % On utilise la position réelle pour le calcul

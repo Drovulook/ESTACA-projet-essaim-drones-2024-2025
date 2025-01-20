@@ -11,8 +11,10 @@ classdef (Abstract) DroneBase < handle
         speedState = [0 0 0]     % Vecteur de vitesse à tn (1,3) [r, teta, phi]
         posLog
         speedLog
-        flightTime = 0  % Temps de vol en sec
-        Target          % Coordonnées de la cible
+        flightTime = 0  % Temps de vol en sec*
+
+        targetGroup = 1         % Groupe de coordonnées dans lequel le drone se trouve de la cible // autant de targetGroup de que target dans swarm manager
+
         IsAlive = true
         mode_Follow_waypoint = false % False = follow target / True = follow waypoints
         Waypoints        % matrice n*3 des waypoints à cycler
@@ -54,32 +56,35 @@ classdef (Abstract) DroneBase < handle
             uniqueName = sprintf('%sDrone%d_%s', upper(type(1)), id, datestr(now, 'HHMMSSFFF'));
         end
 
-        function [distance] = closestDrone(obj, swarm); % Donne la distance au drone le plus proche
+        function [distance] = closestDrone(obj, swarm) % Donne la distance au drone le plus proche
             distance = 100 %calcul a implémenter
         end
            
-        function [score] = obsScore(obj, target, env); %Donne le score d'observation du drone
+        function [score] = obsScore(obj, target, env) %Donne le score d'observation du drone
             score = 100 %calcul a implémenter
         end
 
-        function [distance] = closestEnv(obj, target, env); %donne la distance à l'objet de l'env le plus proche
+        function [distance] = closestEnv(obj, target, env) %donne la distance à l'objet de l'env le plus proche
             distance = 100 %calcul a implémenter
         end
 
-        function [autonomy] = getAutonomy(obj); % donne l'autonomie restante en fct des logs du vol
-            autonomy=obj.autonomy;
+        function [autonomy] = getAutonomy(obj) % donne l'autonomie restante en fct des logs du vol
+            autonomy = obj.autonomy;
         end
 
-        % function [Vx Vy Vz] = velocityNorm(obj); % Normalise la vitesse
-        %     r = obj.speedState(1,1)
-        %     teta = obj.speedState(1,2)
-        %     phi = obj.speedState(1,3)
-        % 
-        %     Vx = r*sin(phi)*cos(teta)
-        %     Vy = r*sin(phi)*sin(teta)
-        %     Vz = r*cos(phi)
-        % end
-        
+
+        function [target] = getTarget(obj, swarm)
+            target = swarm.targets(obj.targetGroup, :);
+        end
+
+        function setTargetGroup(obj, n)
+            obj.targetGroup = n;
+        end
+
+        function crashDrone(obj)
+            obj.IsAlive = false;
+        end
+
     end
     
     methods
@@ -100,8 +105,13 @@ classdef (Abstract) DroneBase < handle
 
 
         function update_pos(obj, dt) %Update la position du drone en fct de sa vitesse
-            dpos = dt * obj.speedState; %on peut ajouter du noise
-            obj.posState = obj.posState + dpos;
+            if obj.IsAlive == true
+                dpos = dt * obj.speedState; %on peut ajouter du noise
+                obj.posState = obj.posState + dpos;
+            else
+                obj.posState(3) = 0;
+                obj.speedState = [0 0 0];
+            end
             obj.logData()
         end
 

@@ -15,26 +15,6 @@ numFixedwing = 5; % Nombre de drones fixedwing
 
 for i = 1:numMultirotor
     swarm.addDrone('multirotor', homeBaseCoord);
-end
-
-
-zone_size = 50;
-min_distance = 0.5;
-for i = 1:numMultirotor
-    valid_position = false;
-    while ~valid_position
-        new_pos = [rand*zone_size, rand*zone_size, rand*zone_size];
-        
-        valid_position = true;
-        for j = 1:i-1
-            dist = norm(new_pos - swarm.Drones{j}.posState);
-            if dist < min_distance
-                valid_position = false;
-                break; 
-            end
-        end
-    end
-    swarm.MultiRotor{i}.posState = new_pos;
     swarm.MultiRotor{i}.mode_Follow_waypoint = false; % Follow des wp ou de la target
 end
 
@@ -42,24 +22,10 @@ end
 % Ajouter les drones multirotors à l'essaim, placés à la coordonnée de la base
 for i = 1:numFixedwing
     swarm.addDrone('fixedwing', homeBaseCoord);
-end
-for i = 1:numFixedwing
-    valid_position = false;
-    while ~valid_position
-        new_pos = [rand*zone_size, rand*zone_size, rand*zone_size];
-        valid_position = true;
-        for j = 1:i-1
-  
-            dist = norm(new_pos - swarm.Drones{j}.posState);
-            if dist < min_distance
-                valid_position = false;
-                break; 
-            end
-        end
-    end
-    swarm.FixedWing{i}.posState = new_pos;
     swarm.FixedWing{i}.mode_Follow_waypoint = false; % Follow des wp ou de la target
 end
+
+
 
 Waypoints = [0 50 100; 0 0 50; 100 100 50 ; 100 -100 100 ; -100 -100 50 ; -100 100 100 ; -100 -10 10]; 
 for i = 1:length(swarm.Drones)
@@ -67,8 +33,13 @@ for i = 1:length(swarm.Drones)
 end
 
 
+% POUR BAPTISTE, switch des targets et groupes d'observation
+swarm.targets = [1 0 0; 140 140 30; 6 8 7]; % 3 groupes de target
 Target = [0 0 75];
-swarm.update_target(Target); 
+swarm.update_target(Target, 1); % Pour modifier la taget du pool n°1
+swarm.Drones{end}.setTargetGroup(2); % Pour modifier le pool du dernier drone (il passe en pool 2)
+swarm.Drones{1}.mode_Follow_waypoint = true; % Le premier drone passe en follow waypoint
+swarm.AliveDrones; % Liste des drones vivants
 
 
 swarm.r = [30 60 100]; % Rayons Répulsion, attraction au sein de l'essaim
@@ -78,4 +49,3 @@ swarm.weights = [0.5 1.2 1 10] / 10; % pondération essaim, inertie, target, év
 
 dt = 0.1;
 RTPlot2(env, swarm, dt, temps, Target, traceSize);
-

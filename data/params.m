@@ -4,8 +4,8 @@
 % Paramètres du multirotor
 multirotorParams = struct();
 multirotorParams.MinSpeed = 0;                % Vitesse minimale [m/s]
-multirotorParams.MaxSpeed = 30;               % Vitesse maximale vers l'avant [m/s]
-multirotorParams.CruiseSpeed = 10;            % Vitesse de croisière [m/s]
+multirotorParams.MaxSpeed = 10;               % Vitesse maximale vers l'avant [m/s]
+multirotorParams.CruiseSpeed = 8;            % Vitesse de croisière [m/s]
 multirotorParams.MaxVarioUp = 5;              % Taux de montée maximal [m/s]
 multirotorParams.MaxVarioDown = -3;           % Taux de descente maximal [m/s]
 multirotorParams.MaxTurnGLoad = 2.0;          % Charge en G maximale lors d'un virage

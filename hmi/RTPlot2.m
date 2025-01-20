@@ -139,7 +139,7 @@ function RTPlot2(env, swarm, dt, temps, Target, traceSize)
 
 
         set(targ(1), 'XData', Target(1, 1), 'YData', Target(1, 2), 'ZData', Target(1, 3));
-        swarm.update_target(Target);
+        swarm.update_target(Target, 1);
 
         set(ax, 'XLim', XLim, 'YLim', YLim, 'ZLim', ZLim);
         

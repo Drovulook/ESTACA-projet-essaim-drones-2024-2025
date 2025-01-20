@@ -15,17 +15,22 @@ function [newSpeedX, newSpeedY, newSpeedZ] = SpeedProcessing(drone, i, desiredVe
     desiredVectorX = tempSpeedState(1);
     desiredVectorY = tempSpeedState(2);
     desiredVectorZ = tempSpeedState(3);
-
     if strcmp(drone.Type,'multirotor')
+
         newSpeedX = desiredVectorX*drone.CruiseSpeed;
         newSpeedY = desiredVectorY*drone.CruiseSpeed;
         newSpeedZ = desiredVectorZ*drone.CruiseSpeed;
-        newTotalSpeed = sqrt(desiredVectorX^2 + desiredVectorY^2 + desiredVectorY^2);
+        newTotalSpeed = sqrt(newSpeedX^2 + newSpeedY^2 + newSpeedZ^2);
                      
         if newTotalSpeed > drone.MaxSpeed
             desiredVectorX = (desiredVectorX/newTotalSpeed)*drone.MaxSpeed;
             desiredVectorY = (desiredVectorY/newTotalSpeed)*drone.MaxSpeed;
             desiredVectorZ = (desiredVectorZ/newTotalSpeed)*drone.MaxSpeed;
+
+            newSpeedX = desiredVectorX*drone.CruiseSpeed;
+            newSpeedY = desiredVectorY*drone.CruiseSpeed;
+            newSpeedZ = desiredVectorZ*drone.CruiseSpeed;
+            newTotalSpeed = sqrt(newSpeedX^2 + newSpeedY^2 + newSpeedZ^2);
         end
         return
     end
