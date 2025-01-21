@@ -26,6 +26,8 @@ classdef SwarmManager < handle
         swarm_weights = [1.4 0.8]; % Pondérations répulsion, attraction au sein de l'essaim
         weights = [0.5 1.2 1 10] / 10; % pondération essaim, inertie, target, évitement
         
+        observationMatrix % Matrice de score, n_lignes, 1 colonne. Pour l'instant une distance
+        
 
 
     end
@@ -136,7 +138,6 @@ classdef SwarmManager < handle
             end
         end
 
-
         function resetCommunications(obj)
             for idx = 1:length(obj.Drones)
                 obj.Drones{idx}.hasCommunicated = 0;
@@ -164,36 +165,11 @@ classdef SwarmManager < handle
             obj.targets(targetGroup, :) = newTarget;
         end
 
-    
-        function check_collisions(obj, zones_list)
-            drones_to_remove = [];
-            n = length(obj.AliveDrones);
-            for i = 1:n
-                i_drone =  obj.AliveDrones{i};
-                for k = 1:i-1
-                    k_drone = obj.AliveDrones{k};
-                    dist = sqrt((i_drone.posState(1) - k_drone.posState(1))^2 ...
-                              + (i_drone.posState(2) - k_drone.posState(2))^2 ...
-                              + (i_drone.posState(3) - k_drone.posState(3))^2);
-                    if dist < i_drone.Radius + k_drone.Radius
-                        drones_to_remove = [drones_to_remove, i, k];
 
-                        %obj.backend.OnDronesCollision(i_drone.ID, k_drone.ID);
-                    end
-                end
-            end
-
-            drones_to_remove = unique(drones_to_remove);
-            for i = numel(drones_to_remove):-1:1  % Supprimer de la fin pour éviter les problèmes d'indice
-                obj.Destroy_drone(drones_to_remove(i));  % Appel de Destroy_drone pour retirer le drone
-            end
-            if isempty(drones_to_remove)
-                %obj.backend.OnDronesNbUpdate();
-            end
+        function observationScore(obj, T_eucli)
+            obj.observationMatrix = T_eucli; % Fonction a modifier pour comportement du score d'observation
         end
 
-
-    
 
         function update_speeds(obj, dt)
 
@@ -221,7 +197,6 @@ classdef SwarmManager < handle
                 speedStateMatrix(i,:) = drone.speedState;
             end
 
-            %obj.check_collisions(zones);
                 
             obj.drones_pos_history_matrix(:,:,size(obj.drones_pos_history_matrix,3)+1) = posStateMatrix; % historique des positions pour le temps diff
 
@@ -254,8 +229,9 @@ classdef SwarmManager < handle
 
             %% TARGET INFLUENCE
             % On utilise la position réelle pour le calcul
-            targetInfluence = target_pond(posStateMatrix, obj); % Utils.Algo (On utilise position réelle)
-           
+            [targetInfluence, T_eucli] = target_pond(posStateMatrix, obj); % Utils.Algo (On utilise position réelle)
+
+            observationScore(T_eucli); % Update de la matrice de score d'observations
             %% Calcul des zones d'évitement 
             % On utilise la position réelle pour le calcul
             zones = obj.Environment.get_zones_pos_weights();
@@ -273,6 +249,10 @@ classdef SwarmManager < handle
                 drone.speedState = [vX, vY, vZ];
 
             end
+
+            %%
+            T_eucli
+
         end
     end
 end

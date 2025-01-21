@@ -1,4 +1,4 @@
-function targetInfluence = target_pond(posStateMatrix, swarm)
+function [targetInfluence, T_eucli] = target_pond(posStateMatrix, swarm)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -27,7 +27,7 @@ function targetInfluence = target_pond(posStateMatrix, swarm)
     nmulti = size(swarm.MultiRotor, 2);
     nb_drones = size(swarm.Drones, 2);
 
-    T_x = WpMatrix(:,1) - posStateMatrix(:, 1); % Distance du drone à sa target pprojetée
+    T_x = WpMatrix(:,1) - posStateMatrix(:, 1); % Distance du drone à sa target projetée
     T_y = WpMatrix(:,2) - posStateMatrix(:, 2);
     T_z = WpMatrix(:,3) - posStateMatrix(:, 3);
   

@@ -36,8 +36,8 @@ end
 % POUR BAPTISTE, switch des targets et groupes d'observation
 swarm.targets = [1 0 0; 140 140 30; 6 8 7]; % 3 groupes de target
 Target = [0 0 75];
-swarm.update_target(Target, 1); % Pour modifier la taget du pool n°1
-swarm.Drones{end}.setTargetGroup(2); % Pour modifier le pool du dernier drone (il passe en pool 2)
+swarm.update_target(Target, 1); % Pour modifier la target du pool n°1
+swarm.Drones{end}.setTargetGroup(2); % Pour modifier le pool de target du dernier drone (il passe en pool 2)
 swarm.Drones{1}.mode_Follow_waypoint = true; % Le premier drone passe en follow waypoint
 swarm.AliveDrones; % Liste des drones vivants
 
