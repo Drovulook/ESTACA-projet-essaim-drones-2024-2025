@@ -34,7 +34,7 @@ function [targetInfluence, T_eucli] = target_pond(posStateMatrix, swarm)
     T_eucli = sqrt(T_x.^2 + T_y.^2 + T_z.^2);
 
     for idx = 1:length(swarm.Drones) 
-        if T_eucli(idx) < swarm.threshold_radius & swarm.Drones{idx}.mode_Follow_waypoint == true
+        if T_eucli(idx) < swarm.threshold_radius && swarm.Drones{idx}.mode_Follow_waypoint == true
             swarm.Drones{idx}.CycleWaypoint;
         end
     end

@@ -231,7 +231,8 @@ classdef SwarmManager < handle
             % On utilise la position réelle pour le calcul
             [targetInfluence, T_eucli] = target_pond(posStateMatrix, obj); % Utils.Algo (On utilise position réelle)
 
-            observationScore(T_eucli); % Update de la matrice de score d'observations
+            observationScore(obj, T_eucli); % Update de la matrice de score d'observations
+
             %% Calcul des zones d'évitement 
             % On utilise la position réelle pour le calcul
             zones = obj.Environment.get_zones_pos_weights();
