@@ -231,7 +231,7 @@ classdef SwarmManager < handle
             % On utilise la position réelle pour le calcul
             [targetInfluence, T_eucli] = target_pond(posStateMatrix, obj); % Utils.Algo (On utilise position réelle)
 
-            observationScore(obj, T_eucli); % Update de la matrice de score d'observations
+            obj.observationScore(T_eucli); % Update de la matrice de score d'observations
 
             %% Calcul des zones d'évitement 
             % On utilise la position réelle pour le calcul
@@ -250,9 +250,6 @@ classdef SwarmManager < handle
                 drone.speedState = [vX, vY, vZ];
 
             end
-
-            %%
-            T_eucli
 
         end
     end
