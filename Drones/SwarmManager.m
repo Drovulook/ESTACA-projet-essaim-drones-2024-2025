@@ -236,7 +236,7 @@ classdef SwarmManager < handle
             %% Calcul des zones d'évitement 
             % On utilise la position réelle pour le calcul
             zones = obj.Environment.get_zones_pos_weights();
-            avoidInfluence = avoid_pond(posStateMatrix, zones, obj.altitude_min); % Utils.Algo
+            avoidInfluence = avoid_pond(posStateMatrix, speedStateMatrix, dt, zones, obj.altitude_min); % Utils.Algo
 
             %% Maintentant, pour chaque drone, on fait la pondération des influeneces swarm/target/speed et on les somme
 
