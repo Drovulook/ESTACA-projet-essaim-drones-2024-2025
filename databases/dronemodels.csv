@@ -1,0 +1,5 @@
+Model,Type,Autonomy (min),Recharge Time (min)
+ModelA,Fixed Wing,120,30
+ModelB,Multirotor,60,20
+ModelC,Fixed Wing,150,40
+ModelD,Multirotor,45,15
