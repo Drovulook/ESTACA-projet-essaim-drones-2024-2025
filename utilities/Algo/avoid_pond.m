@@ -1,4 +1,4 @@
-function [avoidInfluence] = avoid_pond(posStateMatrix, speedStateMatrix, dt, zones_object_list, altitude_min)
+function [avoidInfluence] = avoid_pond(posStateMatrix, speedStateMatrix, dt, zones_object_list, altitude_min, dt_evitement_max)
 
     avoidZones_posDim = zeros(0,6);
    
@@ -16,10 +16,7 @@ function [avoidInfluence] = avoid_pond(posStateMatrix, speedStateMatrix, dt, zon
         Eucli = sqrt(X.^2 + Y.^2 + Z.^2); % delta centre zone/drone depuis le drone 
     end
 
-    posStateMatrix_t_plus_1 = posStateMatrix + speedStateMatrix*dt;
-    posStateMatrix_t_plus_2 = posStateMatrix + speedStateMatrix*dt*2;
-    posStateMatrix_t_plus_3 = posStateMatrix + speedStateMatrix*dt*3;
-    
+
     %diffeo(posStateMatrix_t_plus_1, avoidZones_posDim);
     [zoneCenter_delta_x, zoneCenter_delta_y, zoneCenter_delta_z, zoneCenter_delta_eucli] = diffeo(posStateMatrix, avoidZones_posDim);
 
@@ -49,16 +46,13 @@ function [avoidInfluence] = avoid_pond(posStateMatrix, speedStateMatrix, dt, zon
     %% Evitement vertical prédictif t+3
     % Si dans une zone contestée avec le même vecteur vitesse à t+1, t+2,
     % t+3, alors évitement vertical pleins gaz vers le haut
-    [~, ~, ~, zoneCenter_delta_eucli_1] = diffeo(posStateMatrix_t_plus_1, avoidZones_posDim);
-    [~, ~, ~, zoneCenter_delta_eucli_2] = diffeo(posStateMatrix_t_plus_2, avoidZones_posDim);
-    [~, ~, ~, zoneCenter_delta_eucli_3] = diffeo(posStateMatrix_t_plus_3, avoidZones_posDim);
 
-    t_plus_1 = any(zoneCenter_delta_eucli_1 <= avoidZones_posDim(:,4)'/2, 2)*20;
-    t_plus_2 = any(zoneCenter_delta_eucli_2 <= avoidZones_posDim(:,4)'/2, 2)*20;
-    t_plus_3 = any(zoneCenter_delta_eucli_3 <= avoidZones_posDim(:,4)'/2, 2)*20;
-
-    zoneCenter_delta_z = zoneCenter_delta_z + t_plus_1 + t_plus_2 + t_plus_3;
-
+    for n=1:dt_evitement_max
+        posStateMatrix_t_plus_n = posStateMatrix + speedStateMatrix*dt*n;
+        [~, ~, ~, zoneCenter_delta_eucli_n] = diffeo(posStateMatrix_t_plus_n, avoidZones_posDim);
+        t_plus_n = any(zoneCenter_delta_eucli_n <= avoidZones_posDim(:,4)'/2, 2)*100;
+        zoneCenter_delta_z = zoneCenter_delta_z + t_plus_n;
+    end
 
     avoidInfluence = [zoneCenter_delta_x zoneCenter_delta_y zoneCenter_delta_z];
 
