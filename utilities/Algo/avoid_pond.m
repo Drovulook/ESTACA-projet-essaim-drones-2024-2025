@@ -1,4 +1,4 @@
-function [avoidInfluence] = avoid_pond(posStateMatrix, zones_object_list, altitude_min)
+function [avoidInfluence] = avoid_pond(posStateMatrix, speedStateMatrix, dt, zones_object_list, altitude_min, dt_evitement_max)
 
     avoidZones_posDim = zeros(0,6);
    
@@ -8,13 +8,18 @@ function [avoidInfluence] = avoid_pond(posStateMatrix, zones_object_list, altitu
         avoidZones_posDim = [avoidZones_posDim ; zones_object_list(i).CenterPosition zones_object_list(i).Dimensions]; % (n_zones * 6)
         % stockage des zones d'exclusion + dim
     end
-    
-    zoneCenter_delta_x = avoidZones_posDim(:,1)' - posStateMatrix(:,1); % (n_drones * n_zones)
-    zoneCenter_delta_y = avoidZones_posDim(:,2)' - posStateMatrix(:,2); % Delta en Y a chaque zone (colonne) par drone (ligne)
-    zoneCenter_delta_z = avoidZones_posDim(:,3)' - posStateMatrix(:,3); % Delta en Z
-    zoneCenter_delta_eucli = sqrt(zoneCenter_delta_x.^2 + zoneCenter_delta_y.^2 + zoneCenter_delta_z.^2);
-    % delta centre zone/drone depuis le drone 
-    
+
+    function [X, Y, Z, Eucli] = diffeo(posMatrix, avoidMatrix)
+        X = avoidMatrix(:,1)' - posMatrix(:,1); % (n_drones * n_zones)
+        Y = avoidMatrix(:,2)' - posMatrix(:,2); % Delta en Y a chaque zone (colonne) par drone (ligne)
+        Z = avoidMatrix(:,3)' - posMatrix(:,3); % Delta en Z
+        Eucli = sqrt(X.^2 + Y.^2 + Z.^2); % delta centre zone/drone depuis le drone 
+    end
+
+
+    %diffeo(posStateMatrix_t_plus_1, avoidZones_posDim);
+    [zoneCenter_delta_x, zoneCenter_delta_y, zoneCenter_delta_z, zoneCenter_delta_eucli] = diffeo(posStateMatrix, avoidZones_posDim);
+
     % Assignation du poids négatif pour fuir les zones dangereuses -> Fonctionnement par sphère uniquement
     
     % Création de la fonction continue dépendant de tanh
@@ -37,6 +42,17 @@ function [avoidInfluence] = avoid_pond(posStateMatrix, zones_object_list, altitu
     zoneCenter_delta_z(isnan(zoneCenter_delta_z)) = 0;
 
     zoneCenter_delta_z = zoneCenter_delta_z - f(posStateMatrix(:,3), altitude_min);
+
+    %% Evitement vertical prédictif t+3
+    % Si dans une zone contestée avec le même vecteur vitesse à t+1, t+2,
+    % t+3, alors évitement vertical pleins gaz vers le haut
+
+    for n=1:dt_evitement_max
+        posStateMatrix_t_plus_n = posStateMatrix + speedStateMatrix*dt*n;
+        [~, ~, ~, zoneCenter_delta_eucli_n] = diffeo(posStateMatrix_t_plus_n, avoidZones_posDim);
+        t_plus_n = any(zoneCenter_delta_eucli_n <= avoidZones_posDim(:,4)'/2, 2)*100;
+        zoneCenter_delta_z = zoneCenter_delta_z + t_plus_n;
+    end
 
     avoidInfluence = [zoneCenter_delta_x zoneCenter_delta_y zoneCenter_delta_z];
 
