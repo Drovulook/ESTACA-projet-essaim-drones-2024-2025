@@ -242,8 +242,8 @@ classdef SwarmManager < handle
 
             desiredVector = whole_pond(swarmInfluence, speedInfluence, targetInfluence, avoidInfluence, obj.weights); % Utils.Algo
            
-            for i = 1:length(obj.AliveDrones)
-                drone = obj.AliveDrones{i};
+            for i = 1:length(obj.Drones)
+                drone = obj.Drones{i};
                 
                 [vX, vY, vZ] = SpeedProcessing(drone, i, desiredVector, dt);
             
