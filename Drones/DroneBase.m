@@ -24,6 +24,7 @@ classdef (Abstract) DroneBase < handle
         mass
         powerLog
         mean_consumption
+        phase               % 'take-off','inbound','onsite','return','landing','standby'
         
         % ---------------- Battery/Power/Autonomy (existing) ---------------
         maxCapacity          % e.g. in Wh (if battery)
@@ -49,11 +50,21 @@ classdef (Abstract) DroneBase < handle
             obj.Type = type;
             
             % Some defaults:
-            obj.batteryNominalVoltage = 22.2;  % e.g. 6S LiPo
-            obj.maxCapacity           = 200;
-            obj.remainingCapacity     = obj.maxCapacity;
-            obj.mass                  = 50;
-            obj.k_peukert             = 1.2;
+            if obj.batteryNominalVoltage==0
+                obj.batteryNominalVoltage = 22.2;  % e.g. 6S LiPo
+            end
+            if obj.maxCapacity==0
+                obj.maxCapacity           = 200;
+            end
+
+            obj.remainingCapacity= obj.maxCapacity;
+
+            if obj.mass==0
+                obj.mass                  = 50;
+            end
+            if obj.k_peukert==0
+                obj.k_peukert             = 1.2;
+            end
             
             % Initialize position
             obj.posState = initialPos;
@@ -125,7 +136,7 @@ classdef (Abstract) DroneBase < handle
                 obj.speedState = [0 0 0];
             end
             obj.logData
-            if(size(obj.speedLog,1)>2)
+            if(size(obj.speedLog,1)>2 && obj.IsAlive)
                 obj.compute_autonomy(dt); % utilise les logData
             end
         end

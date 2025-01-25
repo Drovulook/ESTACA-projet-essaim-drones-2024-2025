@@ -46,6 +46,7 @@ classdef MultirotorDrone < DroneBase & handle
             
             % If you want to unify "autonomy" with "AutonomyMins":
             obj.autonomy = obj.AutonomyMins / 60;  % hours
+            obj.remainingCapacity=obj.maxCapacity;
         end
 
         % Méthode de calcul de l'autonomie
@@ -95,7 +96,9 @@ classdef MultirotorDrone < DroneBase & handle
             end
             % autonomie en heures
 
-            obj.conditionReturnToBase
+            if obj.conditionReturnToBase
+                obj.phase='return';
+            end
         end
 
 
