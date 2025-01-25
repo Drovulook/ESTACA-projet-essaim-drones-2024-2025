@@ -15,7 +15,7 @@ classdef MultirotorDrone < DroneBase & handle
         Radius
 
         rotorNumber     % [1]
-        rotorSurface    % [m^2] surface d'un rotor
+        rotorDiameter    % [m^2] surface d'un rotor
     end
 
     methods
@@ -38,9 +38,8 @@ classdef MultirotorDrone < DroneBase & handle
 
             obj.Radius = 0.75;
             obj.rotorNumber=4;
-            obj.rotorSurface=0.05; % m^2 soit 1000 cm^2
+            obj.rotorDiameter=0.210;
             obj.mass=1;
-            obj.maxCapacity=100;
             obj.batteryNominalVoltage=3.7*3;
         end
 
@@ -61,7 +60,8 @@ classdef MultirotorDrone < DroneBase & handle
             % calcul puissance développée (non teste)
             rotorForce=norm(totalThrust)/obj.rotorNumber;
             rho=ISA_volumicMass(currentPos(3)); % à ajuster
-            powerNow=(rotorForce^3/(2*rho*obj.rotorSurface))^0.5*obj.rotorNumber;   % puissance à l'instant [t-dt, t]
+            rotorSurface=pi*(obj.rotorDiameter/2)^2;
+            powerNow=(rotorForce^3/(2*rho*rotorSurface))^0.5*obj.rotorNumber;   % puissance à l'instant [t-dt, t]
 
             % la ligne suivante permet d'éviter de faire la moyenne de la matrice complète
             if(isempty(obj.powerLog))
@@ -76,7 +76,7 @@ classdef MultirotorDrone < DroneBase & handle
             if (obj.maxCapacity == 0)
                 % moteur thermique
             else
-                capacite_consomme=power(obj.powerLog(end)/obj.batteryNominalVoltage, obj.k_peukert)*dt/3600; % J
+                capacite_consomme=power(obj.powerLog(end)/obj.batteryNominalVoltage, obj.k_peukert)*dt/3600; % Wh
                 obj.remainingCapacity=obj.remainingCapacity-capacite_consomme*obj.batteryNominalVoltage;
             end
 
@@ -91,5 +91,13 @@ classdef MultirotorDrone < DroneBase & handle
             end
             % autonomie en heures
         end
+
+
+        % function condition=conditionRTB(obj)
+        %     distance=obj.Destination-obj.posLog(end,:);
+        %     tretour=norm(distance)/obj.CruiseSpeed; % vent non pris en compte  
+        %     %tretour=norm(distance)/(obj.CruiseSpeed+dot(vent,distance)/norm(distance)); % vent pris en compte vecteur à préciser  
+        % 
+        % end
     end
 end
