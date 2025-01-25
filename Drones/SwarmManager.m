@@ -193,7 +193,6 @@ classdef SwarmManager < handle
                 drone = obj.Drones{i};
 
                 drone.update_pos(dt); % On update les drones à leur nouvelle position en fonction du dernier vecteur vitesse computé
-                
                 posStateMatrix(i,:) = drone.posState; 
                 speedStateMatrix(i,:) = drone.speedState;
             end

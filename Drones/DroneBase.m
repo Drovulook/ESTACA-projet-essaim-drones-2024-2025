@@ -84,7 +84,9 @@ classdef (Abstract) DroneBase < handle
         function crashDrone(obj)
             obj.IsAlive = false;
         end
-
+        
+        function compute_autonomy(obj,dt)
+        end
     end
     
     methods
@@ -108,11 +110,15 @@ classdef (Abstract) DroneBase < handle
             if obj.IsAlive == true
                 dpos = dt * obj.speedState; %on peut ajouter du noise
                 obj.posState = obj.posState + dpos;
+                
             else
                 obj.posState(3) = 0;
                 obj.speedState = [0 0 0];
             end
-            obj.logData()
+            obj.logData
+            if(size(obj.speedLog,1)>2)
+                obj.compute_autonomy(dt); % utilise les logData
+            end
         end
 
 

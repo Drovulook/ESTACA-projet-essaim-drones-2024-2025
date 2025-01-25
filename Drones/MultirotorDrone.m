@@ -39,6 +39,9 @@ classdef MultirotorDrone < DroneBase & handle
             obj.Radius = 0.75;
             obj.rotorNumber=4;
             obj.rotorSurface=0.05; % m^2 soit 1000 cm^2
+            obj.mass=1;
+            obj.maxCapacity=100;
+            obj.batteryNominalVoltage=3.7*3;
         end
 
 
@@ -47,26 +50,33 @@ classdef MultirotorDrone < DroneBase & handle
 
             % calcul force développée
             if (size(obj.speedLog,1)>1)
-                acceleration=1/dt*(obj.speedLog(end,:)-obj.speedLog(end,:));
+                acceleration=1/dt.*(obj.speedLog(end,:)-obj.speedLog(end-1,:));
             else
-                acceleration=1/dt*obj.speedLog(end,:);
+                acceleration=1./dt.*obj.speedLog(end,:);
             end
             g=9.81;
             totalThrust=obj.mass*g*[0 0 -1]+acceleration*obj.mass*g;
 
+            currentPos=obj.posLog(end,:);
             % calcul puissance développée (non teste)
             rotorForce=norm(totalThrust)/obj.rotorNumber;
-            rho=ISA_volumicMass(obj.currentPos(3)); % à ajuster
-            powerNow=(rotorForce^3/(2*rho*obj.rotorSurface))*obj.rotorNumber;   % puissance à l'instant [t-dt, t]
+            rho=ISA_volumicMass(currentPos(3)); % à ajuster
+            powerNow=(rotorForce^3/(2*rho*obj.rotorSurface))^0.5*obj.rotorNumber;   % puissance à l'instant [t-dt, t]
 
             % la ligne suivante permet d'éviter de faire la moyenne de la matrice complète
-            obj.mean_consumption=(obj.mean_consumption*size(obj.powerLog)+powerNow)/(size(obj.powerLog)+1);
-            obj.powerLog=[obj.powerLog powerNow];
+            if(isempty(obj.powerLog))
+                obj.mean_consumption=powerNow;
+                obj.powerLog=powerNow;
+            else
+                obj.mean_consumption=(obj.mean_consumption*size(obj.powerLog)+powerNow)/(size(obj.powerLog)+1);
+                obj.powerLog=[obj.powerLog powerNow];
+            end
 
-            if (obj.Capacite_max == 0)
+
+            if (obj.maxCapacity == 0)
                 % moteur thermique
             else
-                capacite_consomme=power(obj.powerLog(end)/obj.batteryNominalVoltage, obj.k_peukert)*dt;
+                capacite_consomme=power(obj.powerLog(end)/obj.batteryNominalVoltage, obj.k_peukert)*dt/3600; % J
                 obj.remainingCapacity=obj.remainingCapacity-capacite_consomme*obj.batteryNominalVoltage;
             end
 

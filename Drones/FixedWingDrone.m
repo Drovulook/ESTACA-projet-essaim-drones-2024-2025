@@ -9,8 +9,8 @@ classdef FixedWingDrone < DroneBase & handle
         CruiseSpeed      % Vitesse de croisière du drone
         MaxClimbRate     % Taux de montée maximal autorisé
         MaxDescentRate   % Taux de descente maximal autorisé
-        % Controller       % Instance de contrôleur d'attitude de base
-        refSurface          % surface de référence en m^2
+        % Controller     % Instance de contrôleur d'attitude de base
+        refSurface       % surface de référence en m^2
         finesse
         Radius
         
@@ -31,7 +31,7 @@ classdef FixedWingDrone < DroneBase & handle
             % Initialiser le contrôleur d'attitude de base
             % obj.Controller = BasicAttitudeController(obj);
             obj.posState = initialPosition; % Définir la position actuelle
-
+            obj.finesse=10;
         end
 
         % Méthode de calcul de l'autonomie
@@ -39,26 +39,35 @@ classdef FixedWingDrone < DroneBase & handle
 
             % calcul acceleration
             if (size(obj.speedLog,1)>1)
-                acceleration=1/dt*(obj.speedLog(end,:)-obj.speedLog(end,:));
+                acceleration=1./dt.*(obj.speedLog(end,:)-obj.speedLog(end-1,:));
             else
-                acceleration=1/dt*obj.speedLog(end,:);
+                acceleration=1./dt.*obj.speedLog(end,:);
             end
-
+            
+            velocity=obj.speedLog(end,:);
+            currentPos=obj.posLog(end-1,:);
+            newPos=obj.posLog(end,:);
 
             %% calcul puissance développée
             % dW=du*F, où '*' est le produit scalaire
-            averageDrag=norm(acceleration)/obj.finesse*velocity/norm(velocity);
+            averageDrag=norm(acceleration)/obj.finesse.*velocity./norm(velocity);
             %averageDrag=0.5*ISA_volumicMass(currentPos(3))*norm(velocity)^2*obj.refSurface;
-            deltaWorkDrag=dot([velocity(1:2); climbRate] * dt,averageDrag);
+            % deltaWorkDrag=dot([velocity(1:2); obj.climbRate] * dt,averageDrag);
+            deltaWorkDrag=dot(velocity * dt,averageDrag);
             Weight=obj.mass*9.81*[0 0 -1];
             deltaWorkWeight=dot(newPos-currentPos,Weight);
             powerNow=(deltaWorkWeight+deltaWorkDrag)/dt;   % puissance à l'instant [t-dt, t]
 
             % la ligne suivante permet d'éviter de faire la moyenne de la matrice complète
-            obj.mean_consumption=(obj.mean_consumption*size(obj.powerLog)+powerNow)/(size(obj.powerLog)+1);
-            obj.powerLog=[obj.powerLog powerNow];
+            if(isempty(obj.powerLog))
+                obj.mean_consumption=powerNow;
+                obj.powerLog=powerNow;
+            else
+                obj.mean_consumption=(obj.mean_consumption*size(obj.powerLog)+powerNow)/(size(obj.powerLog)+1);
+                obj.powerLog=[obj.powerLog powerNow];
+            end
 
-            if (obj.Capacite_max == 0)
+            if (obj.maxCapacity == 0)
                 % moteur thermique
             else
                 capacite_consomme=power(obj.powerLog(end)/obj.batteryNominalVoltage, obj.k_peukert)*dt;
