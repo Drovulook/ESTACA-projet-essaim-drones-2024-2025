@@ -90,14 +90,51 @@ classdef MultirotorDrone < DroneBase & handle
                 obj.autonomy=obj.remainingCapacity*obj.yield/obj.mean_consumption;
             end
             % autonomie en heures
+
+            obj.conditionReturnToBase
         end
 
 
-        % function condition=conditionRTB(obj)
-        %     distance=obj.Destination-obj.posLog(end,:);
-        %     tretour=norm(distance)/obj.CruiseSpeed; % vent non pris en compte  
-        %     %tretour=norm(distance)/(obj.CruiseSpeed+dot(vent,distance)/norm(distance)); % vent pris en compte vecteur à préciser  
-        % 
-        % end
+        function condition=conditionReturnToBase(obj)
+            % Dans ce qui suit le taux de monté est déduit du Vcruise, donc
+            % Vsol<=Vcruise. Autrement dit Vcruise est la norme du vecteur
+            % vitesse choisi pour le calcul et ce peut importe si l'on
+            % monte/descend.
+
+            distance=obj.Destination-obj.posLog(end,:);
+            pente=asin(distance(3)/norm(distance));
+
+            % pente de retour maximale
+            if distance(3)<=0
+                penteMax=asin(obj.MaxVarioDown/obj.CruiseSpeed);
+            else
+                penteMax=asin(obj.MaxVarioUp/obj.CruiseSpeed);
+            end
+            
+            % calcul le temps de retour selon la capacité du drone à
+            % descendre rapidement ou non
+            if pente<penteMax
+                tretour=norm(distance(1:2)/cos(pente))/obj.CruiseSpeed+...
+                abs(distance(3)+norm(distance(1:2)*tan(pente)))/obj.MaxVarioDown;
+                % calcul du temps horizontal + calcul du temps vertical
+                % déduis de la descente durant l'approche
+            elseif pente>penteMax
+                tretour=norm(distance(1:2))/obj.CruiseSpeed+distance(3)/obj.MaxVarioUp;
+                % calcul très approximatif
+            else
+                tretour=norm(distance)/obj.CruiseSpeed;
+            end
+            
+            Epp=obj.mass*9.81*distance(3);
+            energyRTB=obj.mean_consumption*tretour+Epp*obj.yield;
+
+            if energyRTB*1.2>obj.remainingCapacity
+                condition=true;
+            else
+                condition=false;
+            end
+            % tretour=norm(distance)/obj.CruiseSpeed; % vent non pris en compte  
+            % %tretour=norm(distance)/(obj.CruiseSpeed+dot(vent,distance)/norm(distance)); % vent pris en compte vecteur à préciser  
+        end
     end
 end
