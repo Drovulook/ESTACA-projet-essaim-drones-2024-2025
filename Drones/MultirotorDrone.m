@@ -15,7 +15,7 @@ classdef MultirotorDrone < DroneBase & handle
         Radius
 
         rotorNumber     % [1]
-        rotorSurface    % [m^2] surface d'un rotor
+        rotorDiameter    % [m^2] surface d'un rotor
     end
 
     methods
@@ -38,9 +38,8 @@ classdef MultirotorDrone < DroneBase & handle
 
             obj.Radius = 0.75;
             obj.rotorNumber=4;
-            obj.rotorSurface=0.05; % m^2 soit 1000 cm^2
+            obj.rotorDiameter=0.210;
             obj.mass=1;
-            obj.maxCapacity=100;
             obj.batteryNominalVoltage=3.7*3;
         end
 
@@ -61,7 +60,8 @@ classdef MultirotorDrone < DroneBase & handle
             % calcul puissance développée (non teste)
             rotorForce=norm(totalThrust)/obj.rotorNumber;
             rho=ISA_volumicMass(currentPos(3)); % à ajuster
-            powerNow=(rotorForce^3/(2*rho*obj.rotorSurface))^0.5*obj.rotorNumber;   % puissance à l'instant [t-dt, t]
+            rotorSurface=pi*(obj.rotorDiameter/2)^2;
+            powerNow=(rotorForce^3/(2*rho*rotorSurface))^0.5*obj.rotorNumber;   % puissance à l'instant [t-dt, t]
 
             % la ligne suivante permet d'éviter de faire la moyenne de la matrice complète
             if(isempty(obj.powerLog))
@@ -76,7 +76,7 @@ classdef MultirotorDrone < DroneBase & handle
             if (obj.maxCapacity == 0)
                 % moteur thermique
             else
-                capacite_consomme=power(obj.powerLog(end)/obj.batteryNominalVoltage, obj.k_peukert)*dt/3600; % J
+                capacite_consomme=power(obj.powerLog(end)/obj.batteryNominalVoltage, obj.k_peukert)*dt/3600; % Wh
                 obj.remainingCapacity=obj.remainingCapacity-capacite_consomme*obj.batteryNominalVoltage;
             end
 
@@ -90,6 +90,51 @@ classdef MultirotorDrone < DroneBase & handle
                 obj.autonomy=obj.remainingCapacity*obj.yield/obj.mean_consumption;
             end
             % autonomie en heures
+
+            obj.conditionReturnToBase
+        end
+
+
+        function condition=conditionReturnToBase(obj)
+            % Dans ce qui suit le taux de monté est déduit du Vcruise, donc
+            % Vsol<=Vcruise. Autrement dit Vcruise est la norme du vecteur
+            % vitesse choisi pour le calcul et ce peut importe si l'on
+            % monte/descend.
+
+            distance=obj.Destination-obj.posLog(end,:);
+            pente=asin(distance(3)/norm(distance));
+
+            % pente de retour maximale
+            if distance(3)<=0
+                penteMax=asin(obj.MaxVarioDown/obj.CruiseSpeed);
+            else
+                penteMax=asin(obj.MaxVarioUp/obj.CruiseSpeed);
+            end
+            
+            % calcul le temps de retour selon la capacité du drone à
+            % descendre rapidement ou non
+            if pente<penteMax
+                tretour=norm(distance(1:2)/cos(pente))/obj.CruiseSpeed+...
+                abs(distance(3)+norm(distance(1:2)*tan(pente)))/obj.MaxVarioDown;
+                % calcul du temps horizontal + calcul du temps vertical
+                % déduis de la descente durant l'approche
+            elseif pente>penteMax
+                tretour=norm(distance(1:2))/obj.CruiseSpeed+distance(3)/obj.MaxVarioUp;
+                % calcul très approximatif
+            else
+                tretour=norm(distance)/obj.CruiseSpeed;
+            end
+            
+            Epp=obj.mass*9.81*distance(3);
+            energyRTB=obj.mean_consumption*tretour+Epp*obj.yield;
+
+            if energyRTB*1.2>obj.remainingCapacity
+                condition=true;
+            else
+                condition=false;
+            end
+            % tretour=norm(distance)/obj.CruiseSpeed; % vent non pris en compte  
+            % %tretour=norm(distance)/(obj.CruiseSpeed+dot(vent,distance)/norm(distance)); % vent pris en compte vecteur à préciser  
         end
     end
 end

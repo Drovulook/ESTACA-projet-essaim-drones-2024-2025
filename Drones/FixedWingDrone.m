@@ -70,7 +70,7 @@ classdef FixedWingDrone < DroneBase & handle
             if (obj.maxCapacity == 0)
                 % moteur thermique
             else
-                capacite_consomme=power(obj.powerLog(end)/obj.batteryNominalVoltage, obj.k_peukert)*dt;
+                capacite_consomme=power(obj.powerLog(end)/obj.batteryNominalVoltage, obj.k_peukert)*dt/3600; %Wh
                 obj.remainingCapacity=obj.remainingCapacity-capacite_consomme*obj.batteryNominalVoltage;
             end
 
