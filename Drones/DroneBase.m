@@ -27,7 +27,7 @@ classdef (Abstract) DroneBase < handle
         phase               % 'take-off','inbound','onsite','return','landing','standby'
         
         % ---------------- Battery/Power/Autonomy (existing) ---------------
-        maxCapacity          % e.g. in Wh (if battery)
+        % maxCapacity          % e.g. in Wh (if battery)
         batteryNominalVoltage% e.g. in V
         k_peukert = 1.2
         tankVolume           % e.g. in liters (if fuel)
@@ -50,14 +50,14 @@ classdef (Abstract) DroneBase < handle
             obj.Type = type;
             
             % Some defaults:
-            if obj.batteryNominalVoltage==0
-                obj.batteryNominalVoltage = 22.2;  % e.g. 6S LiPo
+            if obj.NominalVoltage==0
+                obj.NominalVoltage = 22.2;  % e.g. 6S LiPo
             end
-            if obj.maxCapacity==0
-                obj.maxCapacity           = 200;
+            if obj.NominalCapacity==0
+                obj.NominalCapacity           = 200;
             end
 
-            obj.remainingCapacity= obj.maxCapacity;
+            obj.remainingCapacity= obj.NominalCapacity;
 
             if obj.mass==0
                 obj.mass                  = 50;

@@ -39,14 +39,14 @@ classdef MultirotorDrone < DroneBase & handle
             % Now fill base-class properties from CSV
             obj.mass                = params.Mass;
             obj.NominalCapacity     = params.NominalCapacity;
-            obj.batteryNominalVoltage = params.NominalVoltage;
+            obj.NominalVoltage = params.NominalVoltage;
             obj.tankVolume          = params.TankVolume;
             obj.AutonomyMins        = params.AutonomyMins;
             obj.ReloadMins          = params.ReloadMins;
             
             % If you want to unify "autonomy" with "AutonomyMins":
             obj.autonomy = obj.AutonomyMins / 60;  % hours
-            obj.remainingCapacity=obj.maxCapacity;
+            obj.remainingCapacity=obj.NominalCapacity;
         end
 
         % Méthode de calcul de l'autonomie
@@ -78,17 +78,17 @@ classdef MultirotorDrone < DroneBase & handle
             end
 
 
-            if (obj.maxCapacity == 0)
+            if (obj.NominalCapacity == 0)
                 % moteur thermique
             else
-                capacite_consomme=power(obj.powerLog(end)/obj.batteryNominalVoltage, obj.k_peukert)*dt/3600; % Wh
-                obj.remainingCapacity=obj.remainingCapacity-capacite_consomme*obj.batteryNominalVoltage;
+                capacite_consomme=power(obj.powerLog(end)/obj.NominalVoltage, obj.k_peukert)*dt/3600; % Wh
+                obj.remainingCapacity=obj.remainingCapacity-capacite_consomme*obj.NominalVoltage;
             end
 
             % calcul de l'autonomie
-            if(obj.batteryNominalVoltage>0)
+            if(obj.NominalVoltage>0)
                 % calc bat
-                I=obj.mean_consumption/obj.batteryNominalVoltage/obj.yield;
+                I=obj.mean_consumption/obj.NominalVoltage/obj.yield;
                 obj.autonomy=obj.remainingCapacity/(I^obj.k_peukert);
             else
                 % calc fuel

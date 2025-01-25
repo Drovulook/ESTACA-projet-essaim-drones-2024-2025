@@ -8,7 +8,6 @@ env = Environment(10, 200, [-1000, 1000, 1000, -1000], ...
 setupZones;
 homeBaseCoord = [0, 0, 0];
 temps = 10000;
-traceSize = 200;
 
 swarm = SwarmManager(env, temps);
 
@@ -112,7 +111,7 @@ figure
 subplot(3,1,1)
 hold on
 for i=1:size(swarm.Drones,2)
-    if swarm.Drones{i}.Type=="multirotor"
+    if swarm.Drones{i}.Type=="fixedwing"
         plot(vecnorm(swarm.Drones{i}.speedLog'))
     end
 end
@@ -121,7 +120,7 @@ title("Vitesses")
 subplot(3,1,2)
 hold on
 for i=1:size(swarm.Drones,2)
-    if swarm.Drones{i}.Type=="multirotor"
+    if swarm.Drones{i}.Type=="fixedwing"
         plot(swarm.Drones{i}.powerLog)
     end
 end
@@ -131,9 +130,9 @@ subplot(3,1,3)
 hold on
 capacity=zeros(size(swarm.Drones{1}.powerLog,2),size(swarm.Drones,2));
 for i=1:size(swarm.Drones,2)
-    if swarm.Drones{i}.Type=="multirotor"
+    if swarm.Drones{i}.Type=="fixedwing"
         drones_capacity=[drones_capacity swarm.Drones{i}.remainingCapacity];
-        capacity_consumption=power(swarm.Drones{i}.powerLog/swarm.Drones{i}.batteryNominalVoltage, swarm.Drones{i}.k_peukert)*dt/3600*swarm.Drones{i}.batteryNominalVoltage;
+        capacity_consumption=power(swarm.Drones{i}.powerLog/swarm.Drones{i}.NominalVoltage, swarm.Drones{i}.k_peukert)*dt/3600*swarm.Drones{i}.NominalVoltage;
         % Wh
         autonomy=zeros(size(capacity_consumption,2),1);
         for j=1:size(capacity_consumption,2)
@@ -142,8 +141,13 @@ for i=1:size(swarm.Drones,2)
             % autonomy(j)=(swarm.Drones{i}.maxCapacity-capacity(i,j))/(I^swarm.Drones{i}.k_peukert);
             % autonomy(j)=(swarm.Drones{i}.maxCapacity-capacity(i,j))/(mean(capacity_consumption(1:j))*3600);
         end
-        plot(capacity(:,i))
+        plot(swarm.Drones{i}.NominalCapacity-capacity(:,i))
         % plot(autonomy);
     end
 end
 title("Capacité consommée (Wh)");
+
+% phases=[];
+% for i=1:size(swarm.Drones,2)
+%     [swarm.Drones{i}.phase ' ' swarm.Drones{i}.Type]
+% end
