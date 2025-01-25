@@ -3,46 +3,50 @@
 
 classdef MultirotorDrone < DroneBase & handle
     properties
-        Destination      % Position cible actuelle du drone
-        MaxSpeed         % Vitesse maximale autorisée
-        MinSpeed         % Vitesse minimale
-        CruiseSpeed      % Vitesse de croisière du drone
-        MaxVarioUp       % Taux de montée maximal autorisé
-        MaxVarioDown     % Taux de descente maximal autorisé
-        MaxTurnGLoad     % Charge en G maximale lors d'un virage
-        MaxTurnRate      % Taux de virage maximal [rad/s]
-        % Controller       % Instance du contrôleur d'attitude
-        Radius
-
-        rotorNumber     % [1]
-        rotorDiameter    % [m^2] surface d'un rotor
+        % ----- Unique to MultirotorDrone (kept) -----
+        Destination
+        MaxSpeed
+        MinSpeed
+        CruiseSpeed
+        MaxVarioUp
+        MaxVarioDown
+        MaxTurnGLoad
+        %Radius
+        rotorNumber
+        rotorDiameter
     end
 
     methods
         % Constructeur pour initialiser un drone multirotor avec ses paramètres
         function obj = MultirotorDrone(id, initialPosition, params)
-            obj@DroneBase(id, 'multirotor', initialPosition); % Appel du constructeur de la classe de base
+            % Call the base class constructor
+            obj@DroneBase(id, 'multirotor', initialPosition);
 
-            % Charger les paramètres depuis la structure params
-            obj.MaxSpeed = params.MaxSpeed; % Initialiser la vitesse maximale
-            obj.CruiseSpeed = params.CruiseSpeed; % Initialiser la vitesse de croisière
-            obj.MaxVarioUp = params.MaxVarioUp; % Initialiser le taux de montée maximal
-            obj.MaxVarioDown = params.MaxVarioDown; % Initialiser le taux de descente maximal
-            obj.MaxTurnGLoad = params.MaxTurnGLoad; % Initialiser la charge en G maximale pour les virages
-            obj.MaxTurnRate = params.MaxTurnRate; % Initialiser le taux de virage maximal
+            % Assign from 'params'
+            obj.MaxSpeed       = params.MaxSpeed;
+            obj.MinSpeed       = params.MinSpeed;
+            obj.CruiseSpeed    = params.CruiseSpeed;
+            obj.MaxVarioUp     = params.MaxVarioUp;
+            obj.MaxVarioDown   = params.MaxVarioDwn;
+            obj.MaxTurnGLoad   = params.MaxTurnGLoad;
+            %obj.Radius         = params.Radius;  % if in CSV
+            obj.Destination    = initialPosition;
 
-            % Initialiser le contrôleur d'attitude pour le drone
-            % obj.Controller = BasicAttitudeController(obj);
-            obj.posState = initialPosition; % Définir la position actuelle
-            obj.Destination = initialPosition; % Définir la destination initiale comme la position de départ
+            % rotor specifics:
+            obj.rotorNumber    = params.RotorNumber;
+            obj.rotorDiameter  = params.RotorDiameter;  % or rotorSurface, if that’s what you store
 
-            obj.Radius = 0.75;
-            obj.rotorNumber=4;
-            obj.rotorDiameter=0.210;
-            obj.mass=1;
-            obj.batteryNominalVoltage=3.7*3;
+            % Now fill base-class properties from CSV
+            obj.mass                = params.Mass;
+            obj.NominalCapacity     = params.NominalCapacity;
+            obj.batteryNominalVoltage = params.NominalVoltage;
+            obj.tankVolume          = params.TankVolume;
+            obj.AutonomyMins        = params.AutonomyMins;
+            obj.ReloadMins          = params.ReloadMins;
+            
+            % If you want to unify "autonomy" with "AutonomyMins":
+            obj.autonomy = obj.AutonomyMins / 60;  % hours
         end
-
 
         % Méthode de calcul de l'autonomie
         function compute_autonomy(obj, dt)

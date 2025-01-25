@@ -3,35 +3,56 @@
 
 classdef FixedWingDrone < DroneBase & handle
     properties
-        Destination      % Position cible actuelle du drone
-        MaxSpeed         % Vitesse maximale du drone
-        MinSpeed         % Vitesse minimale du drone (vitesse de décrochage)
-        CruiseSpeed      % Vitesse de croisière du drone
-        MaxClimbRate     % Taux de montée maximal autorisé
-        MaxDescentRate   % Taux de descente maximal autorisé
-        % Controller     % Instance de contrôleur d'attitude de base
-        refSurface       % surface de référence en m^2
+        % ----- Unique to FixedWingDrone (kept) -----
+        Destination
+        MaxSpeed
+        MinSpeed        % Stall speed
+        CruiseSpeed
+        MaxClimbRate
+        MaxDescentRate
+        refSurface      % e.g. wing reference area
         finesse
-        Radius
-        
-
     end
 
     methods
         % Constructeur pour initialiser un drone à voilure fixe avec ses paramètres
         function obj = FixedWingDrone(id, initialPosition, params)
-            obj@DroneBase(id, 'fixedwing', initialPosition); % Appel du constructeur de la classe de base
+            % Call the base class constructor
+            obj@DroneBase(id, 'fixedwing', initialPosition);
+            
+            % Now assign from 'params' (the structure/table row)
+            obj.MaxSpeed       = params.MaxSpeed;
+            obj.MinSpeed       = params.MinSpeed;
+            obj.CruiseSpeed    = params.CruiseSpeed;
+            obj.MaxClimbRate   = params.MaxVarioUp;
+            obj.MaxDescentRate = params.MaxVarioDwn;
+            obj.Destination    = initialPosition; % or some default
 
-            % Charger les paramètres depuis la structure params
-            obj.MaxSpeed = params.MaxSpeed; % Initialiser la vitesse maximale
-            obj.MinSpeed = params.MinSpeed; % Initialiser la vitesse minimale
-            obj.MaxClimbRate = params.MaxClimbRate; % Initialiser le taux de montée maximal
-            obj.MaxDescentRate = params.MaxDescentRate; % Initialiser le taux de descente maximal
+            % In DroneBase, we have 'mass', 'NominalVoltage', etc.
+            % We can store CSV -> base properties now:
+            obj.mass                = params.Mass;
+            obj.NominalCapacity     = params.NominalCapacity;
+            obj.batteryNominalVoltage = params.NominalVoltage; 
+            obj.tankVolume          = params.TankVolume;
+            obj.AutonomyMins        = params.AutonomyMins;
+            obj.ReloadMins          = params.ReloadMins;
 
-            % Initialiser le contrôleur d'attitude de base
-            % obj.Controller = BasicAttitudeController(obj);
-            obj.posState = initialPosition; % Définir la position actuelle
-            obj.finesse=10;
+            % If you want to unify "autonomy" (in hours) with "AutonomyMins",
+            % you could do:
+            obj.autonomy = obj.AutonomyMins / 60;  % convert minutes -> hours
+
+            % Example for finesse, refSurface, etc. if in your CSV:
+            if isfield(params, 'refSurface')
+                obj.refSurface = params.refSurface;
+            else
+                obj.refSurface = 0.5;  % example default
+            end
+
+            if isfield(params, 'finesse')
+                obj.finesse = params.finesse;
+            else
+                obj.finesse = 10; % default
+            end
         end
 
         % Méthode de calcul de l'autonomie

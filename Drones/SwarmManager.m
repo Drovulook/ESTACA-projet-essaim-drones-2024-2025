@@ -56,7 +56,7 @@ classdef SwarmManager < handle
         end
 
         % Méthode pour ajouter un drone à l'essaim
-        function addDrone(obj, droneName, modelData, initialPosition)
+        function addDrone(obj, dType, droneName, modelData, initialPosition)
             % Method to add a drone to the swarm, using CSV-based parameters
             
             id = length(obj.Drones) + 1;  % Unique ID for the new drone
@@ -81,7 +81,7 @@ classdef SwarmManager < handle
             % Create the drone based on modelData.Type
             % (Depending on whether you store Type as string or cell array, 
             %  you might need modelData.Type{1}.)
-            dType = string(modelData.Type);
+            %dType = string(modelData.Type);
             
             switch lower(dType)
                 case "multirotor"

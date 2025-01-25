@@ -5,73 +5,82 @@ classdef (Abstract) DroneBase < handle
     % DroneBase : Classe de base abstraite pour les drones
     
     properties
-        ID              % Identifiant unique du drone
-        Type            % Type de drone : 'multirotor' ou 'fixedwing' 
-        posState        % Vecteur de position à tn (1,3) [x, y, z]
-        speedState = [0 0 0]     % Vecteur de vitesse à tn (1,3) [r, teta, phi]
+        % ---------------- Existing Properties ----------------
+        ID                   % Identifiant unique du drone
+        Name
+        Model
+        Type                 % 'multirotor' ou 'fixedwing'
+        posState             % [x, y, z]
+        speedState = [0 0 0] % [vx, vy, vz] or [r,theta,phi], etc.
         posLog
         speedLog
-        flightTime = 0  % Temps de vol en sec*
-
-        targetGroup = 1         % Groupe de coordonnées dans lequel le drone se trouve de la cible // autant de targetGroup de que target dans swarm manager
-
+        flightTime = 0
+        targetGroup = 1
         IsAlive = true
-        mode_Follow_waypoint = false % False = follow target / True = follow waypoints
-        Waypoints        % matrice n*3 des waypoints à cycler
-        CurrentWaypoint = 1 %Indice du wp actuel
-
-        hasCommunicated = 0 % 0 non, 1 oui
-
+        mode_Follow_waypoint = false
+        Waypoints
+        CurrentWaypoint = 1
+        hasCommunicated = 0
         mass
+        powerLog
+        mean_consumption
         
-
-        powerLog            % Puissances consommées à chaque pas (1,n)
-        mean_consumption    % Puissance moyenne consommée (pour l'optimisation)
-
-        %energie a bord
-        maxCapacity         % si batterie
-        batteryNominalVoltage       % si batterie
-        k_peukert           % si batterie (cte de Peukert)
-        tankVolume          % si carburant
-        yield=0.9               % pour les deux
-        remainingCapacity   % en Wh
-        autonomy            % en h
+        % ---------------- Battery/Power/Autonomy (existing) ---------------
+        maxCapacity          % e.g. in Wh (if battery)
+        batteryNominalVoltage% e.g. in V
+        k_peukert = 1.2
+        tankVolume           % e.g. in liters (if fuel)
+        yield = 0.9          % generic efficiency factor
+        remainingCapacity    % in Wh
+        autonomy             % in hours (existing property)
+        
+        % ---------------- NEW / CSV-derived (added) -----------------------
+        % (You can store these so that child classes won't need to declare them)
+        AutonomyMins         % e.g. from CSV
+        ReloadMins           % e.g. from CSV
+        NominalCapacity      % if you want to store CSV's "NominalCapacity" directly
+        NominalVoltage       % from CSV's "NominalVoltage"
     end
     
     methods
         % Constructeur pour initialiser un drone avec un ID, un environnement, un type et une position initiale
         function obj = DroneBase(id, type, initialPos)
-            obj.ID = id; % Assigner l'identifiant unique
-            obj.Type = type; % Assigner le type de drone
+            obj.ID   = id;
+            obj.Type = type;
             
-            %dimensionnement drone
-            % !! ne pas retirer ces valeurs, elles ne peuvent être nulles
-            obj.batteryNominalVoltage=22.2;
-            obj.maxCapacity=200;
-            obj.remainingCapacity=obj.maxCapacity;
-            obj.mass=50;
-            obj.k_peukert=1.2;
-
-            % Générer un nom unique en utilisant le type et l'ID du drone
-            uniqueName = sprintf('%sDrone%d_%s', upper(type(1)), id, datestr(now, 'HHMMSSFFF'));
+            % Some defaults:
+            obj.batteryNominalVoltage = 22.2;  % e.g. 6S LiPo
+            obj.maxCapacity           = 200;
+            obj.remainingCapacity     = obj.maxCapacity;
+            obj.mass                  = 50;
+            obj.k_peukert             = 1.2;
+            
+            % Initialize position
+            obj.posState = initialPos;
+            
+            % Example: if you want "autonomy" to start the same as AutonomyMins,
+            % you can do so below (once you assign AutonomyMins). But that’s up to you.
+            
+            % Generate a unique name if desired (though not stored in a property):
+            % uniqueName = sprintf('%sDrone%d_%s', upper(type(1)), id, datestr(now, 'HHMMSSFFF'));
         end
-
-        function [distance] = closestDrone(obj, swarm) % Donne la distance au drone le plus proche
-            distance = 100 %calcul a implémenter
+        
+        % -------------- Example methods -----------------------------------
+        function [distance] = closestDrone(obj, swarm)
+            distance = 100; % calcul à implémenter
         end
            
-        function [score] = obsScore(obj, target, env) %Donne le score d'observation du drone
-            score = 100 %calcul a implémenter
+        function [score] = obsScore(obj, target, env)
+            score = 100; % calcul à implémenter
         end
 
-        function [distance] = closestEnv(obj, target, env) %donne la distance à l'objet de l'env le plus proche
-            distance = 100 %calcul a implémenter
+        function [distance] = closestEnv(obj, target, env)
+            distance = 100; % calcul à implémenter
         end
 
-        function [autonomy] = getAutonomy(obj) % donne l'autonomie restante en fct des logs du vol
-            autonomy = obj.autonomy;
+        function [autonomy] = getAutonomy(obj)
+            autonomy = obj.autonomy;  % e.g. in hours
         end
-
 
         function [target] = getTarget(obj, swarm)
             target = swarm.targets(obj.targetGroup, :);
