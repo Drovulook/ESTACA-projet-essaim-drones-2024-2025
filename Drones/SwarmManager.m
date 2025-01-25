@@ -124,7 +124,7 @@ classdef SwarmManager < handle
             end
         end
 
-        function checkCrash(obj, rhon) % fonction utilisée dans swarm_pond
+        function checkCrash(obj, rhon) % fonction utilisée dans swarm_pond // Crash d'altitude non géré
             crashList = any(rhon < obj.min_dist_between_drones, 2);
             liste = obj.AliveDrones;
 
@@ -166,8 +166,6 @@ classdef SwarmManager < handle
                 if obj.Drones{idx}.ID == id
                     if obj.Drones{idx}.IsAlive == 1
                         obj.Drones{idx} = [];
-                        return
-                    else
                         return
                     end
                 end

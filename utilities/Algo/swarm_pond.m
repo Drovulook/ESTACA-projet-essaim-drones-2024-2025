@@ -47,6 +47,7 @@ function swarmInfluence = swarm_pond(posStateMatrix, neighborI, n, nnmax, swarm)
     repulsion = f(rhon);
     repulsion(isnan(repulsion)) = 0;
 
+   
     
     offset = swarm_weights(2); % Cercle d'attraction
     f = @(x) (tanh(k * (x - r(2))) * (offset/2) + offset/2);
