@@ -55,37 +55,54 @@ classdef SwarmManager < handle
             obj.settings = backend.settings;
         end
 
-        
         % Méthode pour ajouter un drone à l'essaim
-        function addDrone(obj, droneType, initialPosition)
-            id = length(obj.Drones) + 1; % Déterminer un ID unique pour le nouveau drone
-            load('data/params.mat', 'multirotorParams', 'fixedWingParams'); % Charger les paramètres des drones
+        function addDrone(obj, droneName, modelData, initialPosition)
+            % Method to add a drone to the swarm, using CSV-based parameters
             
+            id = length(obj.Drones) + 1;  % Unique ID for the new drone
+            
+            % If you still want the "grid offset" approach:
             index = id - 1;
-
             dx = 5; % m
             dy = 5; % m
-
             side = 5;
             row = floor(index / side);
             col = mod(index, side);
-
-            initialPosition(1) = initialPosition(1) + col * dx;
-            initialPosition(2) = initialPosition(2) + row * dy;
-            initialPosition(3) = rand;
-
-
-            % Créer le drone en fonction de son type (multirotor ou fixedwing)
-            switch droneType
-                case 'multirotor'
-                    drone = MultirotorDrone(id, initialPosition, multirotorParams);
-                case 'fixedwing'
-                    drone = FixedWingDrone(id, initialPosition, fixedWingParams);
+            initialPosition(1) = initialPosition(1) + col*dx;
+            initialPosition(2) = initialPosition(2) + row*dy;
+            initialPosition(3) = rand;  % some altitude or random offset
+            
+            % NOTE: modelData is a table row from dronemodels.csv that includes:
+            %  modelData.Model
+            %  modelData.Type
+            %  modelData.MaxSpeed, modelData.MinSpeed, ...
+            %  etc.
+            
+            % Create the drone based on modelData.Type
+            % (Depending on whether you store Type as string or cell array, 
+            %  you might need modelData.Type{1}.)
+            dType = string(modelData.Type);
+            
+            switch lower(dType)
+                case "multirotor"
+                    % Provide the entire modelData to the Drone constructor
+                    drone = MultirotorDrone(id, initialPosition, modelData);
+                case "fixedwing"
+                    drone = FixedWingDrone(id, initialPosition, modelData);
                 otherwise
-                    error('Type de drone inconnu.'); 
+                    error('Unknown drone type: %s', dType);
             end
             
-            obj.Drones{end+1} = drone; % Ajouter le drone au tableau des drones
+            % Assign the "Name" to the drone (from fleet.csv)
+            drone.Name = droneName;          % e.g. "DroneA" or "MyDrone1"
+            drone.Model = modelData.Model;   % e.g. "PhantomX" or similar
+            % You might also store the rest of the columns in your drone object:
+            %   drone.MaxSpeed = modelData.MaxSpeed;
+            %   drone.MinSpeed = modelData.MinSpeed;
+            %   ... etc. ...
+            
+            % Add the drone to the cell array
+            obj.Drones{end+1} = drone;
         end
     
 
@@ -97,7 +114,6 @@ classdef SwarmManager < handle
                 end
             end
         end
-
 
         function crashed = get.CrashedDrones(obj)
             crashed = {};
@@ -119,7 +135,6 @@ classdef SwarmManager < handle
                 end
             end
         end
-
 
         function fixedwing = get.FixedWing(obj) 
             fixedwing = {};
@@ -170,7 +185,6 @@ classdef SwarmManager < handle
         function observationScore(obj, T_eucli)
             obj.observationMatrix = T_eucli; % Fonction a modifier pour comportement du score d'observation
         end
-
 
         function update_speeds(obj, dt)
 

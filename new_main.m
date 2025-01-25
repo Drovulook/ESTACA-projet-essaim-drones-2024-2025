@@ -7,7 +7,7 @@ env = Environment(10, 200, [-1000, 1000, 1000, -1000], [-1000, -1000, 1000, 1000
 setupZones;
 homeBaseCoord = [0, 0, 0];
 temps = 100000;
-traceSize = 20;
+traceSize = 200;
 
 swarm = SwarmManager(env, temps);
 numMultirotor = 10; % Nombre de drones multirotors

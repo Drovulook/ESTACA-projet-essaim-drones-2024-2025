@@ -1,0 +1,8 @@
+Model,Type,MaxSpeed,MinSpeed,CruiseSpeed,MaxVarioUp,MaxVarioDwn,MarTurnGLoad,Mass,RotorNumber,   RotorDiameter,NominalCapacity,NominalVoltage,TankVolume,AutonomyMins,ReloadMins,Finesse
+
+ModelTestA,multirotor,10,,8,5,-3,2,1,4
+
+ModelA,fixedwing,120,30
+ModelB,multirotor,
+ModelC,fixedwing,
+ModelD,multirotor,
