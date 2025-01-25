@@ -21,7 +21,7 @@ classdef SwarmManager < handle
         dist_target_min = 20 % Distance minimal du drone à la target
         orbit_radius = 60 % Distance des fixedwing à la cible à partir de laquelle ils orbitent
         min_dist_between_drones = 2 % si <, alors crash (distance en mètres)
-        dt_evitement_max = 50 % dt max pour lequel on calcul l'évitement vertical
+        dt_evitement_max = 0 % dt max pour lequel on calcul l'évitement vertical
 
         r = [30 60 100]  % Rayons Répulsion, attraction au sein de l'essaim
         swarm_weights = [1.4 0.8]; % Pondérations répulsion, attraction au sein de l'essaim

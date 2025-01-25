@@ -2,12 +2,12 @@ clear all;
 close all;
 clc;
 
-env = Environment(10, 200, [-1000, 1000, 1000, -1000], ...
-                 [-1000, -1000, 1000, 1000], [0, 0, 0, 0]);
+env = Environment(10, 200, [-200, 200, 200, -200], ...
+                 [-200, -200, 200, 200], [0, 0, 0, 0]);
 setupZones;
 homeBaseCoord = [0, 0, 0];
 temps = 100000;
-traceSize = 200;
+traceSize = 50;
 
 swarm = SwarmManager(env, temps);
 
