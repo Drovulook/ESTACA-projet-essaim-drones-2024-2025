@@ -118,7 +118,7 @@ classdef SwarmManager < handle
             liste = obj.AliveDrones;
 
             for idx = 1:length(liste)
-                if crashList(idx, 1) == 1  && (~contains(liste{idx}.phase, 'stand-by') && ~contains(liste{idx}.phase, 'take-off') && ~contains(liste{idx}.phase, 'landing'))
+                if crashList(idx, 1) == 1  && (~contains(liste{idx}.phase, 'stand-by') && ~contains(liste{idx}.phase, 'take-off') && ~contains(liste{idx}.phase, 'landing') && ~contains(liste{idx}.phase, 'return') && ~contains(liste{idx}.phase, 'reload'))
                     liste{idx}.crashDrone;
                     liste{idx}.phase
                     disp([num2str(liste{idx}.ID) ' crashed' ]);
@@ -202,6 +202,8 @@ classdef SwarmManager < handle
             % répulsion pour les drones, évitement pour le terrain,
             % attraction max, distance d'attraction maximum (bruit de communication)
             
+
+            % Séquenceur de lancement
             if length(obj.StandBy) > 0 & obj.LastSentDroneTimer > obj.Drone_sending_schedule
                 obj.StandBy{1}.setPhase('take-off')
                 obj.LastSentDroneTimer = 0;

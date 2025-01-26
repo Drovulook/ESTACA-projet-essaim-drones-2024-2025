@@ -6,7 +6,7 @@ function [desiredVector] = whole_pond(swarmInfluence, speedInfluence, targetInfl
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %distances pondérées et normalisées = matrices d'attraction
-
+            
             swarm_weight = weights(1);
             speed_weight = weights(2);
             target_weight = weights(3);

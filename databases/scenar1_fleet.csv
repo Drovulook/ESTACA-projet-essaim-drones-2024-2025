@@ -1,9 +1,9 @@
 Name,Model
-FalconAlpha,ModelTestA
+FalconAlpha,ModelTestB
 SkyRider,ModelTestB
-WindRover,ModelTestA
-EagleDrift,ModelTestA
+WindRover,ModelTestB
+EagleDrift,ModelTestB
 HawkStride,ModelTestB
-CloudVigil,ModelTestA
+CloudVigil,ModelTestB
 TerraWing,ModelTestB
-StormScout,ModelTestA
+StormScout,ModelTestB

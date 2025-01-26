@@ -26,8 +26,6 @@ function [targetInfluence, T_eucli] = target_pond(posStateMatrix, swarm)
         end
     end
 
-    % WpMatrix
-    
 
     nmulti = size(swarm.MultiRotor, 2);
     nb_drones = size(swarm.Drones, 2);
@@ -40,15 +38,19 @@ function [targetInfluence, T_eucli] = target_pond(posStateMatrix, swarm)
 
     for idx = 1:length(swarm.Drones) 
         if T_eucli(idx) < swarm.threshold_radius && swarm.Drones{idx}.mode_Follow_waypoint == true
-            if contains(swarm.Drones{idx}.phase, 'take-off') & swarm.Drones{idx}.CurrentWaypoint == length(swarm.Drones{idx}.Waypoints)
+            swarm.Drones{idx}.phase
+            if contains(swarm.Drones{idx}.phase, 'take-off') & swarm.Drones{idx}.CurrentWaypoint == size(swarm.Drones{idx}.Waypoints, 1)
                 swarm.Drones{idx}.setPhase('airborn')
 
-            elseif contains(swarm.Drones{idx}.phase, 'return') & swarm.Drones{idx}.CurrentWaypoint == length(swarm.Drones{idx}.Waypoints)
+            elseif contains(swarm.Drones{idx}.phase, 'return') & swarm.Drones{idx}.CurrentWaypoint == size(swarm.Drones{idx}.Waypoints, 1)
                 swarm.Drones{idx}.setPhase('landing')
+
+            elseif contains(swarm.Drones{idx}.phase, 'landing') & swarm.Drones{idx}.CurrentWaypoint == size(swarm.Drones{idx}.Waypoints, 1)
+                swarm.Drones{idx}.setPhase('reload')
 
             else 
                 swarm.Drones{idx}.CycleWaypoint;
-            
+            end
         end
     end
 
@@ -59,7 +61,7 @@ function [targetInfluence, T_eucli] = target_pond(posStateMatrix, swarm)
     % à la direction de la cible.
     % A appliquer SSI Follow wp 1 car sinon on veut que le drone franchisse
     % le WP
-
+   
     row = nmulti + 1 : nb_drones;
 
     T_X_fixedwing_tangent = -T_y(row(followMatrix(row) == 1)); % on crée le vecteur tangent dans le plan XY
@@ -76,7 +78,7 @@ function [targetInfluence, T_eucli] = target_pond(posStateMatrix, swarm)
 
     T_x(row(followMatrix(row) == 1)) = T_X_fixedwing_tangent; % on réinjecte le calcul dans les matrices totales 
     T_y(row(followMatrix(row) == 1)) = T_Y_fixedwing_tangent;
-
+    
 
     
     %%
