@@ -40,7 +40,15 @@ function [targetInfluence, T_eucli] = target_pond(posStateMatrix, swarm)
 
     for idx = 1:length(swarm.Drones) 
         if T_eucli(idx) < swarm.threshold_radius && swarm.Drones{idx}.mode_Follow_waypoint == true
-            swarm.Drones{idx}.CycleWaypoint;
+            if contains(swarm.Drones{idx}.phase, 'take-off') & swarm.Drones{idx}.CurrentWaypoint == length(swarm.Drones{idx}.Waypoints)
+                swarm.Drones{idx}.setPhase('airborn')
+
+            elseif contains(swarm.Drones{idx}.phase, 'return') & swarm.Drones{idx}.CurrentWaypoint == length(swarm.Drones{idx}.Waypoints)
+                swarm.Drones{idx}.setPhase('landing')
+
+            else 
+                swarm.Drones{idx}.CycleWaypoint;
+            
         end
     end
 
