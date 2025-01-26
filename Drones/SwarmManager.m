@@ -14,7 +14,7 @@ classdef SwarmManager < handle
         communicationFrequency % Hz, le nombre de fois par itération que les drones peuvent communiquer. Si 1 Hz, 1 drone seulement communique par itération
         communicationMatrix = zeros(0,0,0) % La matrice de communication utilisée par les drones pour se repérer entre eux
         LastSentDroneTimer = 0 %Pas de temps depuis dernier envoi drone
-        Drone_sending_schedule = 1 % 1 drone envoyé tous les x pas de temps
+        Drone_sending_schedule = 1.5 % 1 drone envoyé tous les x pas de temps
 
         %% Comportement essaim
         threshold_radius = 15 % Distance de trigger des waypoint cycliques
@@ -28,7 +28,7 @@ classdef SwarmManager < handle
         swarm_weights = [1.4 0.8]; % Pondérations répulsion, attraction au sein de l'essaim
         weights = [0.5 1.2 1 10] / 10; % pondération essaim, inertie, target, évitement
 
-        TO_WP = [30 0 5; 50 0 10; 100 20 30]
+        TO_WP = [50 0 20; 150 150 20]
         landing_WP = [-200 -10 40; -140 -5 20; -80 0 10]
         
         observationMatrix % Matrice de score, n_lignes, 1 colonne. Pour l'instant une distance*
@@ -118,9 +118,13 @@ classdef SwarmManager < handle
             liste = obj.AliveDrones;
 
             for idx = 1:length(liste)
-                if (crashList(idx, 1) == 1 || altitude(idx) < 0)  && (~contains(liste{idx}.phase, 'stand-by') || ~contains(liste{idx}.phase, 'landing'))
+                if crashList(idx, 1) == 1  && (~contains(liste{idx}.phase, 'stand-by') && ~contains(liste{idx}.phase, 'take-off') && ~contains(liste{idx}.phase, 'landing'))
                     liste{idx}.crashDrone;
+                    liste{idx}.phase
                     disp([num2str(liste{idx}.ID) ' crashed' ]);
+                elseif altitude(idx) < 0
+                    liste{idx}.crashDrone;
+                    disp([num2str(liste{idx}.ID) ' crashed on the ground' ]);
                 end
             end
         end
@@ -200,11 +204,12 @@ classdef SwarmManager < handle
             
             if length(obj.StandBy) > 0 & obj.LastSentDroneTimer > obj.Drone_sending_schedule
                 obj.StandBy{1}.setPhase('take-off')
-                LastSentDroneTimer = 0;
+                obj.LastSentDroneTimer = 0;
             end
 
             obj.LastSentDroneTimer = obj.LastSentDroneTimer + dt;
             % obj.Phase
+            
 
             n = length(obj.Drones);
 
