@@ -97,7 +97,10 @@ classdef FixedWingDrone < DroneBase & handle
 
             if (obj.NominalCapacity == 0)
                 % moteur thermique
+                energie_consomme=obj.powerLog(end)*obj.yieldThermo*dt/3600;
+                obj.remainingCapacity=obj.remainingCapacity-energie_consomme;
             else
+                % moteur electrique
                 capacite_consomme=power(obj.powerLog(end)/obj.NominalVoltage, obj.k_peukert)*dt/3600; %Wh
                 obj.remainingCapacity=obj.remainingCapacity-capacite_consomme*obj.NominalVoltage;
             end
@@ -109,7 +112,7 @@ classdef FixedWingDrone < DroneBase & handle
                 obj.autonomy=obj.remainingCapacity/(I^obj.k_peukert);
             else
                 % calc fuel
-                obj.autonomy=obj.remainingCapacity*obj.yield/obj.mean_consumption;
+                obj.autonomy=obj.remainingCapacity*obj.yieldThermo/obj.mean_consumption;
             end
             % autonomie en heures
 
@@ -124,12 +127,12 @@ classdef FixedWingDrone < DroneBase & handle
             % vitesse choisi pour le calcul et ce peut importe si l'on
             % monte/descend.
 
-            distance=obj.Destination-obj.posLog(end,:);
-            pente=asin(distance(3)/norm(distance));
+            distance=obj.posLog(end,:)-obj.Destination;
+            pente=-asin(distance(3)/norm(distance));
 
             % pente de retour maximale
             if distance(3)<=0
-                penteMax=asin(obj.MaxDescentRate/obj.CruiseSpeed);
+                penteMax=asin(obj.MaxDescentRate/obj.CruiseSpeed); % négatif car repère avion
             else
                 penteMax=asin(obj.MaxClimbRate/obj.CruiseSpeed);
             end
@@ -138,7 +141,7 @@ classdef FixedWingDrone < DroneBase & handle
             % descendre rapidement ou non
             if pente<penteMax
                 tretour=norm(distance(1:2)/cos(pente))/obj.CruiseSpeed+...
-                    abs(distance(3)+norm(distance(1:2)*tan(pente)))/obj.MaxDescentRate;
+                    abs(distance(3)+norm(distance(1:2))*tan(penteMax))/abs(obj.MaxDescentRate);
                 % calcul du temps horizontal + calcul du temps vertical
                 % déduis de la descente durant l'approche
             elseif pente>penteMax
@@ -149,16 +152,14 @@ classdef FixedWingDrone < DroneBase & handle
             end
 
             Epp=obj.mass*9.81*distance(3);
-            energyRTB=obj.mean_consumption*tretour+Epp*obj.yield;
+            energyRTB=obj.mean_consumption*tretour-Epp*obj.yield;
+            energyRTB=energyRTB/3600;
 
-            if energyRTB*1.2>obj.remainingCapacity
+            if energyRTB*1.2>obj.remainingCapacity || obj.remainingCapacity/obj.NominalCapacity<0.05
                 condition=true;
             else
                 condition=false;
             end
-            % tretour=norm(distance)/obj.CruiseSpeed; % vent non pris en compte
-            % %tretour=norm(distance)/(obj.CruiseSpeed+dot(vent,distance)/norm(distance)); % vent pris en compte vecteur à préciser
         end
-
     end
 end
