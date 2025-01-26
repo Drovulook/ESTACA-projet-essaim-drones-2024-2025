@@ -14,7 +14,7 @@ classdef SwarmManager < handle
         communicationFrequency % Hz, le nombre de fois par itération que les drones peuvent communiquer. Si 1 Hz, 1 drone seulement communique par itération
         communicationMatrix = zeros(0,0,0) % La matrice de communication utilisée par les drones pour se repérer entre eux
         LastSentDroneTimer = 0 %Pas de temps depuis dernier envoi drone
-        Drone_sending_schedule = 1.5 % 1 drone envoyé tous les x pas de temps
+        Drone_sending_schedule = 2 % 1 drone envoyé tous les x pas de temps
 
         %% Comportement essaim
         threshold_radius = 15 % Distance de trigger des waypoint cycliques
@@ -210,7 +210,6 @@ classdef SwarmManager < handle
             end
 
             obj.LastSentDroneTimer = obj.LastSentDroneTimer + dt;
-            % obj.Phase
             
 
             n = length(obj.Drones);
