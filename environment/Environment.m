@@ -7,11 +7,16 @@ classdef Environment < handle
         GroundCoordinates % Coordonnées de la surface au sol en x, y, z
         
         ZonesList = {}      % Liste pour stocker toutes les zones
-        TargetsList = {}    % Liste pour stocker toutes les cibles
         ObstaclesList = {}  % Liste pour stocker tous les obstacles
 
         DegradedMode = false   % Mode dégradé => erreurs / bruits sur les calculs 
                                % (par défaut en false)
+        swarm = [] % objet enfant swarm
+        
+    end
+
+    properties (Dependent)
+        TargetsList % Liste pour stocker toutes les cibles
     end
     
     methods
@@ -36,6 +41,10 @@ classdef Environment < handle
             end
         end
         
+        % ------------------- GETTER ------------------------%
+        function TargetsList = get.TargetsList(obj)
+            TargetsList = obj.swarm.targets;
+        end
         %-------------------- ADDERS ------------------------%
         function addZone(obj, zone)
             obj.ZonesList{end+1} = zone;
