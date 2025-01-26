@@ -28,6 +28,7 @@ classdef (Abstract) DroneBase < handle
         powerLog
         mean_consumption
         phase               % 'take-off','inbound','onsite','return','landing','standby'
+        chargeTime          % indique le temps restant de recharge en temps réel
         
         % ---------------- Battery/Power/Autonomy (existing) ---------------
         % maxCapacity          % e.g. in Wh (if battery)
@@ -67,7 +68,11 @@ classdef (Abstract) DroneBase < handle
                 obj.NominalCapacity           = 200;
             end
 
-            obj.remainingCapacity= obj.NominalCapacity;
+    		if(obj.NominalVoltage>0)
+                obj.remainingCapacity=obj.NominalCapacity;
+    		else
+    			obj.remainingCapacity=obj.tankVolume*42.8*0.8*10^6;
+    		end
 
             if obj.mass==0
                 obj.mass                  = 50;
@@ -163,6 +168,20 @@ classdef (Abstract) DroneBase < handle
             else
                 obj.Waypoints = obj.StoredWaypoints{3};
                 obj.mode_Follow_waypoint = obj.wanted_mode;
+            end
+        end
+
+        function charge(obj,dt)
+            % chargement du drone, si drone chargé standby
+            if(obj.chargeTime==0 && obj.NominalCapacity~=obj.remainingCapacity)
+                obj.chargeTime=obj.remainingCapacity/(obj.NominalCapacity/obj.ReloadMins*60)*3600;
+            elseif (obj.chargeTime)
+                obj.chargeTime=obj.chargeTime-dt;
+                if(obj.chargeTime<=0)
+                    obj.remainingCapacity=obj.NominalCapacity;
+                    obj.chargeTime=0;
+                    obj.setPhase('standby');
+                end
             end
         end
 
