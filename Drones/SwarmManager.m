@@ -118,7 +118,7 @@ classdef SwarmManager < handle
             liste = obj.AliveDrones;
 
             for idx = 1:length(liste)
-                if (crashList(idx, 1) == 1 || altitude(idx) < 0)  && (~contains(liste{idx}.Phase, 'stand-by') || ~contains(liste{idx}.Phase, 'landing'))
+                if (crashList(idx, 1) == 1 || altitude(idx) < 0)  && (~contains(liste{idx}.phase, 'stand-by') || ~contains(liste{idx}.phase, 'landing'))
                     liste{idx}.crashDrone;
                     disp([num2str(liste{idx}.ID) ' crashed' ]);
                 end
@@ -259,7 +259,7 @@ classdef SwarmManager < handle
             %% Calcul des zones d'évitement 
             % On utilise la position réelle pour le calcul
             zones = obj.env.get_zones_pos_weights();
-            avoidInfluence = avoid_pond(posStateMatrix, speedStateMatrix, dt, zones, obj.altitude_min, obj.dt_evitement_max); % Utils.Algo
+            avoidInfluence = avoid_pond(posStateMatrix, speedStateMatrix, dt, zones, obj.altitude_min, obj.dt_evitement_max, obj); % Utils.Algo
 
             %% Maintentant, pour chaque drone, on fait la pondération des influeneces swarm/target/speed et on les somme
 

@@ -20,7 +20,7 @@ classdef (Abstract) DroneBase < handle
         IsAlive = true
         mode_Follow_waypoint = false
         wanted_mode %Privé de follow waypoint
-        Waypoints = [2 2 2; 1 1 1]
+        Waypoints = [0 0 0]
         CurrentWaypoint = 1
         StoredWaypoints = []
         hasCommunicated = 0
@@ -136,6 +136,7 @@ classdef (Abstract) DroneBase < handle
             if(size(obj.speedLog,1)>2 && obj.IsAlive)
                 obj.compute_autonomy(dt); % utilise les logData
             end
+            
         end
 
 
