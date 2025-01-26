@@ -1,3 +1,5 @@
 ﻿Model,Type,MaxSpeed,MinSpeed,CruiseSpeed,MaxVarioUp,MaxVarioDwn,MaxTurnGLoad,Mass,RotorNumber,RotorDiameter,NominalCapacity,NominalVoltage,TankVolume,AutonomyMins,ReloadMins,Finesse
 ModelTestA,multirotor,10,0,8,5,-3,2,0.741,4,0.22,40,11.1,0,30,1,0
 ModelTestB,fixedwing,50,10,30,10,-5,2,300,0,0,16000,44.4,0,60,10,10
+Phantom_4_Pro_V2.0,multirotor,20,2.8,10,1.1,1,1.375,4,0.24,5.87,15.2,0,30,90,5
+Parrot_Disco,fixedwing,22.2,8.3,13.9,5,4,2.5,0.75,1,0.2,2.7,11.1,0,45,55,10

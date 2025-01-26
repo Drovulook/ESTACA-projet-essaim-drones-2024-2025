@@ -43,7 +43,7 @@ classdef MultirotorDrone < DroneBase & handle
             obj.tankVolume          = params.TankVolume;
             obj.AutonomyMins        = params.AutonomyMins;
             obj.ReloadMins          = params.ReloadMins;
-            
+
             % If you want to unify "autonomy" with "AutonomyMins":
             obj.autonomy = obj.AutonomyMins / 60;  % hours
             obj.remainingCapacity=obj.NominalCapacity;
@@ -80,8 +80,11 @@ classdef MultirotorDrone < DroneBase & handle
 
             if (obj.NominalCapacity == 0)
                 % moteur thermique
+                energie_consomme=obj.powerLog(end)*obj.yieldThermo*dt/3600;
+                obj.remainingCapacity=obj.remainingCapacity-energie_consomme;
             else
-                capacite_consomme=power(obj.powerLog(end)/obj.NominalVoltage, obj.k_peukert)*dt/3600; % Wh
+                % moteur electrique
+                capacite_consomme=power(obj.powerLog(end)/obj.NominalVoltage, obj.k_peukert)*dt/3600; %Wh
                 obj.remainingCapacity=obj.remainingCapacity-capacite_consomme*obj.NominalVoltage;
             end
 
@@ -92,12 +95,15 @@ classdef MultirotorDrone < DroneBase & handle
                 obj.autonomy=obj.remainingCapacity/(I^obj.k_peukert);
             else
                 % calc fuel
-                obj.autonomy=obj.remainingCapacity*obj.yield/obj.mean_consumption;
+                obj.autonomy=obj.remainingCapacity*obj.yieldThermo/obj.mean_consumption;
             end
             % autonomie en heures
 
             if obj.conditionReturnToBase
                 obj.setPhase('return');
+            end
+            if obj.conditionReturnToBase=='reload'
+                obj.charge(dt);
             end
         end
 
@@ -109,39 +115,39 @@ classdef MultirotorDrone < DroneBase & handle
             % monte/descend.
 
             distance=obj.posLog(end,:)-obj.Destination;
-            pente=asin(distance(3)/norm(distance));
+            pente=-asin(distance(3)/norm(distance)); % négatif car repère avion
 
             % pente de retour maximale
-            if distance(3)<=0
-                penteMax=asin(obj.MaxVarioDown/obj.CruiseSpeed);
+            if distance(3)>=0
+                penteMax=asin(obj.MaxVarioDown/obj.CruiseSpeed); 
             else
                 penteMax=asin(obj.MaxVarioUp/obj.CruiseSpeed);
             end
-            
+
             % calcul le temps de retour selon la capacité du drone à
             % descendre rapidement ou non
             if pente<penteMax
-                tretour=norm(distance(1:2)/cos(pente))/obj.CruiseSpeed+...
-                abs(distance(3)+norm(distance(1:2)*tan(pente)))/obj.MaxVarioDown;
+                tretour=norm(distance(1:2))/cos(pente)/obj.CruiseSpeed+...
+                    abs(distance(3)+norm(distance(1:2))*tan(penteMax))/abs(obj.MaxVarioDown);
                 % calcul du temps horizontal + calcul du temps vertical
                 % déduis de la descente durant l'approche
             elseif pente>penteMax
-                tretour=norm(distance(1:2))/obj.CruiseSpeed+distance(3)/obj.MaxVarioUp;
-                % calcul très approximatif
-            else
+                % le drone peut descendre en ligne droite
                 tretour=norm(distance)/obj.CruiseSpeed;
+            else
+                tretour=norm(distance)/obj.CruiseSpeed+distance(3)/abs(obj.MaxVarioDown);
             end
-            
-            Epp=obj.mass*9.81*distance(3);
-            energyRTB=obj.mean_consumption*tretour+Epp*obj.yield;
 
-            if energyRTB*1.2>obj.remainingCapacity
+            Epp=obj.mass*9.81*distance(3);
+            energyRTB=obj.mean_consumption*tretour-Epp*obj.yield;
+            energyRTB=energyRTB/3600;
+
+            if energyRTB*1.2>obj.remainingCapacity || obj.remainingCapacity/obj.NominalCapacity<0.05
                 condition=true;
             else
                 condition=false;
             end
-            % tretour=norm(distance)/obj.CruiseSpeed; % vent non pris en compte  
-            % %tretour=norm(distance)/(obj.CruiseSpeed+dot(vent,distance)/norm(distance)); % vent pris en compte vecteur à préciser  
         end
+
     end
 end
