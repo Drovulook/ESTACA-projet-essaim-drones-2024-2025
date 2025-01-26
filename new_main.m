@@ -18,6 +18,8 @@ temps = 100000;
 traceSize = 50;
 
 swarm = SwarmManager(env, temps);
+env.swarm = app.swarm;
+
 
 %% 3) Load DroneModels and Fleet, then build the swarm
 dronemodels = readtable('dronemodels.csv', ...
