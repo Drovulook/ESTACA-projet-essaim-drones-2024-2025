@@ -16,9 +16,9 @@ classdef FixedWingDrone < DroneBase & handle
 
     methods
         % Constructeur pour initialiser un drone à voilure fixe avec ses paramètres
-        function obj = FixedWingDrone(id, initialPosition, params)
+        function obj = FixedWingDrone(id, initialPosition, params, swarm)
             % Call the base class constructor
-            obj@DroneBase(id, 'fixedwing', initialPosition);
+            obj@DroneBase(id, 'fixedwing', initialPosition, swarm);
 
             % Now assign from 'params' (the structure/table row)
             obj.MaxSpeed       = params.MaxSpeed;
@@ -114,7 +114,7 @@ classdef FixedWingDrone < DroneBase & handle
             % autonomie en heures
 
             if obj.conditionReturnToBase
-                obj.phase='return';
+                obj.setPhase('return');
             end
         end
 

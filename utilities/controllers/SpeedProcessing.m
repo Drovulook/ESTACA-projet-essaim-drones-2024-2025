@@ -1,4 +1,12 @@
 function [newSpeedX, newSpeedY, newSpeedZ] = SpeedProcessing(drone, i, desiredVector, dt)
+    
+    if contains(drone.phase, 'stand-by')
+        newSpeedX = 0;
+        newSpeedY = 0;
+        newSpeedZ = 0;
+        return
+    end
+
     tholdDesiredVectorV = 0.05;
     tholdDesiredVectorH = 0.025;
     
@@ -54,7 +62,10 @@ function [newSpeedX, newSpeedY, newSpeedZ] = SpeedProcessing(drone, i, desiredVe
 
     else
 
-    
+        maxSpeed = drone.MaxSpeed;
+        if contains(drone.phase, 'landing')
+            maxSpeed = drone.MaxSpeed/5;
+        end
         %%
     
         dampingFactorV = sqrt(max(0,min(1,  0.3 + abs(desiredVectorZ) / tholdDesiredVectorV)));
@@ -80,14 +91,15 @@ function [newSpeedX, newSpeedY, newSpeedZ] = SpeedProcessing(drone, i, desiredVe
         if abs(deltaAngle) > deg2rad(30)
             newTotalSpeed = previousTotalSpeed - aDecel * dt;
         else
-            if previousTotalSpeed < drone.MaxSpeed
+            if previousTotalSpeed < maxSpeed
                 newTotalSpeed = previousTotalSpeed + aProp * dt;
-            elseif previousTotalSpeed > drone.MaxSpeed
+            elseif previousTotalSpeed > maxSpeed
                 newTotalSpeed = previousTotalSpeed - aDecel * dt;
             else
                 newTotalSpeed = previousTotalSpeed;
             end
         end
+        
 
         if deltaAngle < 0
             % turnVelocity = g * sqrt((dampingFactorH * nTurn)^2 - 1) / newTotalSpeed;

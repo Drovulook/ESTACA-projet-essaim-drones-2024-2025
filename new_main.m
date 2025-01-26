@@ -9,9 +9,8 @@ env = Environment(10, 200, ...
     [0, 0, 0, 0]);
 
 %% 2) Load Obstacles, Targets, and Zones from CSV
-defineObstaclesFromFile(env, "obstaclelist.csv");
-defineTargetsFromFile(env, "targetlist.csv");
-defineZonesFromFile(env,  "zonelist.csv");
+defineTargetsFromFile(env, "scenar1_targets.csv");
+defineZonesFromFile(env,  "scenar1_zones.csv");
 
 homeBaseCoord = [0, 0, 0];
 temps = 100000;
@@ -24,7 +23,7 @@ swarm = SwarmManager(env, temps);
 dronemodels = readtable('dronemodels.csv', ...
     'Delimiter', ',', 'VariableNamingRule', 'preserve');
 
-fleet = readtable('fleet.csv', ...
+fleet = readtable('scenar1_fleet.csv', ...
     'Delimiter', ',', 'VariableNamingRule', 'preserve');
 
 for iRow = 1:height(fleet)
@@ -57,13 +56,16 @@ Waypoints = [0 50 100;
              -100 -10 10];
 
 for i = 1:length(swarm.Drones)
-    swarm.Drones{i}.Waypoints = Waypoints;
+    swarm.Drones{i}.setWP(Waypoints);
+    swarm.Drones{1}.mode_Follow_waypoint = true;
+    swarm.Drones{1}.setPhase('stand-by');
+    
 end
 
 % Example: assign targets and groups
 Target = [0 0 75];
 swarm.Drones{end}.setTargetGroup(2);
-swarm.Drones{1}.mode_Follow_waypoint = true;
+
 swarm.AliveDrones;
 
 % Swarm parameters
@@ -74,6 +76,12 @@ swarm.weights = [0.5 1.2 1 10] / 10;
 %% 5) Run the RTPlot2 simulation
 dt = 0.1;
 RTPlot2(env, swarm, dt, temps, Target, traceSize);
+
+
+
+
+
+
 
 %% ------------------------------------------------------------------------
 %% Helper functions for reading CSV files: Obstacles, Targets, Zones

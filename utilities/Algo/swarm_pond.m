@@ -28,7 +28,7 @@ function swarmInfluence = swarm_pond(posStateMatrix, neighborI, n, nnmax, swarm)
     rho_z = reshape(stateA(neighborI,3),n,nnmax) - posStateMatrix(:,3); % Différence axe z
     rhon = sqrt(rho_x.^2 + rho_y.^2 + rho_z.^2); % Distance euclidienne en 3D
 
-    swarm.checkCrash(rhon); % test des crash
+    swarm.checkCrash(rhon, posStateMatrix(:,3)); % test des crash
 
     %Chaque matrice a le drone par ligne, et ses contacts par
     %dépendance sur la ligne. Ainsi, on peut, en fonction de rhon,

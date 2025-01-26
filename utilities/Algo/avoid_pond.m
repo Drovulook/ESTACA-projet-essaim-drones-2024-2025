@@ -1,4 +1,4 @@
-function [avoidInfluence] = avoid_pond(posStateMatrix, speedStateMatrix, dt, zones_object_list, altitude_min, dt_evitement_max)
+function [avoidInfluence] = avoid_pond(posStateMatrix, speedStateMatrix, dt, zones_object_list, altitude_min, dt_evitement_max, swarm)
 
     avoidZones_posDim = zeros(0,6);
    
@@ -9,6 +9,7 @@ function [avoidInfluence] = avoid_pond(posStateMatrix, speedStateMatrix, dt, zon
         % stockage des zones d'exclusion + dim
     end
 
+    
     function [X, Y, Z, Eucli] = diffeo(posMatrix, avoidMatrix)
         X = avoidMatrix(:,1)' - posMatrix(:,1); % (n_drones * n_zones)
         Y = avoidMatrix(:,2)' - posMatrix(:,2); % Delta en Y a chaque zone (colonne) par drone (ligne)
@@ -41,9 +42,23 @@ function [avoidInfluence] = avoid_pond(posStateMatrix, speedStateMatrix, dt, zon
     zoneCenter_delta_y(isnan(zoneCenter_delta_y)) = 0;
     zoneCenter_delta_z(isnan(zoneCenter_delta_z)) = 0;
 
-    zoneCenter_delta_z = zoneCenter_delta_z - f(posStateMatrix(:,3), altitude_min);
+    %% Condition d'altitude sauf si phase de vol particulière
+    delta = f(posStateMatrix(:,3), altitude_min);
 
-    %% Evitement vertical prédictif t+3
+    
+    phase = [];
+    for idx=1:length(swarm.Drones)
+        if contains(swarm.Drones{idx}.phase, 'take-off') || contains(swarm.Drones{idx}.phase, 'landing') || contains(swarm.Drones{idx}.phase, 'reload') || contains(swarm.Drones{idx}.phase, 'stand-by')
+            phase = [phase; 0];
+        else
+            phase = [phase; 1];
+        end
+    end
+
+    zoneCenter_delta_z = zoneCenter_delta_z - delta.*phase;
+    
+
+    %% Evitement vertical prédictif t+n
     % Si dans une zone contestée avec le même vecteur vitesse à t+1, t+2,
     % t+3, alors évitement vertical pleins gaz vers le haut
 

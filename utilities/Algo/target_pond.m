@@ -13,16 +13,19 @@ function [targetInfluence, T_eucli] = target_pond(posStateMatrix, swarm)
     WpMatrix = zeros(0,3); % Pour chaque drone donne sa target
     followMatrix = zeros(0,1); % 1 si target, 0 si waypoint
 
-    for idx = 1:length(swarm.Drones) 
+    for idx = 1:length(swarm.Drones)
+        
         if swarm.Drones{idx}.mode_Follow_waypoint == true
             followMatrix = [followMatrix ; 0];
             wp_id = swarm.Drones{idx}.CurrentWaypoint;
             WpMatrix = [WpMatrix ; swarm.Drones{idx}.Waypoints(wp_id,:)];
+            
         else
             followMatrix = [followMatrix ; 1];
-            WpMatrix = [WpMatrix ; swarm.Drones{idx}.getTarget(swarm)]; %%Il faut que le swarm target soir en fait 
+            WpMatrix = [WpMatrix ; swarm.Drones{idx}.getTarget(swarm)];
         end
     end
+    
 
     nmulti = size(swarm.MultiRotor, 2);
     nb_drones = size(swarm.Drones, 2);

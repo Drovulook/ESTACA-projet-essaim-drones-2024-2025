@@ -172,6 +172,10 @@ classdef Environment < handle
         function zone_pos_weight_matrix = get_zones_pos_weights(obj)
             zone_pos_weight_matrix = obj.ZonesList;
         end
+
+        function update_target(obj, newTarget, targetGroup)
+            obj.TargetsList{targetGroup}.setPosition(newTarget);
+        end
     end
 end
 
