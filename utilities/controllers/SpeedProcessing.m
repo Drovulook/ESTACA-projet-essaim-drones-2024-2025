@@ -1,6 +1,6 @@
 function [newSpeedX, newSpeedY, newSpeedZ] = SpeedProcessing(drone, i, desiredVector, dt)
     
-    if contains(drone.phase, 'stand-by')
+    if contains(drone.phase, 'stand-by') | contains(drone.phase, 'reload')
         newSpeedX = 0;
         newSpeedY = 0;
         newSpeedZ = 0;

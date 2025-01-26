@@ -14,7 +14,7 @@ classdef SwarmManager < handle
         communicationFrequency % Hz, le nombre de fois par itération que les drones peuvent communiquer. Si 1 Hz, 1 drone seulement communique par itération
         communicationMatrix = zeros(0,0,0) % La matrice de communication utilisée par les drones pour se repérer entre eux
         LastSentDroneTimer = 0 %Pas de temps depuis dernier envoi drone
-        Drone_sending_schedule = 1.5 % 1 drone envoyé tous les x pas de temps
+        Drone_sending_schedule = 2 % 1 drone envoyé tous les x pas de temps
 
         %% Comportement essaim
         threshold_radius = 15 % Distance de trigger des waypoint cycliques
@@ -118,7 +118,7 @@ classdef SwarmManager < handle
             liste = obj.AliveDrones;
 
             for idx = 1:length(liste)
-                if crashList(idx, 1) == 1  && (~contains(liste{idx}.phase, 'stand-by') && ~contains(liste{idx}.phase, 'take-off') && ~contains(liste{idx}.phase, 'landing'))
+                if crashList(idx, 1) == 1  && (~contains(liste{idx}.phase, 'stand-by') && ~contains(liste{idx}.phase, 'take-off') && ~contains(liste{idx}.phase, 'landing') && ~contains(liste{idx}.phase, 'return') && ~contains(liste{idx}.phase, 'reload'))
                     liste{idx}.crashDrone;
                     liste{idx}.phase
                     disp([num2str(liste{idx}.ID) ' crashed' ]);
@@ -202,13 +202,14 @@ classdef SwarmManager < handle
             % répulsion pour les drones, évitement pour le terrain,
             % attraction max, distance d'attraction maximum (bruit de communication)
             
+
+            % Séquenceur de lancement
             if length(obj.StandBy) > 0 & obj.LastSentDroneTimer > obj.Drone_sending_schedule
                 obj.StandBy{1}.setPhase('take-off')
                 obj.LastSentDroneTimer = 0;
             end
 
             obj.LastSentDroneTimer = obj.LastSentDroneTimer + dt;
-            % obj.Phase
             
 
             n = length(obj.Drones);

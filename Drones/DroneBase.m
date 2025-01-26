@@ -27,7 +27,7 @@ classdef (Abstract) DroneBase < handle
         mass
         powerLog
         mean_consumption
-        phase               % 'take-off','airborn','return','landing','standby'
+        phase               % 'take-off','airborn','return','landing','standby', 'reload'
         chargeTime          % indique le temps restant de recharge en temps réel
         needReplacement     % indique le retour imminent
         
@@ -158,10 +158,15 @@ classdef (Abstract) DroneBase < handle
             obj.phase = phase;
             
             if contains(phase, 'take-off')
-                obj.wanted_mode = obj.mode_Follow_waypoint;
-                obj.mode_Follow_waypoint = true;
-                obj.Waypoints = obj.StoredWaypoints{1};
-                obj.CurrentWaypoint = 1;
+                if contains(obj.Type, 'fixedwing')
+                    obj.wanted_mode = obj.mode_Follow_waypoint;
+                    obj.mode_Follow_waypoint = true;
+                    obj.Waypoints = obj.StoredWaypoints{1};
+                    obj.CurrentWaypoint = 1;
+                else
+                    obj.phase = 'airborn';
+                end
+
 
             elseif contains(phase, 'return')
                 obj.Waypoints = obj.StoredWaypoints{2};
@@ -169,12 +174,17 @@ classdef (Abstract) DroneBase < handle
                 obj.mode_Follow_waypoint = true;
                 obj.CurrentWaypoint = 1;
 
+            elseif contains(phase, 'landing')
+                obj.CurrentWaypoint = 1;
+                obj.Waypoints = [0 0 0]; %Coords de la base
+
             else
                 obj.Waypoints = obj.StoredWaypoints{3};
                 obj.mode_Follow_waypoint = obj.wanted_mode;
                 obj.CurrentWaypoint = 1;
             end
         end
+
 
         function charge(obj,dt)
             % chargement du drone, si drone chargé standby

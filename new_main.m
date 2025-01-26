@@ -14,7 +14,7 @@ defineZonesFromFile(env,  "scenar1_zones.csv");
 
 homeBaseCoord = [0, 0, 0];
 temps = 100000;
-traceSize = 50;
+traceSize = 20;
 
 swarm = SwarmManager(env, temps);
 
