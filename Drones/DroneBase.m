@@ -27,7 +27,7 @@ classdef (Abstract) DroneBase < handle
         mass
         powerLog
         mean_consumption
-        phase               % 'take-off','inbound','onsite','return','landing','standby'
+        phase               % 'take-off','airborn','return','landing','standby'
         chargeTime          % indique le temps restant de recharge en temps réel
         
         % ---------------- Battery/Power/Autonomy (existing) ---------------
@@ -147,7 +147,7 @@ classdef (Abstract) DroneBase < handle
 
         function CycleWaypoint(obj)
             obj.CurrentWaypoint = obj.CurrentWaypoint + 1 ;
-            if obj.CurrentWaypoint > size(obj.Waypoints,1)
+            if obj.CurrentWaypoint > size(obj.Waypoints, 1)
                 obj.CurrentWaypoint = 1;
             end
         end
@@ -159,15 +159,18 @@ classdef (Abstract) DroneBase < handle
                 obj.wanted_mode = obj.mode_Follow_waypoint;
                 obj.mode_Follow_waypoint = true;
                 obj.Waypoints = obj.StoredWaypoints{1};
+                obj.CurrentWaypoint = 1;
 
             elseif contains(phase, 'return')
                 obj.Waypoints = obj.StoredWaypoints{2};
                 obj.wanted_mode = obj.mode_Follow_waypoint;
                 obj.mode_Follow_waypoint = true;
+                obj.CurrentWaypoint = 1;
 
             else
                 obj.Waypoints = obj.StoredWaypoints{3};
                 obj.mode_Follow_waypoint = obj.wanted_mode;
+                obj.CurrentWaypoint = 1;
             end
         end
 

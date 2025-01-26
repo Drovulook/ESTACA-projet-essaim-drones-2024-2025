@@ -28,7 +28,7 @@ classdef SwarmManager < handle
         swarm_weights = [1.4 0.8]; % Pondérations répulsion, attraction au sein de l'essaim
         weights = [0.5 1.2 1 10] / 10; % pondération essaim, inertie, target, évitement
 
-        TO_WP = [50 0 20; 150 150 20]
+        TO_WP = [70 20 30]
         landing_WP = [-200 -10 40; -140 -5 20; -80 0 10]
         
         observationMatrix % Matrice de score, n_lignes, 1 colonne. Pour l'instant une distance*
