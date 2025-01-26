@@ -154,6 +154,17 @@ classdef FixedWingDrone < DroneBase & handle
             Epp=obj.mass*9.81*distance(3);
             energyRTB=obj.mean_consumption*tretour-Epp*obj.yield;
             energyRTB=energyRTB/3600;
+                  
+            if energyRTB/obj.NominalCapacity>0.05
+                returnCountdownTime=(obj.remainingCapacity-energyRTB)/obj.mean_consumption*3600;
+            else
+                returnCountdownTime=(obj.remainingCapacity-obj.NominalCapacity*0.05)/obj.mean_consumption*3600;
+            end
+
+            if returnCountdownTime<tretour*3
+                obj.needReplacement=1;
+            end
+
 
             if energyRTB*1.2>obj.remainingCapacity || obj.remainingCapacity/obj.NominalCapacity<0.05
                 condition=true;

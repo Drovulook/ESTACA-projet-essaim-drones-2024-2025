@@ -29,6 +29,7 @@ classdef (Abstract) DroneBase < handle
         mean_consumption
         phase               % 'take-off','airborn','return','landing','standby'
         chargeTime          % indique le temps restant de recharge en temps réel
+        needReplacement     % indique le retour imminent
         
         % ---------------- Battery/Power/Autonomy (existing) ---------------
         % maxCapacity          % e.g. in Wh (if battery)
@@ -36,6 +37,7 @@ classdef (Abstract) DroneBase < handle
         k_peukert = 1.2
         tankVolume           % e.g. in liters (if fuel)
         yield = 0.9          % generic efficiency factor
+        yieldThermo=0.25
         remainingCapacity    % in Wh
         autonomy             % in hours (existing property)
         
