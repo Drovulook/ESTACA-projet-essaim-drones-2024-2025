@@ -119,6 +119,9 @@ classdef FixedWingDrone < DroneBase & handle
             if obj.conditionReturnToBase
                 obj.setPhase('return');
             end
+            if obj.conditionReturnToBase=='reload'
+                obj.charge(dt);
+            end
         end
 
         function condition=conditionReturnToBase(obj)
