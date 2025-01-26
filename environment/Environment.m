@@ -170,7 +170,12 @@ classdef Environment < handle
         % Exemple de récupération de "matrice" ou "table" 
         % de positions depuis les zones. (À adapter si besoin.)
         function zone_pos_weight_matrix = get_zones_pos_weights(obj)
-            zone_pos_weight_matrix = obj.ZonesList;
+            zone_pos_weight_matrix = {};
+            for idx=1:length(obj.ZonesList)
+                if obj.ZonesList{idx}.Category == 'P'
+                    zone_pos_weight_matrix{end+1} = obj.ZonesList{idx};
+                end
+            end
         end
 
         function update_target(obj, newTarget, targetGroup)

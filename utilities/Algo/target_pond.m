@@ -25,6 +25,8 @@ function [targetInfluence, T_eucli] = target_pond(posStateMatrix, swarm)
             WpMatrix = [WpMatrix ; swarm.Drones{idx}.getTarget(swarm)];
         end
     end
+
+    % WpMatrix
     
 
     nmulti = size(swarm.MultiRotor, 2);
