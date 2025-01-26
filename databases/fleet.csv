@@ -1,11 +1,136 @@
 Name,Model
-FalconAlpha,ModelTestA
-SkyRider,ModelTestB
-WindRover,ModelTestA
-EagleDrift,ModelTestA
-HawkStride,ModelTestB
-CloudVigil,ModelTestA
-TerraWing,ModelTestB
-StormScout,ModelTestA
-Phantom,Phantom_4_Pro_V2.0
-ParrotDisco,Parrot_Disco
+M_1,ModelTestA
+M_2,ModelTestA
+M_3,ModelTestA
+M_4,ModelTestA
+M_5,ModelTestA
+M_6,ModelTestA
+M_7,ModelTestA
+M_8,ModelTestA
+M_9,ModelTestA
+M_1,ModelTestB
+M_2,ModelTestB
+M_3,ModelTestB
+M_4,ModelTestB
+M_5,ModelTestB
+M_6,ModelTestB
+M_7,ModelTestB
+M_8,ModelTestB
+M_9,ModelTestB
+P_1,Phantom_4_Pro_V2.0
+P_2,Phantom_4_Pro_V2.0
+P_3,Phantom_4_Pro_V2.0
+P_4,Phantom_4_Pro_V2.0
+P_5,Phantom_4_Pro_V2.0
+P_6,Phantom_4_Pro_V2.0
+P_7,Phantom_4_Pro_V2.0
+P_8,Phantom_4_Pro_V2.0
+P_9,Phantom_4_Pro_V2.0
+P_1,Parrot_Disco
+P_2,Parrot_Disco
+P_3,Parrot_Disco
+P_4,Parrot_Disco
+P_5,Parrot_Disco
+P_6,Parrot_Disco
+P_7,Parrot_Disco
+P_8,Parrot_Disco
+P_9,Parrot_Disco
+M3_1,DJI Mavic 3
+M3_2,DJI Mavic 3
+M3_3,DJI Mavic 3
+M3_4,DJI Mavic 3
+M3_5,DJI Mavic 3
+M3_6,DJI Mavic 3
+M3_7,DJI Mavic 3
+M3_8,DJI Mavic 3
+M3_9,DJI Mavic 3
+S2_1,Skydio 2
+S2_2,Skydio 2
+S2_3,Skydio 2
+S2_4,Skydio 2
+S2_5,Skydio 2
+S2_6,Skydio 2
+S2_7,Skydio 2
+S2_8,Skydio 2
+S2_9,Skydio 2
+AU_1,Parrot Anafi USA
+AU_2,Parrot Anafi USA
+AU_3,Parrot Anafi USA
+AU_4,Parrot Anafi USA
+AU_5,Parrot Anafi USA
+AU_6,Parrot Anafi USA
+AU_7,Parrot Anafi USA
+AU_8,Parrot Anafi USA
+AU_9,Parrot Anafi USA
+WGI_1,WingtraOne GEN II
+WGI_2,WingtraOne GEN II
+WGI_3,WingtraOne GEN II
+WGI_4,WingtraOne GEN II
+WGI_5,WingtraOne GEN II
+WGI_6,WingtraOne GEN II
+WGI_7,WingtraOne GEN II
+WGI_8,WingtraOne GEN II
+WGI_9,WingtraOne GEN II
+EX_1,eBee X
+EX_2,eBee X
+EX_3,eBee X
+EX_4,eBee X
+EX_5,eBee X
+EX_6,eBee X
+EX_7,eBee X
+EX_8,eBee X
+EX_9,eBee X
+M3R_1,DJI Matrice 300 RTK
+M3R_2,DJI Matrice 300 RTK
+M3R_3,DJI Matrice 300 RTK
+M3R_4,DJI Matrice 300 RTK
+M3R_5,DJI Matrice 300 RTK
+M3R_6,DJI Matrice 300 RTK
+M3R_7,DJI Matrice 300 RTK
+M3R_8,DJI Matrice 300 RTK
+M3R_9,DJI Matrice 300 RTK
+FAX_1,Freefly Alta X
+FAX_2,Freefly Alta X
+FAX_3,Freefly Alta X
+FAX_4,Freefly Alta X
+FAX_5,Freefly Alta X
+FAX_6,Freefly Alta X
+FAX_7,Freefly Alta X
+FAX_8,Freefly Alta X
+FAX_9,Freefly Alta X
+IF8_1,Intel Falcon 8+
+IF8_2,Intel Falcon 8+
+IF8_3,Intel Falcon 8+
+IF8_4,Intel Falcon 8+
+IF8_5,Intel Falcon 8+
+IF8_6,Intel Falcon 8+
+IF8_7,Intel Falcon 8+
+IF8_8,Intel Falcon 8+
+IF8_9,Intel Falcon 8+
+AT_1,DJI Agras T30
+AT_2,DJI Agras T30
+AT_3,DJI Agras T30
+AT_4,DJI Agras T30
+AT_5,DJI Agras T30
+AT_6,DJI Agras T30
+AT_7,DJI Agras T30
+AT_8,DJI Agras T30
+AT_9,DJI Agras T30
+LSX_1,Lockheed Martin Stalker XE
+LSX_2,Lockheed Martin Stalker XE
+LSX_3,Lockheed Martin Stalker XE
+LSX_4,Lockheed Martin Stalker XE
+LSX_5,Lockheed Martin Stalker XE
+LSX_6,Lockheed Martin Stalker XE
+LSX_7,Lockheed Martin Stalker XE
+LSX_8,Lockheed Martin Stalker XE
+LSX_9,Lockheed Martin Stalker XE
+P3A_1,AeroVironment Puma 3 AE
+P3A_2,AeroVironment Puma 3 AE
+P3A_3,AeroVironment Puma 3 AE
+P3A_4,AeroVironment Puma 3 AE
+P3A_5,AeroVironment Puma 3 AE
+P3A_6,AeroVironment Puma 3 AE
+P3A_7,AeroVironment Puma 3 AE
+P3A_8,AeroVironment Puma 3 AE
+P3A_9,AeroVironment Puma 3 AE
