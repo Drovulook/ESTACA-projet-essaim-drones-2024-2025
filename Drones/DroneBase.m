@@ -48,6 +48,7 @@ classdef (Abstract) DroneBase < handle
         function obj = DroneBase(id, type, initialPos)
             obj.ID   = id;
             obj.Type = type;
+            obj.phase = 'standby';
             
             % Some defaults:
             if obj.NominalVoltage==0
