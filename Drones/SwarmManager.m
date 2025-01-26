@@ -13,6 +13,8 @@ classdef SwarmManager < handle
         drones_pos_history_matrix % Matrice 3 dim de l'historique des positions
         communicationFrequency % Hz, le nombre de fois par itération que les drones peuvent communiquer. Si 1 Hz, 1 drone seulement communique par itération
         communicationMatrix = zeros(0,0,0) % La matrice de communication utilisée par les drones pour se repérer entre eux
+        LastSentDroneTimer = 0 %Pas de temps depuis dernier envoi drone
+        Drone_sending_schedule = 1 % 1 drone envoyé tous les x pas de temps
 
         %% Comportement essaim
         threshold_radius = 15 % Distance de trigger des waypoint cycliques
@@ -25,8 +27,11 @@ classdef SwarmManager < handle
         r = [30 60 100]  % Rayons Répulsion, attraction au sein de l'essaim
         swarm_weights = [1.4 0.8]; % Pondérations répulsion, attraction au sein de l'essaim
         weights = [0.5 1.2 1 10] / 10; % pondération essaim, inertie, target, évitement
+
+        TO_WP = [30 0 5; 50 0 10; 100 20 30]
+        landing_WP = [-200 -10 40; -140 -5 20; -80 0 10]
         
-        observationMatrix % Matrice de score, n_lignes, 1 colonne. Pour l'instant une distance
+        observationMatrix % Matrice de score, n_lignes, 1 colonne. Pour l'instant une distance*
         
 
 
@@ -38,6 +43,8 @@ classdef SwarmManager < handle
         MultiRotor
         CrashedDrones
         targets % target en coordonées xyz, une target par ligne
+        StandBy
+        Phase
     end
 
     methods
@@ -49,10 +56,6 @@ classdef SwarmManager < handle
 
         end
 
-        function update_backend(obj, backend)
-            obj.backend = backend;
-            obj.settings = backend.settings;
-        end
 
         % Méthode pour ajouter un drone à l'essaim
         function addDrone(obj, dType, droneName, modelData, initialPosition)
@@ -71,36 +74,20 @@ classdef SwarmManager < handle
             initialPosition(2) = initialPosition(2) + row*dy;
             initialPosition(3) = rand;  % some altitude or random offset
             
-            % NOTE: modelData is a table row from dronemodels.csv that includes:
-            %  modelData.Model
-            %  modelData.Type
-            %  modelData.MaxSpeed, modelData.MinSpeed, ...
-            %  etc.
-            
-            % Create the drone based on modelData.Type
-            % (Depending on whether you store Type as string or cell array, 
-            %  you might need modelData.Type{1}.)
-            %dType = string(modelData.Type);
-            
             switch lower(dType)
                 case "multirotor"
                     % Provide the entire modelData to the Drone constructor
-                    drone = MultirotorDrone(id, initialPosition, modelData);
+                    drone = MultirotorDrone(id, initialPosition, modelData, obj);
                 case "fixedwing"
-                    drone = FixedWingDrone(id, initialPosition, modelData);
+                    drone = FixedWingDrone(id, initialPosition, modelData, obj);
                 otherwise
                     error('Unknown drone type: %s', dType);
             end
-            
-            % Assign the "Name" to the drone (from fleet.csv)
-            drone.Name = droneName;          % e.g. "DroneA" or "MyDrone1"
-            drone.Model = modelData.Model;   % e.g. "PhantomX" or similar
-            % You might also store the rest of the columns in your drone object:
-            %   drone.MaxSpeed = modelData.MaxSpeed;
-            %   drone.MinSpeed = modelData.MinSpeed;
-            %   ... etc. ...
-            
-            % Add the drone to the cell array
+
+            drone.setPhase('stand-by')
+
+            drone.Name = droneName;    
+            drone.Model = modelData.Model;  
             obj.Drones{end+1} = drone;
         end
     
@@ -126,12 +113,12 @@ classdef SwarmManager < handle
             end
         end
 
-        function checkCrash(obj, rhon) % fonction utilisée dans swarm_pond // Crash d'altitude non géré
+        function checkCrash(obj, rhon, altitude) % fonction utilisée dans swarm_pond
             crashList = any(rhon < obj.min_dist_between_drones, 2);
             liste = obj.AliveDrones;
 
             for idx = 1:length(liste)
-                if crashList(idx, 1) == 1
+                if (crashList(idx, 1) == 1 || altitude(idx) < 0)  && (~contains(liste{idx}.Phase, 'stand-by') || ~contains(liste{idx}.Phase, 'landing'))
                     liste{idx}.crashDrone;
                     disp([num2str(liste{idx}.ID) ' crashed' ]);
                 end
@@ -156,6 +143,22 @@ classdef SwarmManager < handle
             end
         end
 
+        function standby = get.StandBy(obj)
+            standby = {};
+            for idx = 1:length(obj.AliveDrones)
+                if contains(obj.AliveDrones{idx}.phase, 'stand-by')
+                    standby{end+1} = obj.AliveDrones{idx};
+                end
+            end
+        end
+
+        function ph = get.Phase(obj)
+            ph = {};
+            for idx = 1:length(obj.AliveDrones)
+                ph = [ph ; obj.AliveDrones{idx}.phase];
+            end
+        end
+      
         function resetCommunications(obj)
             for idx = 1:length(obj.Drones)
                 obj.Drones{idx}.hasCommunicated = 0;
@@ -177,16 +180,15 @@ classdef SwarmManager < handle
         end
 
 
-        function update_target(obj, newTarget, targetGroup)
-            obj.targets(targetGroup, :) = newTarget;
-        end
-
 
         function observationScore(obj, T_eucli)
             obj.observationMatrix = T_eucli; % Fonction a modifier pour comportement du score d'observation
         end
 
         function update_speeds(obj, dt)
+
+            n = length(obj.Drones);
+            %Check les stand by
 
             % Compute le vecteur vitesse t+1 du drone en fonction de l'influence de l'essaim, de sa vitesse, des targets et des zones d'exclusion 
             % Et gère les collisions éventuelles
@@ -195,6 +197,14 @@ classdef SwarmManager < handle
             % weights la liste de pondération (répulsion, attraction, target, évitement),
             % répulsion pour les drones, évitement pour le terrain,
             % attraction max, distance d'attraction maximum (bruit de communication)
+            
+            if length(obj.StandBy) > 0 & obj.LastSentDroneTimer > obj.Drone_sending_schedule
+                obj.StandBy{1}.setPhase('take-off')
+                LastSentDroneTimer = 0;
+            end
+
+            obj.LastSentDroneTimer = obj.LastSentDroneTimer + dt;
+            % obj.Phase
 
             n = length(obj.Drones);
 

@@ -18,9 +18,9 @@ classdef MultirotorDrone < DroneBase & handle
 
     methods
         % Constructeur pour initialiser un drone multirotor avec ses paramètres
-        function obj = MultirotorDrone(id, initialPosition, params)
+        function obj = MultirotorDrone(id, initialPosition, params, swarm)
             % Call the base class constructor
-            obj@DroneBase(id, 'multirotor', initialPosition);
+            obj@DroneBase(id, 'multirotor', initialPosition, swarm);
 
             % Assign from 'params'
             obj.MaxSpeed       = params.MaxSpeed;
@@ -97,7 +97,7 @@ classdef MultirotorDrone < DroneBase & handle
             % autonomie en heures
 
             if obj.conditionReturnToBase
-                obj.phase='return';
+                obj.setPhase('return');
             end
         end
 
@@ -108,7 +108,7 @@ classdef MultirotorDrone < DroneBase & handle
             % vitesse choisi pour le calcul et ce peut importe si l'on
             % monte/descend.
 
-            distance=obj.Destination-obj.posLog(end,:);
+            distance=obj.posLog(end,:)-obj.Destination;
             pente=asin(distance(3)/norm(distance));
 
             % pente de retour maximale

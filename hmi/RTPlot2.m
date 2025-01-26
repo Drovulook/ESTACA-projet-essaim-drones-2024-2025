@@ -56,7 +56,7 @@ function RTPlot2(env, swarm, dt, temps, Target, traceSize)
     wp = gobjects(1, 1);
     
     for i = 1:length(swarm.FixedWing)
-        wp(i) = scatter3(swarm.FixedWing{i}.Waypoints(1,1), swarm.FixedWing{i}.Waypoints(1,2), swarm.FixedWing{i}.Waypoints(1,3), 50, 'filled', 'MarkerFaceColor', 'g');
+        wp(i) = scatter3(swarm.FixedWing{i}.Waypoints(swarm.FixedWing{i}.CurrentWaypoint, 1), swarm.FixedWing{i}.Waypoints(swarm.FixedWing{i}.CurrentWaypoint, 2), swarm.FixedWing{i}.Waypoints(swarm.FixedWing{i}.CurrentWaypoint, 3), 50, 'filled', 'MarkerFaceColor', 'g');
     end
 
     n_drone = size(swarm.Drones, 2);
@@ -136,7 +136,7 @@ function RTPlot2(env, swarm, dt, temps, Target, traceSize)
         Target(1, 2) = update(sliderY);
         Target(1, 3) = update(sliderZ);
 
-
+        env.update_target(Target, 1);
 
         set(targ(1), 'XData', Target(1, 1), 'YData', Target(1, 2), 'ZData', Target(1, 3));
 

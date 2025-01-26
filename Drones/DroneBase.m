@@ -12,14 +12,17 @@ classdef (Abstract) DroneBase < handle
         Type                 % 'multirotor' ou 'fixedwing'
         posState             % [x, y, z]
         speedState = [0 0 0] % [vx, vy, vz] or [r,theta,phi], etc.
+        swarm
         posLog
         speedLog
         flightTime = 0
         targetGroup = 1
         IsAlive = true
         mode_Follow_waypoint = false
-        Waypoints
+        wanted_mode %Privé de follow waypoint
+        Waypoints = [2 2 2; 1 1 1]
         CurrentWaypoint = 1
+        StoredWaypoints = []
         hasCommunicated = 0
         mass
         powerLog
@@ -45,11 +48,17 @@ classdef (Abstract) DroneBase < handle
     
     methods
         % Constructeur pour initialiser un drone avec un ID, un environnement, un type et une position initiale
-        function obj = DroneBase(id, type, initialPos)
+        function obj = DroneBase(id, type, initialPos, swarm)
             obj.ID   = id;
             obj.Type = type;
             obj.phase = 'standby';
-            
+            obj.swarm = swarm;
+            obj.StoredWaypoints{1} = obj.swarm.TO_WP;
+            obj.StoredWaypoints{2} = obj.swarm.landing_WP;
+            obj.StoredWaypoints{3} = [0 0 0];
+            obj.wanted_mode = obj.mode_Follow_waypoint;
+
+
             % Some defaults:
             if obj.NominalVoltage==0
                 obj.NominalVoltage = 22.2;  % e.g. 6S LiPo
@@ -78,22 +87,6 @@ classdef (Abstract) DroneBase < handle
         end
         
         % -------------- Example methods -----------------------------------
-        function [distance] = closestDrone(obj, swarm)
-            distance = 100; % calcul à implémenter
-        end
-           
-        function [score] = obsScore(obj, target, env)
-            score = 100; % calcul à implémenter
-        end
-
-        function [distance] = closestEnv(obj, target, env)
-            distance = 100; % calcul à implémenter
-        end
-
-        function [autonomy] = getAutonomy(obj)
-            autonomy = obj.autonomy;  % e.g. in hours
-        end
-
         function [target] = getTarget(obj, swarm)
             target = swarm.targets(obj.targetGroup, :);
         end
@@ -106,8 +99,11 @@ classdef (Abstract) DroneBase < handle
             obj.IsAlive = false;
         end
         
-        function compute_autonomy(obj,dt)
+        function setWP(obj, WP)
+            obj.StoredWaypoints{3} = WP;
+            obj.Waypoints = WP;
         end
+
     end
     
     methods
@@ -150,6 +146,24 @@ classdef (Abstract) DroneBase < handle
             end
         end
 
+        function setPhase(obj, phase)
+            obj.phase = phase;
+            
+            if contains(phase, 'take-off')
+                obj.wanted_mode = obj.mode_Follow_waypoint;
+                obj.mode_Follow_waypoint = true;
+                obj.Waypoints = obj.StoredWaypoints{1};
+
+            elseif contains(phase, 'return')
+                obj.Waypoints = obj.StoredWaypoints{2};
+                obj.wanted_mode = obj.mode_Follow_waypoint;
+                obj.mode_Follow_waypoint = true;
+
+            else
+                obj.Waypoints = obj.StoredWaypoints{3};
+                obj.mode_Follow_waypoint = obj.wanted_mode;
+            end
+        end
 
     end
 end
