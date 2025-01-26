@@ -5,7 +5,7 @@ classdef Environment < handle
         Env               % Objet représentant le scénario de simulation UAV (uavScenario)
         GroundDimensions  % Dimensions de la zone au sol (longueur, largeur)
         GroundCoordinates % Coordonnées de la surface au sol en x, y, z
-        
+        TargetsList % Liste pour stocker toutes les cibles
         ZonesList = {}      % Liste pour stocker toutes les zones
         ObstaclesList = {}  % Liste pour stocker tous les obstacles
 
@@ -14,10 +14,11 @@ classdef Environment < handle
         swarm = [] % objet enfant swarm
         
     end
-
+    
     properties (Dependent)
-        TargetsList % Liste pour stocker toutes les cibles
+        targets % target position
     end
+
     
     methods
         % Constructeur
@@ -41,9 +42,12 @@ classdef Environment < handle
             end
         end
         
-        % ------------------- GETTER ------------------------%
-        function TargetsList = get.TargetsList(obj)
-            TargetsList = obj.swarm.targets;
+        %-----------------GETTER---------------%
+        function list = get.targets(obj)
+            list = zeros(length(obj.TargetsList), 3);
+            for i = 1:length(obj.TargetsList)
+                list(i, :) = obj.TargetsList{i}.Position;                
+            end
         end
         %-------------------- ADDERS ------------------------%
         function addZone(obj, zone)
@@ -130,6 +134,7 @@ classdef Environment < handle
             end
         end
 
+
         %-------------------- OBSTACLES HELPER --------------%
         %  Fichier CSV attendu avec colonnes :
         %  Name,Type,Category,CenterX,CenterY,CenterZ,Dim1,Dim2,Dim3,TiltAngle,Status
@@ -165,15 +170,8 @@ classdef Environment < handle
         % Exemple de récupération de "matrice" ou "table" 
         % de positions depuis les zones. (À adapter si besoin.)
         function zone_pos_weight_matrix = get_zones_pos_weights(obj)
-            zone_pos_weight_matrix = [];
-            for i = 1:length(obj.ZonesList)
-                % Par exemple, vous pourriez rassembler 
-                % [ZoneName, X, Y, Z, ...] ou [X, Y, Z, Category] etc.
-                % Ici, on illustre juste la concaténation :
-                Z = obj.ZonesList{i};
-                row = [Z.CenterPosition, Z.Dimensions];
-                zone_pos_weight_matrix = [zone_pos_weight_matrix; row];
-            end
+            zone_pos_weight_matrix = obj.ZonesList;
         end
     end
 end
+

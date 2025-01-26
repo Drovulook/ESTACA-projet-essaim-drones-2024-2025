@@ -5,7 +5,7 @@ function [avoidInfluence] = avoid_pond(posStateMatrix, speedStateMatrix, dt, zon
     %Le besoin c'est une matrice qui renvoie coords + diamètre
     %sphère (à mettre dans Environnement)
     for i = 1:length(zones_object_list)
-        avoidZones_posDim = [avoidZones_posDim ; zones_object_list(i).CenterPosition zones_object_list(i).Dimensions]; % (n_zones * 6)
+        avoidZones_posDim = [avoidZones_posDim ; zones_object_list{i}.CenterPosition zones_object_list{i}.Dimensions]; % (n_zones * 6)
         % stockage des zones d'exclusion + dim
     end
 

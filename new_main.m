@@ -18,7 +18,6 @@ temps = 100000;
 traceSize = 50;
 
 swarm = SwarmManager(env, temps);
-env.swarm = app.swarm;
 
 
 %% 3) Load DroneModels and Fleet, then build the swarm
@@ -62,9 +61,7 @@ for i = 1:length(swarm.Drones)
 end
 
 % Example: assign targets and groups
-swarm.targets = [1 0 0; 140 140 30; 6 8 7]; % 3 groups of targets
 Target = [0 0 75];
-swarm.update_target(Target, 1);
 swarm.Drones{end}.setTargetGroup(2);
 swarm.Drones{1}.mode_Follow_waypoint = true;
 swarm.AliveDrones;
@@ -141,7 +138,7 @@ function defineZonesFromFile(env, filename)
     % For example, columns: Name,Type,Category,CenterX,CenterY,CenterZ,
     %                       Dim1,Dim2,Dim3,Tilt,Status
     needed = ["Name","Type","Category","CenterX","CenterY","CenterZ", ...
-              "Dim1","Dim2","Dim3","Tilt","Status"];
+              "Dim1","Tilt","Status"];
     for c = 1:numel(needed)
         if ~ismember(needed(c), T.Properties.VariableNames)
             error('Missing column "%s" in "%s".', needed(c), filename);
@@ -153,7 +150,7 @@ function defineZonesFromFile(env, filename)
         ztype  = T.Type{i};
         cat    = T.Category{i};
         center = [T.CenterX(i), T.CenterY(i), T.CenterZ(i)];
-        dims   = [T.Dim1(i), T.Dim2(i), T.Dim3(i)];
+        dims   = T.Dim1(i);
         tilt   = T.Tilt(i);
         stat   = T.Status{i};
 

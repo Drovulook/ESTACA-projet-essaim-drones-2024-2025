@@ -5,12 +5,11 @@ classdef SwarmManager < handle
     properties
         backend             % Référence à l'application (pour afficher un message quand il y a collision par ex)
         settings
-        Environment     % Objet uavScenario représentant l'environnement de simulation
+        env     % Objet uavScenario représentant l'environnement de simulation
 
         %% Swarm PROPERTIES
 
-        Drones % Liste d'objet Drones_Base
-        targets % target en coordonées xyz, une target par ligne
+        Drones % Liste d'objet Drones_Base 
         drones_pos_history_matrix % Matrice 3 dim de l'historique des positions
         communicationFrequency % Hz, le nombre de fois par itération que les drones peuvent communiquer. Si 1 Hz, 1 drone seulement communique par itération
         communicationMatrix = zeros(0,0,0) % La matrice de communication utilisée par les drones pour se repérer entre eux
@@ -38,6 +37,7 @@ classdef SwarmManager < handle
         FixedWing
         MultiRotor
         CrashedDrones
+        targets % target en coordonées xyz, une target par ligne
     end
 
     methods
@@ -45,8 +45,7 @@ classdef SwarmManager < handle
         function obj = SwarmManager(env, temps) % Bien prendre l'objet env
             
             obj.Drones = {};  % Initialiser le tableau de drones comme vide
-            obj.targets = zeros(0,3);
-            obj.Environment = env; % Assigner l'environnement de simulation
+            obj.env = env; % Assigner l'environnement de simulation
 
         end
 
@@ -105,6 +104,9 @@ classdef SwarmManager < handle
             obj.Drones{end+1} = drone;
         end
     
+        function targets = get.targets(obj)
+            targets = obj.env.targets;
+        end
 
         function alive = get.AliveDrones(obj) 
             alive = {};
@@ -194,7 +196,6 @@ classdef SwarmManager < handle
             % répulsion pour les drones, évitement pour le terrain,
             % attraction max, distance d'attraction maximum (bruit de communication)
 
-            zones = obj.Environment.get_zones_pos_weights();
             n = length(obj.Drones);
 
             posStateMatrix = zeros(n,3);
@@ -247,7 +248,7 @@ classdef SwarmManager < handle
 
             %% Calcul des zones d'évitement 
             % On utilise la position réelle pour le calcul
-            zones = obj.Environment.get_zones_pos_weights();
+            zones = obj.env.get_zones_pos_weights();
             avoidInfluence = avoid_pond(posStateMatrix, speedStateMatrix, dt, zones, obj.altitude_min, obj.dt_evitement_max); % Utils.Algo
 
             %% Maintentant, pour chaque drone, on fait la pondération des influeneces swarm/target/speed et on les somme
