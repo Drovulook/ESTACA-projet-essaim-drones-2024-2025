@@ -140,7 +140,7 @@ classdef (Abstract) DroneBase < handle
                 obj.speedState = [0 0 0];
             end
             obj.logData
-            if(size(obj.speedLog,1)>2 && obj.IsAlive)
+            if(size(obj.speedLog,1)>3 && obj.IsAlive)
                 obj.compute_autonomy(dt); % utilise les logData
             end
             
