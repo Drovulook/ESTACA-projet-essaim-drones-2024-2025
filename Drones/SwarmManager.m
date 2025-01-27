@@ -122,7 +122,6 @@ classdef SwarmManager < handle
             for idx = 1:length(liste)
                 if crashList(idx, 1) == 1  && (~contains(liste{idx}.phase, 'stand-by') && ~contains(liste{idx}.phase, 'take-off') && ~contains(liste{idx}.phase, 'landing') && ~contains(liste{idx}.phase, 'return') && ~contains(liste{idx}.phase, 'reload'))
                     liste{idx}.crashDrone;
-                    liste{idx}.phase
                     disp([num2str(liste{idx}.ID) ' crashed' ]);
                 elseif altitude(idx) < 0
                     liste{idx}.crashDrone;
