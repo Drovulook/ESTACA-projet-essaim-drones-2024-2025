@@ -16,7 +16,7 @@ classdef (Abstract) DroneBase < handle
         posLog
         speedLog
         flightTime = 0
-        targetGroup = 1
+        targetGroup
         IsAlive = true
         mode_Follow_waypoint = false
         wanted_mode %Privé de follow waypoint
@@ -30,6 +30,7 @@ classdef (Abstract) DroneBase < handle
         phase               % 'take-off','airborn','return','landing','standby', 'reload'
         chargeTime          % indique le temps restant de recharge en temps réel
         needReplacement     % indique le retour imminent
+        replacementOrderTransmitted
         
         % ---------------- Battery/Power/Autonomy (existing) ---------------
         % maxCapacity          % e.g. in Wh (if battery)
@@ -61,6 +62,8 @@ classdef (Abstract) DroneBase < handle
             obj.StoredWaypoints{3} = [0 0 0];
             obj.wanted_mode = obj.mode_Follow_waypoint;
 
+            obj.targetGroup = 1;
+            obj.replacementOrderTransmitted = 0;
 
             % Some defaults:
             if obj.NominalVoltage==0

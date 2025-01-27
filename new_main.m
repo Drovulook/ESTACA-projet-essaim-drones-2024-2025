@@ -75,7 +75,7 @@ swarm.weights = [0.5 1.2 1 10] / 10;
 
 %% 5) Run the RTPlot2 simulation
 dt = 0.1;
-RTPlot2(env, swarm, dt, temps, Target, traceSize);
+RTPlot2(env, swarm, dt, temps, env.TargetsList, traceSize);
 
 
 %% ------------------------------------------------------------------------

@@ -5,7 +5,8 @@ classdef Target < handle
         Position            % [x, y, z]
         Status              % 'actif', 'inactif', ...
         ObservabilityScore  % numeric value
-        AllocatedFleet      % e.g. string or ID for the allocated drones (optional)
+        AllocatedFleet      % ID for the allocated drones (optional)
+        NeededFleet
     end
 
     methods
@@ -23,6 +24,9 @@ classdef Target < handle
             if nargin == 5
                 obj.Env = env;
             end
+
+            obj.AllocatedFleet = 0;
+            obj.NeededFleet = 3;
         end
         %------------------------------------------------------------------
         function displayInfo(obj)

@@ -1,4 +1,4 @@
-function RTPlot2(env, swarm, dt, temps, Target, traceSize)
+function RTPlot2(env, swarm, dt, temps, Targets, traceSize)
 
     framerate = 1/20;
 
@@ -48,9 +48,9 @@ function RTPlot2(env, swarm, dt, temps, Target, traceSize)
         create_shape(zone.Type, zoneColor, zone.CenterPosition, zone.Dimensions, zone.TiltAngle, ax);
     end
 
-    targ = gobjects(1, size(Target,1));
-    for k = 1:size(Target,1)
-        targ(k) = scatter3(Target(k,1), Target(k,2), Target(k,3), 50, 'filled', 'MarkerFaceColor', 'r');
+    targ = gobjects(1, length(Targets));
+    for k = 1:length(Targets)
+        targ(k) = scatter3(Targets{k}.Position(1), Targets{k}.Position(2), Targets{k}.Position(3), 50, 'filled', 'MarkerFaceColor', 'r');
     end
 
     wp = gobjects(1, 1);
@@ -132,13 +132,18 @@ function RTPlot2(env, swarm, dt, temps, Target, traceSize)
                         'ZData', swarm.FixedWing{i}.Waypoints(swarm.FixedWing{i}.CurrentWaypoint,3));
         end
 
-        Target(1, 1) = update(sliderX);
-        Target(1, 2) = update(sliderY);
-        Target(1, 3) = update(sliderZ);
+        % Target(1, 1) = update(sliderX);
+        % Target(1, 2) = update(sliderY);
+        % Target(1, 3) = update(sliderZ);
+        % 
+        % env.update_target(Target, 1);
+        % 
+        % set(targ(1), 'XData', Target(1, 1), 'YData', Target(1, 2), 'ZData', Target(1, 3));
 
-        env.update_target(Target, 1);
-
-        set(targ(1), 'XData', Target(1, 1), 'YData', Target(1, 2), 'ZData', Target(1, 3));
+        targ = gobjects(1, length(Targets));
+        for k = 1:length(Targets)
+            targ(k) = scatter3(Targets{k}.Position(1), Targets{k}.Position(2), Targets{k}.Position(3), 50, 'filled', 'MarkerFaceColor', 'r');
+        end
 
         set(ax, 'XLim', XLim, 'YLim', YLim, 'ZLim', ZLim);
         

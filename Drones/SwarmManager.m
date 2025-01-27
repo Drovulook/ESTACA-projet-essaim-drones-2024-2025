@@ -51,8 +51,7 @@ classdef SwarmManager < handle
 
     methods
         % Constructeur pour initialiser le gestionnaire d'essaim avec l'environnement
-        function obj = SwarmManager(env, temps) % Bien prendre l'objet env
-            
+        function obj = SwarmManager(env, temps) % Bien prendre l'objet env   
             obj.Drones = {};  % Initialiser le tableau de drones comme vide
             obj.env = env; % Assigner l'environnement de simulation
 
@@ -213,7 +212,8 @@ classdef SwarmManager < handle
 
         function update_speeds(obj, dt)
 
-            n = length(obj.Drones);
+            nDrones = length(obj.Drones);
+            nTargets = length(obj.env.TargetsList);
             %Check les stand by
 
             % Compute le vecteur vitesse t+1 du drone en fonction de l'influence de l'essaim, de sa vitesse, des targets et des zones d'exclusion 
@@ -223,24 +223,44 @@ classdef SwarmManager < handle
             % weights la liste de pondération (répulsion, attraction, target, évitement),
             % répulsion pour les drones, évitement pour le terrain,
             % attraction max, distance d'attraction maximum (bruit de communication)
-            
 
-            % Séquenceur de lancement
-            if length(obj.StandBy) > 0 & obj.LastSentDroneTimer > obj.Drone_sending_schedule
-                obj.StandBy{1}.setPhase('take-off')
-                obj.LastSentDroneTimer = 0;
+            for i = 1:nTargets
+                currentTarget = obj.env.TargetsList{i};
+
+                if currentTarget.AllocatedFleet < currentTarget.NeededFleet 
+                    % Séquenceur de lancement
+                    if length(obj.StandBy) > 0 & obj.LastSentDroneTimer > obj.Drone_sending_schedule
+                            nextDepartingDrone = obj.StandBy{1};
+                            nextDepartingDrone.targetGroup = i;
+                            nextDepartingDrone.replacementOrderTransmitted = 0;
+                            nextDepartingDrone.setPhase('take-off')
+                            obj.LastSentDroneTimer = 0;
+                            currentTarget.AllocatedFleet = currentTarget.AllocatedFleet + 1;
+                    end
+                end 
             end
 
-            obj.LastSentDroneTimer = obj.LastSentDroneTimer + dt;
+            for i = 1:nDrones
+                currentDrone = obj.Drones{i};
+                targetList = obj.env.TargetsList;
+                if strcmp(currentDrone.phase, 'airborn') == 0 
+                    if currentDrone.needReplacement == 1
+                        if currentDrone.replacementOrderTransmitted == 1
+                            hisTarget = currentDrone.targetGroup;
+                            targetList{hisTarget}.AllocatedFleet = targetList{hisTarget}.AllocatedFleet - 1;
+                            currentDrone.replacementOrderTransmitted = 1;
+                        end
+                    end
+                end
+            end
             
+            obj.LastSentDroneTimer = obj.LastSentDroneTimer + dt;
 
-            n = length(obj.Drones);
-
-            posStateMatrix = zeros(n,3);
-            speedStateMatrix = zeros (n,3);
+            posStateMatrix = zeros(nDrones,3);
+            speedStateMatrix = zeros (nDrones,3);
 
 
-            for i = 1:n
+            for i = 1:nDrones
                 drone = obj.Drones{i};
 
                 drone.update_pos(dt); % On update les drones à leur nouvelle position en fonction du dernier vecteur vitesse computé
@@ -268,11 +288,11 @@ classdef SwarmManager < handle
 
             %% CALCUL DES VOISINS
             % On utilise les positions connues par les drones pour le calcul
-            [neighborI, nnmax] = VoroiNeighbor(obj.communicationMatrix, n); % Utils.Algo + a mod pour granularité info de comm (donner historique pos en entrée)
+            [neighborI, nnmax] = VoroiNeighbor(obj.communicationMatrix, nDrones); % Utils.Algo + a mod pour granularité info de comm (donner historique pos en entrée)
             
             %% SWARM INFLUENCE
             % On utilise les positions connues par les drones pour le calcul
-            swarmInfluence = swarm_pond(obj.communicationMatrix, neighborI, n, nnmax, obj); % Utils.Algo + a mod pour granularité de comm (donner historique pos en entrée) 
+            swarmInfluence = swarm_pond(obj.communicationMatrix, neighborI, nDrones, nnmax, obj); % Utils.Algo + a mod pour granularité de comm (donner historique pos en entrée) 
                     
             %% SPEED INFLUENCE
             % On utilise la position réelle pour le calcul
