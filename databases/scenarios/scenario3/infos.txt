@@ -1,0 +1,36 @@
+### 1. **Fichier Flotte (`fleet_3.csv`) :**
+Ce fichier contient des informations sur une autre flotte de drones, avec deux modèles :
+- **Modèle** : DJI Mavic 3 et AeroVironment Puma 3 AE.
+- **Drones** : Plusieurs drones sont présents, comme :
+  - Drones DJI Mavic 3 : M3_1, M3_7
+  - Drones AeroVironment Puma 3 AE : P3A_7, P3A_6, P3A_8
+  
+Cela montre une distribution similaire des drones dans ce scénario, avec encore une proportion plus importante de drones de type AeroVironment Puma 3 AE, ce qui pourrait indiquer des missions nécessitant des drones plus petits, comme des missions de reconnaissance ou de surveillance discrète.
+
+### 2. **Fichier Cibles (`targets_3.csv`) :**
+Ce fichier contient des informations sur plusieurs cibles, avec des caractéristiques similaires aux fichiers précédents :
+- **Nom** : Chaque cible est identifiée par un nom unique (par exemple, Target_1, Target_2, Target_3, Target_4).
+- **CenterX, CenterY, CenterZ** : Ce sont les coordonnées 3D de chaque cible.
+- **Statut** : Le statut de la cible, soit "actif" (actif) soit "inactif" (inactif).
+- **Score d'observabilité** : Un score numérique indiquant la facilité avec laquelle la cible peut être observée ou suivie.
+
+Les cibles actives, avec des scores d'observabilité plus élevés, sont prioritaires pour les missions de surveillance. Ce fichier permet de suivre les cibles selon leur statut et leur importance stratégique.
+
+### 3. **Fichier Zones (`zones_3.csv`) :**
+Ce fichier décrit plusieurs zones géographiques dans ce scénario, similaires aux précédents :
+- **Nom** : Chaque zone est identifiée par un nom unique (par exemple, Home Base, PZone_1, PZone_2, etc.).
+- **Type** : Les zones sont de type "half_sphere" (demi-sphère), ce qui peut encore indiquer une couverture 3D spécifique, utile pour des missions où la gestion de l’espace est cruciale.
+- **Catégorie** : Les zones sont classées en catégories comme "A" et "P".
+- **CenterX, CenterY, CenterZ** : Ce sont les coordonnées 3D du centre de chaque zone.
+- **Dim1** : Cette colonne représente la dimension de la zone, comme un rayon ou un diamètre, ce qui peut être utilisé pour décrire la taille de la zone d’opération.
+- **Tilt** : L'inclinaison des zones est indiquée comme étant zéro dans ce cas, suggérant que les zones sont horizontales.
+- **Statut** : Toutes les zones sont listées comme "actif" (actif).
+
+### **Ce qui est spécifique à ce scénario :**
+1. **Flotte hybride de drones** : Ce scénario, tout comme les précédents, met l'accent sur l'utilisation de drones AeroVironment Puma 3 AE en plus des DJI Mavic 3. Les drones AeroVironment Puma 3 AE sont à nouveau plus nombreux, ce qui suggère un besoin de drones compacts et discrets pour des missions spécifiques de surveillance ou de reconnaissance dans des espaces confinés ou à proximité.
+
+2. **Cibles avec statut et score d'observabilité** : Le scénario met en avant l'importance des cibles actives et de leur **score d'observabilité**. Les cibles ayant un score élevé seront probablement priorisées dans les missions des drones, en fonction de leur visibilité et de leur importance stratégique pour la mission.
+
+3. **Zones en demi-sphère** : L'utilisation de zones de type "half_sphere" est maintenue dans ce scénario, ce qui peut être pertinent pour des missions où les drones doivent opérer dans des volumes tridimensionnels. Cela pourrait être utilisé dans des environnements complexes comme des zones urbaines, des espaces ouverts ou des missions de recherche et sauvetage, où la gestion de l'espace 3D est essentielle.
+
+En résumé, ce scénario continue de faire usage de drones compacts et spécialisés, avec un focus sur la gestion de cibles stratégiques selon leur observabilité, et l'utilisation de zones modélisées en trois dimensions pour couvrir efficacement les missions de surveillance ou de reconnaissance.

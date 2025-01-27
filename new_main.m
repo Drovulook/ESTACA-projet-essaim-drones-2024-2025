@@ -9,8 +9,8 @@ env = Environment(10, 200, ...
     [0, 0, 0, 0]);
 
 %% 2) Load Obstacles, Targets, and Zones from CSV
-defineTargetsFromFile(env, "scenar1_targets.csv");
-defineZonesFromFile(env,  "scenar1_zones.csv");
+defineTargetsFromFile(env, "targets_1.csv");
+defineZonesFromFile(env,  "zones_1.csv");
 
 homeBaseCoord = [0, 0, 0];
 temps = 100000;
@@ -23,7 +23,7 @@ swarm = SwarmManager(env, temps);
 dronemodels = readtable('dronemodels.csv', ...
     'Delimiter', ',', 'VariableNamingRule', 'preserve');
 
-fleet = readtable('scenar1_fleet.csv', ...
+fleet = readtable('fleet_1.csv', ...
     'Delimiter', ',', 'VariableNamingRule', 'preserve');
 
 for iRow = 1:height(fleet)

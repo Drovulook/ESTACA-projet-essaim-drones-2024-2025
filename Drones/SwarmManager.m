@@ -226,18 +226,19 @@ classdef SwarmManager < handle
 
             for i = 1:nTargets
                 currentTarget = obj.env.TargetsList{i};
-
-                if currentTarget.AllocatedFleet < currentTarget.NeededFleet 
-                    % Séquenceur de lancement
-                    if length(obj.StandBy) > 0 & obj.LastSentDroneTimer > obj.Drone_sending_schedule
-                            nextDepartingDrone = obj.StandBy{1};
-                            nextDepartingDrone.targetGroup = i;
-                            nextDepartingDrone.replacementOrderTransmitted = 0;
-                            nextDepartingDrone.setPhase('take-off')
-                            obj.LastSentDroneTimer = 0;
-                            currentTarget.AllocatedFleet = currentTarget.AllocatedFleet + 1;
-                    end
-                end 
+                if strcmp(currentTarget.Status, 'actif')
+                    if currentTarget.AllocatedFleet < currentTarget.NeededFleet 
+                        % Séquenceur de lancement
+                        if length(obj.StandBy) > 0 & obj.LastSentDroneTimer > obj.Drone_sending_schedule
+                                nextDepartingDrone = obj.StandBy{1};
+                                nextDepartingDrone.targetGroup = i;
+                                nextDepartingDrone.replacementOrderTransmitted = 0;
+                                nextDepartingDrone.setPhase('take-off')
+                                obj.LastSentDroneTimer = 0;
+                                currentTarget.AllocatedFleet = currentTarget.AllocatedFleet + 1;
+                        end
+                    end 
+                end
             end
 
             for i = 1:nDrones

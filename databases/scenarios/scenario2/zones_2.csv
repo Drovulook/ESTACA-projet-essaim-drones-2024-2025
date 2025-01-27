@@ -1,0 +1,12 @@
+Name,Type,Category,CenterX,CenterY,CenterZ,Dim1,Tilt,Status
+Home Base,half_sphere,A,0.0,0.0,0.0,80.0,0.0,actif
+PZone_1,half_sphere,P,116.059064,211.063154,0.0,100,0.0,actif
+PZone_2,half_sphere,P,206.760036,204.035638,0.0,150,0.0,actif
+PZone_3,half_sphere,P,42.426661,-232.688780,0.0,100,0.0,actif
+PZone_4,half_sphere,P,-111.673029,-133.552663,0.0,175,0.0,actif
+PZone_5,half_sphere,P,-17.093359,133.367407,0.0,125,0.0,actif
+PZone_6,half_sphere,P,169.245120,-128.498812,0.0,80,0.0,actif
+PZone_7,half_sphere,P,-172.439450,146.967575,0.0,160,0.0,actif
+AZone_1,half_sphere,A,129.587873,-142.622393,0.0,27.799514,0.0,actif
+AZone_2,half_sphere,A,-22.666246,-153.141029,0.0,39.730832,0.0,actif
+AZone_3,half_sphere,A,232.552373,-25.756021,0.0,63.006303,0.0,actif
