@@ -19,8 +19,8 @@ classdef SwarmManager < handle
         %% Comportement essaim
         threshold_radius = 15 % Distance de trigger des waypoint cycliques
         altitude_min = 10 % Altitude min des drones
-        dist_target_min = 20 % Distance minimal du drone à la target
-        orbit_radius = 60 % Distance des fixedwing à la cible à partir de laquelle ils orbitent
+        dist_target_min = 30 % Distance minimal du drone à la target
+        orbit_radius = 100 % Distance des fixedwing à la cible à partir de laquelle ils orbitent
         min_dist_between_drones = 2 % si <, alors crash (distance en mètres)
         dt_evitement_max = 0 % dt max pour lequel on calcul l'évitement vertical
 
