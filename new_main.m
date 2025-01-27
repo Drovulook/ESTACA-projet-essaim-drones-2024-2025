@@ -78,11 +78,6 @@ dt = 0.1;
 RTPlot2(env, swarm, dt, temps, Target, traceSize);
 
 
-
-
-
-
-
 %% ------------------------------------------------------------------------
 %% Helper functions for reading CSV files: Obstacles, Targets, Zones
 %% ------------------------------------------------------------------------
