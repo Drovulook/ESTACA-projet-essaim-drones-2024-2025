@@ -118,7 +118,7 @@ classdef MultirotorDrone < DroneBase & handle
             pente=-asin(distance(3)/norm(distance)); % négatif car repère avion
 
             % pente de retour maximale
-            if distance(3)>=0
+            if distance(3)<=0 && contains(obj.phase, 'airborn')
                 penteMax=asin(obj.MaxVarioDown/obj.CruiseSpeed); 
             else
                 penteMax=asin(obj.MaxVarioUp/obj.CruiseSpeed);

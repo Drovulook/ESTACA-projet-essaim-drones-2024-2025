@@ -134,7 +134,7 @@ classdef FixedWingDrone < DroneBase & handle
             pente=-asin(distance(3)/norm(distance));
 
             % pente de retour maximale
-            if distance(3)<=0
+            if distance(3)<=0 && contains(obj.phase, 'airborn')
                 penteMax=asin(obj.MaxDescentRate/obj.CruiseSpeed); % négatif car repère avion
             else
                 penteMax=asin(obj.MaxClimbRate/obj.CruiseSpeed);

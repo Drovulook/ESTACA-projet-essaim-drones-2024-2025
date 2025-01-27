@@ -170,6 +170,10 @@ classdef (Abstract) DroneBase < handle
                     obj.phase = 'airborn';
                 end
 
+            elseif contains(phase, 'airborn')
+                obj.mode_Follow_waypoint = obj.wanted_mode;
+                obj.Waypoints = obj.StoredWaypoints{2};
+                obj.CurrentWaypoint = 1;
 
             elseif contains(phase, 'return')
                 obj.Waypoints = obj.StoredWaypoints{2};
@@ -192,7 +196,7 @@ classdef (Abstract) DroneBase < handle
         function charge(obj,dt)
             % chargement du drone, si drone chargé standby
             if(obj.chargeTime==0 && obj.NominalCapacity~=obj.remainingCapacity)
-                obj.chargeTime=obj.remainingCapacity/(obj.NominalCapacity/obj.ReloadMins*60)*3600;
+                obj.chargeTime=(obj.NominalCapacity - obj.remainingCapacity)/(obj.NominalCapacity/obj.ReloadMins*60)*3600;
             elseif (obj.chargeTime)
                 obj.chargeTime=obj.chargeTime-dt;
                 if(obj.chargeTime<=0)

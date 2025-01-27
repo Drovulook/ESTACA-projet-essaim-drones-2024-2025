@@ -25,8 +25,7 @@ function [targetInfluence, T_eucli] = target_pond(posStateMatrix, swarm)
             WpMatrix = [WpMatrix ; swarm.Drones{idx}.getTarget(swarm)];
         end
     end
-
-
+    
     nmulti = size(swarm.MultiRotor, 2);
     nb_drones = size(swarm.Drones, 2);
 
@@ -38,13 +37,13 @@ function [targetInfluence, T_eucli] = target_pond(posStateMatrix, swarm)
 
     for idx = 1:length(swarm.Drones) 
         if T_eucli(idx) < swarm.threshold_radius && swarm.Drones{idx}.mode_Follow_waypoint == true
-            if contains(swarm.Drones{idx}.phase, 'take-off') & swarm.Drones{idx}.CurrentWaypoint == size(swarm.Drones{idx}.Waypoints, 1)
+            if contains(swarm.Drones{idx}.phase, 'take-off') && swarm.Drones{idx}.CurrentWaypoint == size(swarm.Drones{idx}.Waypoints, 1)
                 swarm.Drones{idx}.setPhase('airborn')
 
-            elseif contains(swarm.Drones{idx}.phase, 'return') & swarm.Drones{idx}.CurrentWaypoint == size(swarm.Drones{idx}.Waypoints, 1)
+            elseif contains(swarm.Drones{idx}.phase, 'return') && swarm.Drones{idx}.CurrentWaypoint == size(swarm.Drones{idx}.Waypoints, 1)
                 swarm.Drones{idx}.setPhase('landing')
 
-            elseif contains(swarm.Drones{idx}.phase, 'landing') & swarm.Drones{idx}.CurrentWaypoint == size(swarm.Drones{idx}.Waypoints, 1)
+            elseif contains(swarm.Drones{idx}.phase, 'landing') && swarm.Drones{idx}.CurrentWaypoint == size(swarm.Drones{idx}.Waypoints, 1)
                 swarm.Drones{idx}.setPhase('reload')
 
             else 

@@ -20,7 +20,7 @@ classdef SwarmManager < handle
         threshold_radius = 15 % Distance de trigger des waypoint cycliques
         altitude_min = 10 % Altitude min des drones
         dist_target_min = 30 % Distance minimal du drone à la target
-        orbit_radius = 100 % Distance des fixedwing à la cible à partir de laquelle ils orbitent
+        orbit_radius = 60 % Distance des fixedwing à la cible à partir de laquelle ils orbitent
         min_dist_between_drones = 2 % si <, alors crash (distance en mètres)
         dt_evitement_max = 0 % dt max pour lequel on calcul l'évitement vertical
 
@@ -96,6 +96,7 @@ classdef SwarmManager < handle
             targets = obj.env.targets;
         end
 
+        
         function alive = get.AliveDrones(obj) 
             alive = {};
             for idx = 1:length(obj.Drones)
@@ -240,6 +241,7 @@ classdef SwarmManager < handle
                     end 
                 end
             end
+
 
             for i = 1:nDrones
                 currentDrone = obj.Drones{i};

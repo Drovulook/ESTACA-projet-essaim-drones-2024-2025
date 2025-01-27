@@ -44,9 +44,9 @@ classdef Environment < handle
         
         %-----------------GETTER---------------%
         function list = get.targets(obj)
-            list = zeros(length(obj.TargetsList), 3);
+            list = [];
             for i = 1:length(obj.TargetsList)
-                list(i, :) = obj.TargetsList{i}.Position;                
+                list = [list ; obj.TargetsList{i}.Position];                
             end
         end
         %-------------------- ADDERS ------------------------%
