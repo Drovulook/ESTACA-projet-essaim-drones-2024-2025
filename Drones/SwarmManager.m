@@ -45,6 +45,8 @@ classdef SwarmManager < handle
         targets % target en coordonées xyz, une target par ligne
         StandBy
         Phase
+        Intrusion_time
+        
     end
 
     methods
@@ -163,6 +165,27 @@ classdef SwarmManager < handle
             end
         end
       
+        function int = get.Intrusion_time(obj)
+            int = [];
+            for idx = 1:length(obj.env.ZonesList)
+                if obj.env.ZonesList{idx}.Category == 'P'
+                    int = [int obj.env.ZonesList{idx}.ViolationTime];
+                end
+            end
+        end
+
+        function set.Intrusion_time(obj, matrix)
+            n = 0;
+            for idx = 1:length(obj.env.ZonesList)
+                if obj.env.ZonesList{idx}.Category == 'P'
+                    n = n + 1;
+                end
+            end
+            for idx = 1:n
+                obj.env.ZonesList{idx}.ViolationTime = matrix(idx);
+            end
+        end
+
         function resetCommunications(obj)
             for idx = 1:length(obj.Drones)
                 obj.Drones{idx}.hasCommunicated = 0;
@@ -265,8 +288,12 @@ classdef SwarmManager < handle
             %% Calcul des zones d'évitement 
             % On utilise la position réelle pour le calcul
             zones = obj.env.get_zones_pos_weights();
-            avoidInfluence = avoid_pond(posStateMatrix, speedStateMatrix, dt, zones, obj.altitude_min, obj.dt_evitement_max, obj); % Utils.Algo
-
+            [avoidInfluence, intrusionMatrix] = avoid_pond(posStateMatrix, speedStateMatrix, dt, zones, obj.altitude_min, obj.dt_evitement_max, obj); % Utils.Algo
+            
+            %Intrusion
+            obj.Intrusion_time = obj.Intrusion_time + intrusionMatrix;
+        
+            
             %% Maintentant, pour chaque drone, on fait la pondération des influeneces swarm/target/speed et on les somme
 
             desiredVector = whole_pond(swarmInfluence, speedInfluence, targetInfluence, avoidInfluence, obj.weights); % Utils.Algo

@@ -1,4 +1,4 @@
-function [avoidInfluence] = avoid_pond(posStateMatrix, speedStateMatrix, dt, zones_object_list, altitude_min, dt_evitement_max, swarm)
+function [avoidInfluence, intrusionMatrix] = avoid_pond(posStateMatrix, speedStateMatrix, dt, zones_object_list, altitude_min, dt_evitement_max, swarm)
 
     avoidZones_posDim = zeros(0,6);
    
@@ -20,6 +20,9 @@ function [avoidInfluence] = avoid_pond(posStateMatrix, speedStateMatrix, dt, zon
 
     %diffeo(posStateMatrix_t_plus_1, avoidZones_posDim);
     [zoneCenter_delta_x, zoneCenter_delta_y, zoneCenter_delta_z, zoneCenter_delta_eucli] = diffeo(posStateMatrix, avoidZones_posDim);
+
+    intrusionMatrix = any(zoneCenter_delta_eucli < avoidZones_posDim(:,4)'/2, 1);
+
 
     % Assignation du poids négatif pour fuir les zones dangereuses -> Fonctionnement par sphère uniquement
     
