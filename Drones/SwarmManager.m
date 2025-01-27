@@ -209,7 +209,6 @@ classdef SwarmManager < handle
         nTargets = length(obj.env.TargetsList);
             for i = 1:nTargets
                 currentTarget = obj.env.TargetsList{i};
-                currentTarget.Status
                 if contains(currentTarget.Status, 'actif') && (currentTarget.AllocatedFleet < currentTarget.NeededFleet) 
                     if length(obj.StandBy) > 0 && (obj.LastSentDroneTimer > obj.Drone_sending_schedule)
                         nextDepartingDrone = obj.StandBy{1};
@@ -230,10 +229,12 @@ classdef SwarmManager < handle
                 currentDrone = obj.Drones{i};
                 targetList = obj.env.TargetsList;
                 if contains(currentDrone.phase, 'airborn') == 0 
-                    if currentDrone.needReplacement == 1 && currentDrone.replacementOrderTransmitted == 1
-                        hisTarget = currentDrone.targetGroup;
-                        targetList{hisTarget}.AllocatedFleet = targetList{hisTarget}.AllocatedFleet - 1;
-                        currentDrone.replacementOrderTransmitted = 1;
+                    if currentDrone.needReplacement == 1
+                        if currentDrone.replacementOrderTransmitted == 1
+                            hisTarget = currentDrone.targetGroup;
+                            targetList{hisTarget}.AllocatedFleet = targetList{hisTarget}.AllocatedFleet - 1;
+                            currentDrone.replacementOrderTransmitted = 1;
+                        end
                     end
                 end
             end
@@ -265,7 +266,7 @@ classdef SwarmManager < handle
             obj.AllocateDroneToTarget();
             obj.LastSentDroneTimer = obj.LastSentDroneTimer + dt;
             
-            obj.ReplaceLowBatteryDrone()
+            obj.ReplaceLowBatteryDrone();
 
 
             posStateMatrix = zeros(nDrones,3);

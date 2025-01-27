@@ -51,7 +51,7 @@ function [avoidInfluence, intrusionMatrix] = avoid_pond(posStateMatrix, speedSta
     
     phase = [];
     for idx=1:length(swarm.Drones)
-        if contains(swarm.Drones{idx}.phase, 'take-off') || contains(swarm.Drones{idx}.phase, 'landing') || contains(swarm.Drones{idx}.phase, 'reload') || contains(swarm.Drones{idx}.phase, 'stand-by')
+        if contains(swarm.Drones{idx}.phase, 'landing') || contains(swarm.Drones{idx}.phase, 'reload') || contains(swarm.Drones{idx}.phase, 'stand-by')
             phase = [phase; 0];
         else
             phase = [phase; 1];
