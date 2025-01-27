@@ -60,6 +60,7 @@ function [targetInfluence, T_eucli] = target_pond(posStateMatrix, swarm)
     % A appliquer SSI Follow wp 1 car sinon on veut que le drone franchisse
     % le WP
    
+        
     row = nmulti + 1 : nb_drones;
 
     T_X_fixedwing_tangent = -T_y(row(followMatrix(row) == 1)); % on crée le vecteur tangent dans le plan XY

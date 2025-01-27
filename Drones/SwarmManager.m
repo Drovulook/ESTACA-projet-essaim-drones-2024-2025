@@ -96,7 +96,7 @@ classdef SwarmManager < handle
             targets = obj.env.targets;
         end
 
-        
+
         function alive = get.AliveDrones(obj) 
             alive = {};
             for idx = 1:length(obj.Drones)
@@ -204,6 +204,41 @@ classdef SwarmManager < handle
             %Past this point, no candidate was found
             error('No drone at this ID found')
         end
+            
+        function AllocateDroneToTarget(obj)
+        nTargets = length(obj.env.TargetsList);
+            for i = 1:nTargets
+                currentTarget = obj.env.TargetsList{i};
+                currentTarget.Status
+                if contains(currentTarget.Status, 'actif') && (currentTarget.AllocatedFleet < currentTarget.NeededFleet) 
+                    if length(obj.StandBy) > 0 && (obj.LastSentDroneTimer > obj.Drone_sending_schedule)
+                        nextDepartingDrone = obj.StandBy{1};
+                        nextDepartingDrone.targetGroup = i;
+                        nextDepartingDrone.replacementOrderTransmitted = 0;
+                        nextDepartingDrone.setPhase('take-off')
+                        obj.LastSentDroneTimer = 0;
+                        currentTarget.AllocatedFleet = currentTarget.AllocatedFleet + 1;
+                    end
+                end
+            end
+        end
+        
+
+        function ReplaceLowBatteryDrone(obj)
+        nDrones = length(obj.Drones);
+            for i = 1:nDrones
+                currentDrone = obj.Drones{i};
+                targetList = obj.env.TargetsList;
+                if contains(currentDrone.phase, 'airborn') == 0 
+                    if currentDrone.needReplacement == 1 && currentDrone.replacementOrderTransmitted == 1
+                        hisTarget = currentDrone.targetGroup;
+                        targetList{hisTarget}.AllocatedFleet = targetList{hisTarget}.AllocatedFleet - 1;
+                        currentDrone.replacementOrderTransmitted = 1;
+                    end
+                end
+            end
+        end
+
 
 
 
@@ -213,8 +248,7 @@ classdef SwarmManager < handle
 
         function update_speeds(obj, dt)
 
-            nDrones = length(obj.Drones);
-            nTargets = length(obj.env.TargetsList);
+            
             %Check les stand by
 
             % Compute le vecteur vitesse t+1 du drone en fonction de l'influence de l'essaim, de sa vitesse, des targets et des zones d'exclusion 
@@ -224,40 +258,15 @@ classdef SwarmManager < handle
             % weights la liste de pondération (répulsion, attraction, target, évitement),
             % répulsion pour les drones, évitement pour le terrain,
             % attraction max, distance d'attraction maximum (bruit de communication)
-
-            for i = 1:nTargets
-                currentTarget = obj.env.TargetsList{i};
-                if strcmp(currentTarget.Status, 'actif')
-                    if currentTarget.AllocatedFleet < currentTarget.NeededFleet 
-                        % Séquenceur de lancement
-                        if length(obj.StandBy) > 0 & obj.LastSentDroneTimer > obj.Drone_sending_schedule
-                                nextDepartingDrone = obj.StandBy{1};
-                                nextDepartingDrone.targetGroup = i;
-                                nextDepartingDrone.replacementOrderTransmitted = 0;
-                                nextDepartingDrone.setPhase('take-off')
-                                obj.LastSentDroneTimer = 0;
-                                currentTarget.AllocatedFleet = currentTarget.AllocatedFleet + 1;
-                        end
-                    end 
-                end
-            end
-
-
-            for i = 1:nDrones
-                currentDrone = obj.Drones{i};
-                targetList = obj.env.TargetsList;
-                if strcmp(currentDrone.phase, 'airborn') == 0 
-                    if currentDrone.needReplacement == 1
-                        if currentDrone.replacementOrderTransmitted == 1
-                            hisTarget = currentDrone.targetGroup;
-                            targetList{hisTarget}.AllocatedFleet = targetList{hisTarget}.AllocatedFleet - 1;
-                            currentDrone.replacementOrderTransmitted = 1;
-                        end
-                    end
-                end
-            end
             
+            nDrones = length(obj.Drones);
+
+
+            obj.AllocateDroneToTarget();
             obj.LastSentDroneTimer = obj.LastSentDroneTimer + dt;
+            
+            obj.ReplaceLowBatteryDrone()
+
 
             posStateMatrix = zeros(nDrones,3);
             speedStateMatrix = zeros (nDrones,3);

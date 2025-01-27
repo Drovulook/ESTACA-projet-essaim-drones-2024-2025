@@ -31,6 +31,7 @@ classdef (Abstract) DroneBase < handle
         chargeTime          % indique le temps restant de recharge en temps réel
         needReplacement     % indique le retour imminent
         replacementOrderTransmitted
+        TargetObject
         
         % ---------------- Battery/Power/Autonomy (existing) ---------------
         % maxCapacity          % e.g. in Wh (if battery)
@@ -106,6 +107,7 @@ classdef (Abstract) DroneBase < handle
         end
 
         function crashDrone(obj)
+            obj.swarm.env.TargetsList{obj.targetGroup}.AllocatedFleet = obj.swarm.env.TargetsList{obj.targetGroup}.AllocatedFleet - 1;
             obj.IsAlive = false;
         end
         
