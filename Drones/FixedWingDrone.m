@@ -79,7 +79,7 @@ classdef FixedWingDrone < DroneBase & handle
             % deltaWorkDrag=dot([velocity(1:2); obj.climbRate] * dt,averageDrag);
             deltaWorkDrag=norm(velocity)*dt*averageDrag;
             Weight=obj.mass*9.81*[0 0 -1];
-            deltaWorkWeight=dot(deltaPos,Weight);
+            deltaWorkWeight=-dot(deltaPos,Weight);
             if (deltaWorkWeight+deltaWorkDrag)>0
                 powerNow=(deltaWorkWeight+deltaWorkDrag)/dt;   % puissance à l'instant [t-dt, t]
             else
@@ -97,11 +97,11 @@ classdef FixedWingDrone < DroneBase & handle
 
             if (obj.NominalCapacity == 0)
                 % moteur thermique
-                energie_consomme=obj.powerLog(end)*obj.yieldThermo*dt/3600;
+                energie_consomme=obj.powerLog(end)/obj.yieldThermo*dt/3600;
                 obj.remainingCapacity=obj.remainingCapacity-energie_consomme;
             else
                 % moteur electrique
-                capacite_consomme=power(obj.powerLog(end)/obj.NominalVoltage, obj.k_peukert)*dt/3600; %Wh
+                capacite_consomme=power(obj.powerLog(end)/obj.yield/obj.NominalVoltage, obj.k_peukert)*dt/3600; %Wh
                 obj.remainingCapacity=obj.remainingCapacity-capacite_consomme*obj.NominalVoltage;
             end
 

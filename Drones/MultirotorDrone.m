@@ -80,11 +80,11 @@ classdef MultirotorDrone < DroneBase & handle
 
             if (obj.NominalCapacity == 0)
                 % moteur thermique
-                energie_consomme=obj.powerLog(end)*obj.yieldThermo*dt/3600;
+                energie_consomme=obj.powerLog(end)/obj.yieldThermo*dt/3600;
                 obj.remainingCapacity=obj.remainingCapacity-energie_consomme;
             else
                 % moteur electrique
-                capacite_consomme=power(obj.powerLog(end)/obj.NominalVoltage, obj.k_peukert)*dt/3600; %Wh
+                capacite_consomme=power(obj.powerLog(end)/obj.yield/obj.NominalVoltage, obj.k_peukert)*dt/3600; %Wh
                 obj.remainingCapacity=obj.remainingCapacity-capacite_consomme*obj.NominalVoltage;
             end
 
