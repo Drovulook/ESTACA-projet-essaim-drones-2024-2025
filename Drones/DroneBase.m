@@ -21,6 +21,7 @@ classdef (Abstract) DroneBase < handle
         mode_Follow_waypoint = false
         wanted_mode %Privé de follow waypoint
         Waypoints = [0 0 0]
+        TOheading
         CurrentWaypoint = 1
         StoredWaypoints = []
         hasCommunicated = 0

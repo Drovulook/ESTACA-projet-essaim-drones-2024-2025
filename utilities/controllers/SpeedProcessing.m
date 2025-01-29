@@ -16,7 +16,7 @@ function [newSpeedX, newSpeedY, newSpeedZ] = SpeedProcessing(drone, i, desiredVe
     targetSpeed = 40;
     aProp = 8; % m/s2
     aDecel = 5; % m/s2
-    runwayHeading_degrees = 0;
+    runwayHeading_degrees = drone.TOheading;
     runwayHeading_radians = deg2rad(runwayHeading_degrees);
     
     tempSpeedState = desiredVector(i,:);

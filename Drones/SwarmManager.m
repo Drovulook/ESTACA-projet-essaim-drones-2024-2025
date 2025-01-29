@@ -28,8 +28,9 @@ classdef SwarmManager < handle
         swarm_weights = [1.4 0.8]; % Pondérations répulsion, attraction au sein de l'essaim
         weights = [0.5 1.2 1 10] / 10; % pondération essaim, inertie, target, évitement
 
-        TO_WP = [70 20 30]
-        landing_WP = [-200 -10 40; -140 -5 20; -80 0 10]
+        runwayHeading
+        TO_WP
+        landing_WP
         
         observationMatrix % Matrice de score, n_lignes, 1 colonne. Pour l'instant une distance*
         
@@ -209,7 +210,7 @@ classdef SwarmManager < handle
         nTargets = length(obj.env.TargetsList);
             for i = 1:nTargets
                 currentTarget = obj.env.TargetsList{i};
-                if contains(currentTarget.Status, 'actif') && (currentTarget.AllocatedFleet < currentTarget.NeededFleet) 
+                if strcmp(currentTarget.Status, 'actif') == 1 && currentTarget.AllocatedFleet < currentTarget.NeededFleet 
                     if length(obj.StandBy) > 0 && (obj.LastSentDroneTimer > obj.Drone_sending_schedule)
                         nextDepartingDrone = obj.StandBy{1};
                         nextDepartingDrone.targetGroup = i;
@@ -228,7 +229,7 @@ classdef SwarmManager < handle
             for i = 1:nDrones
                 currentDrone = obj.Drones{i};
                 targetList = obj.env.TargetsList;
-                if contains(currentDrone.phase, 'airborn') == 0 
+                if strcmp(currentDrone.phase, 'airborn') == 0 
                     if currentDrone.needReplacement == 1
                         if currentDrone.replacementOrderTransmitted == 1
                             hisTarget = currentDrone.targetGroup;

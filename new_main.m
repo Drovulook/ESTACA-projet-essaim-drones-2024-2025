@@ -12,11 +12,16 @@ env = Environment(10, 200, ...
 defineTargetsFromFile(env, "targets_1.csv");
 defineZonesFromFile(env,  "zones_1.csv");
 
+runwayHeading = 1;
 homeBaseCoord = [0, 0, 0];
 temps = 100000;
-traceSize = 20;
+traceSize = 70;
 
 swarm = SwarmManager(env, temps);
+
+swarm.runwayHeading = runwayHeading;
+defineWaypointsDecollageFromFile(swarm, runwayHeading, "waypointsdecollage.csv");
+defineWaypointsAtterrissageFromFile(swarm, runwayHeading, "waypointsatterrissage.csv");
 
 
 %% 3) Load DroneModels and Fleet, then build the swarm
@@ -44,19 +49,20 @@ end
 % Example: disable waypoint-following by default
 for i = 1:length(swarm.Drones)
     swarm.Drones{i}.mode_Follow_waypoint = false;
+    swarm.Drones{i}.TOheading = runwayHeading;
 end
 
 %% 4) Example Waypoints and Target Setup
-Waypoints = [0 50 100;
-             0 0 50;
-             100 100 50;
-             100 -100 100;
-             -100 -100 50;
-             -100 100 100;
-             -100 -10 10];
+% Waypoints = [0 50 100;
+%              0 0 50;
+%              100 100 50;
+%              100 -100 100;
+%              -100 -100 50;
+%              -100 100 100;
+%              -100 -10 10];
 
 for i = 1:length(swarm.Drones)
-    swarm.Drones{i}.setWP(Waypoints);
+    % swarm.Drones{i}.setWP(Waypoints);
     swarm.Drones{1}.mode_Follow_waypoint = true;
     swarm.Drones{1}.setPhase('stand-by');
     
@@ -78,9 +84,7 @@ dt = 0.1;
 RTPlot2(env, swarm, dt, temps, env.TargetsList, traceSize);
 
 
-%% ------------------------------------------------------------------------
-%% Helper functions for reading CSV files: Obstacles, Targets, Zones
-%% ------------------------------------------------------------------------
+
 function defineObstaclesFromFile(env, filename)
     % Load obstacles from CSV and add them to env.ObstaclesList
     T = readtable(filename, 'Delimiter', ',', 'VariableNamingRule','preserve');
@@ -161,4 +165,34 @@ function defineZonesFromFile(env, filename)
         env.addZone(newZone);
     end
     fprintf('Loaded %d zones from "%s".\n', height(T), filename);
+end
+
+function defineWaypointsDecollageFromFile(swarm, heading, filename)
+    T = readtable(filename, 'Delimiter', ',', 'VariableNamingRule', 'preserve');
+    requiredCols = ["X","Y","Z"];
+    for c = 1:numel(requiredCols)
+        if ~ismember(requiredCols(c), T.Properties.VariableNames)
+            error('Missing column "%s" in "%s".', requiredCols(c), filename);
+        end
+    end
+    
+    computedX = T.X * cosd(heading) - T.Y * sind(heading);
+    computedY = T.X * sind(heading) + T.Y * cosd(heading);
+    swarm.TO_WP = [computedX, computedY, T.Z];
+    fprintf('%d waypoints de décollage chargés depuis "%s".\n', height(T), filename);
+end
+
+function defineWaypointsAtterrissageFromFile(swarm, heading, filename)
+    T = readtable(filename, 'Delimiter', ',', 'VariableNamingRule', 'preserve');
+    requiredCols = ["X","Y","Z"];
+    for c = 1:numel(requiredCols)
+        if ~ismember(requiredCols(c), T.Properties.VariableNames)
+            error('Missing column "%s" in "%s".', requiredCols(c), filename);
+        end
+    end
+
+    computedX = T.X * cosd(heading) - T.Y * sind(heading);
+    computedY = T.X * sind(heading) + T.Y * cosd(heading);
+    swarm.landing_WP = [computedX, computedY, T.Z];
+    fprintf('%d waypoints d''atterrissage chargés depuis "%s".\n', height(T), filename);
 end
