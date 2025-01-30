@@ -52,57 +52,62 @@ classdef MultirotorDrone < DroneBase & handle
         % Méthode de calcul de l'autonomie
         function compute_autonomy(obj, dt)
 
-            % calcul force développée
-            if (size(obj.speedLog,1)>1)
-                acceleration=1/dt.*(obj.speedLog(end,:)-obj.speedLog(end-1,:));
-            else
-                acceleration=1./dt.*obj.speedLog(end,:);
-            end
-            g=9.81;
-            totalThrust=obj.mass*g*[0 0 -1]+acceleration*obj.mass*g;
+            if ~(contains(obj.phase,'stand-by')||contains(obj.phase,'reload'))
+                % calcul force développée
+                if (size(obj.speedLog,1)>1)
+                    acceleration=1/dt.*(obj.speedLog(end,:)-obj.speedLog(end-1,:));
+                else
+                    acceleration=1./dt.*obj.speedLog(end,:);
+                end
+                g=9.81;
+                totalThrust=obj.mass*g*[0 0 -1]+acceleration*obj.mass*g;
 
-            currentPos=obj.posLog(end,:);
-            % calcul puissance développée (non teste)
-            rotorForce=norm(totalThrust)/obj.rotorNumber;
-            rho=ISA_volumicMass(currentPos(3)); % à ajuster
-            rotorSurface=pi*(obj.rotorDiameter/2)^2;
-            powerNow=(rotorForce^3/(2*rho*rotorSurface))^0.5*obj.rotorNumber;   % puissance à l'instant [t-dt, t]
+                currentPos=obj.posLog(end,:);
+                % calcul puissance développée (non teste)
+                rotorForce=norm(totalThrust)/obj.rotorNumber;
+                rho=ISA_volumicMass(currentPos(3)); % à ajuster
+                rotorSurface=pi*(obj.rotorDiameter/2)^2;
+                powerNow=(rotorForce^3/(2*rho*rotorSurface))^0.5*obj.rotorNumber;   % puissance à l'instant [t-dt, t]
 
-            % la ligne suivante permet d'éviter de faire la moyenne de la matrice complète
-            if(isempty(obj.powerLog))
-                obj.mean_consumption=powerNow;
-                obj.powerLog=powerNow;
-            else
-                obj.mean_consumption=(obj.mean_consumption*size(obj.powerLog)+powerNow)/(size(obj.powerLog)+1);
+                % la ligne suivante permet d'éviter de faire la moyenne de la matrice complète
+                powerLogSize=sum(obj.powerLog>0);
+                obj.mean_consumption=(obj.mean_consumption*powerLogSize+powerNow)/(powerLogSize+1);
                 obj.powerLog=[obj.powerLog powerNow];
-            end
 
+                if (obj.NominalCapacity == 0)
+                    % moteur thermique
+                    energie_consomme=obj.powerLog(end)/obj.yieldThermo*dt/3600;
+                    obj.remainingCapacity=obj.remainingCapacity-energie_consomme;
+                else
+                    % moteur electrique
+                    capacite_consomme=power(obj.powerLog(end)/obj.yield/obj.NominalVoltage, obj.k_peukert)*dt/3600; %Wh
+                    obj.remainingCapacity=obj.remainingCapacity-capacite_consomme*obj.NominalVoltage;
+                end
 
-            if (obj.NominalCapacity == 0)
-                % moteur thermique
-                energie_consomme=obj.powerLog(end)/obj.yieldThermo*dt/3600;
-                obj.remainingCapacity=obj.remainingCapacity-energie_consomme;
+                % calcul de l'autonomie
+                if(obj.NominalVoltage>0)
+                    % calc bat
+                    I=obj.mean_consumption/obj.NominalVoltage/obj.yield;
+                    obj.autonomy=obj.remainingCapacity/(I^obj.k_peukert);
+                else
+                    % calc fuel
+                    obj.autonomy=obj.remainingCapacity*obj.yieldThermo/obj.mean_consumption;
+                end
+                % autonomie en heures
+
+                if obj.conditionReturnToBase && contains(obj.phase,'airborn')
+                    obj.setPhase('return');
+                end
             else
-                % moteur electrique
-                capacite_consomme=power(obj.powerLog(end)/obj.yield/obj.NominalVoltage, obj.k_peukert)*dt/3600; %Wh
-                obj.remainingCapacity=obj.remainingCapacity-capacite_consomme*obj.NominalVoltage;
+                obj.powerLog=[obj.powerLog 0];
             end
 
-            % calcul de l'autonomie
-            if(obj.NominalVoltage>0)
-                % calc bat
-                I=obj.mean_consumption/obj.NominalVoltage/obj.yield;
-                obj.autonomy=obj.remainingCapacity/(I^obj.k_peukert);
-            else
-                % calc fuel
-                obj.autonomy=obj.remainingCapacity*obj.yieldThermo/obj.mean_consumption;
-            end
-            % autonomie en heures
+            test_capacity=obj.remainingCapacity;
+            test_phase=obj.phase;
+            test_need=obj.needReplacement;
 
-            if obj.conditionReturnToBase
-                obj.setPhase('return');
-            end
-            if obj.conditionReturnToBase=='reload'
+
+            if contains(obj.phase,'reload')
                 obj.charge(dt);
             end
         end
@@ -119,7 +124,7 @@ classdef MultirotorDrone < DroneBase & handle
 
             % pente de retour maximale
             if distance(3)<=0 && contains(obj.phase, 'airborn')
-                penteMax=asin(obj.MaxVarioDown/obj.CruiseSpeed); 
+                penteMax=asin(obj.MaxVarioDown/obj.CruiseSpeed);
             else
                 penteMax=asin(obj.MaxVarioUp/obj.CruiseSpeed);
             end
@@ -141,13 +146,13 @@ classdef MultirotorDrone < DroneBase & handle
             Epp=obj.mass*9.81*distance(3);
             energyRTB=obj.mean_consumption*tretour-Epp*obj.yield;
             energyRTB=energyRTB/3600;
-            
+
             if energyRTB/obj.NominalCapacity>0.05
                 returnCountdownTime=(obj.remainingCapacity-energyRTB)/obj.mean_consumption*3600;
             else
                 returnCountdownTime=(obj.remainingCapacity-obj.NominalCapacity*0.05)/obj.mean_consumption*3600;
             end
-            
+
             if returnCountdownTime<tretour*3
                 obj.needReplacement=1;
             end

@@ -27,9 +27,9 @@ classdef (Abstract) DroneBase < handle
         hasCommunicated = 0
         mass
         powerLog
-        mean_consumption
+        mean_consumption=0
         phase               % 'take-off','airborn','return','landing','standby', 'reload'
-        chargeTime          % indique le temps restant de recharge en temps réel
+        chargeTime=0        % indique le temps restant de recharge en temps réel
         needReplacement     % indique le retour imminent
         replacementOrderTransmitted
         TargetObject
@@ -74,7 +74,8 @@ classdef (Abstract) DroneBase < handle
             if obj.NominalCapacity==0
                 obj.NominalCapacity           = 200;
             end
-
+            
+            
     		if(obj.NominalVoltage>0)
                 obj.remainingCapacity=obj.NominalCapacity;
     		else
@@ -105,6 +106,19 @@ classdef (Abstract) DroneBase < handle
 
         function setTargetGroup(obj, n)
             obj.targetGroup = n;
+        end
+            
+        function setActualCapacity(obj, percentageOfCapacity)
+            if percentageOfCapacity<5
+                percentageOfCapacity=5;
+            elseif percentageOfCapacity>100
+                percentageOfCapacity=100;
+            end
+            if(obj.NominalVoltage>0)
+                obj.remainingCapacity=obj.NominalCapacity*percentageOfCapacity/100;
+            else
+                obj.remainingCapacity=obj.tankVolume*42.8*0.8*10^6*percentageOfCapacity/100;
+            end
         end
 
         function crashDrone(obj)
@@ -206,6 +220,7 @@ classdef (Abstract) DroneBase < handle
                     obj.remainingCapacity=obj.NominalCapacity;
                     obj.chargeTime=0;
                     obj.setPhase('standby');
+                    obj.needReplacement=0;
                 end
             end
         end
