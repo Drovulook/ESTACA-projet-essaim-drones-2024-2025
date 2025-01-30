@@ -210,8 +210,8 @@ classdef SwarmManager < handle
         nTargets = length(obj.env.TargetsList);
             for i = 1:nTargets
                 currentTarget = obj.env.TargetsList{i};
-                if strcmp(currentTarget.Status, 'actif') == 1 && currentTarget.AllocatedFleet < currentTarget.NeededFleet 
-                    if length(obj.StandBy) > 0 && (obj.LastSentDroneTimer > obj.Drone_sending_schedule)
+                if strcmp(currentTarget.Status, 'actif') && currentTarget.AllocatedFleet < currentTarget.NeededFleet 
+                    if ~isempty(obj.StandBy) && (obj.LastSentDroneTimer > obj.Drone_sending_schedule)
                         nextDepartingDrone = obj.StandBy{1};
                         nextDepartingDrone.targetGroup = i;
                         nextDepartingDrone.replacementOrderTransmitted = 0;
