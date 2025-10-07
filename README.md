@@ -21,9 +21,9 @@ The simulated drones are aerial (flying) with:
 
 # Behavioral laws
 
+The swarm behaviour is modeled based on natural swarms
 
-
-# User interface
+# User interface (UI)
 
 The program includes a MATLAB interface for real-time visualization, allowing to control and monitor the simulation ;
 After specifying the settings of the simulation, the user can start/pause or reset the simulation, and see informations about each drone, obstacles, targets, important messages (like a collision between drones), etc.
@@ -32,8 +32,11 @@ After specifying the settings of the simulation, the user can start/pause or res
 
 Here is a glimpse of the simulation:
 
+view at the start of the simulation with UI :
+![view at the start of the simulation with UI](screenshot1.png)
 
-
+view of the movement of drones during simulation :
+![view of the movement of drones during simulation](screenshot2.png)
 
 # Installation and usage (in French)
 
